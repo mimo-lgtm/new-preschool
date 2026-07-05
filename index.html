@@ -47,13 +47,13 @@
         <!-- 📑 タブナビゲーション -->
         <ul class="nav nav-tabs mb-4 justify-content-center" id="myTab" role="tablist" style="font-size: 11pt; font-weight: bold;">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="kabegami-tab-btn" data-bs-toggle="tab" data-bs-target="#kabechuchi-tab-pane" type="button" role="tab">✨ 1. AIと壁打ちする</button>
+                <button class="nav-link active" id="wall-tab-btn" data-bs-toggle="tab" data-bs-target="#wall-tab-pane" type="button" role="tab" aria-controls="wall-tab-pane" aria-selected="true">✨ 1. AIと壁打ちする</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab">🗺️ 2. アイデアの地図</button>
+                <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab" aria-controls="map-tab-pane" aria-selected="false">🗺️ 2. アイデアの地図</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab">📥 3. 届いた提案箱</button>
+                <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab" aria-controls="list-tab-pane" aria-selected="false">📥 3. 届いた提案箱</button>
             </li>
         </ul>
 
@@ -63,7 +63,7 @@
             <!-- ========================================== -->
             <!-- 🧠 タブ1: AIと壁打ちする                       -->
             <!-- ========================================== -->
-            <div class="tab-pane fade show active" id="kabechuchi-tab-pane" role="tabpanel" aria-labelledby="kabegami-tab-btn">
+            <div class="tab-pane fade show active" id="wall-tab-pane" role="tabpanel" aria-labelledby="wall-tab-btn">
                 <div class="mb-4">
                     <img src="image/aiWall.jpg" class="tab-sub-image shadow-sm" alt="壁打ちイメージ" onerror="this.src='https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80'">
                 </div>
@@ -110,7 +110,7 @@
                                 </div>
                             </div>
                             
-                            <!-- 分類選択メニュー（GASの仕様上必須となるケースが多いため配置） -->
+                            <!-- 分類選択メニュー -->
                             <div class="mb-3">
                                 <label for="categorySelect" class="form-label small fw-bold text-secondary">📌 投稿する分類を選択してください：</label>
                                 <select class="form-select select-sm" id="categorySelect" style="font-size: 10pt; border-radius: 6px;">
@@ -131,7 +131,7 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- 🗺️ タブ2: アイデアの地図（50対50 最終提案ダッシュボード） -->
+            <!-- 🗺️ タブ2: アイデアの地図                          -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
                 <div class="mb-4">
