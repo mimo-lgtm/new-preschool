@@ -2,7 +2,7 @@
 // 意見ひろば システム連携プログラム（完全同期・根本解決版）
 // =================================================================
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzl2w3LIhCKFx0Xw-biVr2bEarkPl3mZWGi-wKLahfG_u4EWdDioF0CLpnn1Mjr2FY0/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwhi5dmsG_PlC80sh5Y5_nMeGqf2vcA6PxbZFXvtCnWSYgX1z2tS5fLzY3NFYI36PE/exec";
 
 // 1. 画面（HTML）側の5つの柱の正式名称
 const MAIN_CATEGORIES = [
