@@ -6,7 +6,7 @@ const STRUC_CONFIG = {
     "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
     "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
     "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
+    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓窓口", "育児休業からの復職支援", "その他"]
 };
 
 let allOpinions = [];
@@ -30,8 +30,11 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
-        // 提案箱（タブ3）の3段階アコーディオンを描画
+        // 1. 提案箱（タブ3）の3段階アコーディオンを描画
         render3StepProposalBox(allOpinions);
+        
+        // 2. アイデアの地図（タブ2）への描画を連動（★欠落していた機能を追加）
+        renderIdeaMap(allOpinions);
 
     } catch (e) {
         console.error("データ取得失敗:", e);
@@ -40,13 +43,12 @@ async function fetchOpinions() {
     }
 }
 
-// 📦 3段階アコーディオン & 件数バッジ付き 描画ロジック
+// 📦 3段階アコーディオン & 件数バッジ付き 描画ロジック（タブ3用）
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = ""; // 初期化
 
-    // 親アコーディオンの作成
     const mainAccordion = document.createElement("div");
     mainAccordion.className = "accordion";
     mainAccordion.id = "mainProposalAccordion";
@@ -57,15 +59,17 @@ function render3StepProposalBox(opinions) {
     for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
         bigIndex++;
         
-        // この大分類に属する全記事数をカウント
-        const totalBigCount = opinions.filter(item => item.category && String(item.category).trim().includes(bigCat.substring(0, 4))).length;
+        // 【修正】安全に文字部分が含まれているかを部分一致で判定（substringのバグを修正）
+        const totalBigCount = opinions.filter(item => {
+            if (!item.category) return false;
+            return String(item.category).trim().includes(bigCat.trim());
+        }).length;
 
         const bigCollapseId = `bigCollapse-${bigIndex}`;
         const bigAccordionItem = document.createElement("div");
         bigAccordionItem.className = "accordion-item mb-3 shadow-sm border rounded overflow-hidden";
         bigAccordionItem.style.borderRadius = "8px";
 
-        // 大分類ヘッダー（右上にバッジ配置用スタイル）
         bigAccordionItem.innerHTML = `
             <h2 class="accordion-header position-relative">
                 <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigCollapseId}">
@@ -75,7 +79,6 @@ function render3StepProposalBox(opinions) {
             </h2>
         `;
 
-        // 大分類のボディ（この中に中分類のアコーディオンを入れる）
         const bigCollapseDiv = document.createElement("div");
         bigCollapseDiv.id = bigCollapseId;
         bigCollapseDiv.className = "accordion-collapse collapse";
@@ -97,8 +100,10 @@ function render3StepProposalBox(opinions) {
 
             // この中分類に属するデータを抽出
             const matchedItems = opinions.filter(item => {
-                const bMatch = item.category && String(item.category).trim().includes(bigCat.substring(0, 4));
-                const mMatch = item.midCat && String(item.midCat).trim() === midCat;
+                if (!item.category || !item.midCat) return false;
+                const bMatch = String(item.category).trim().includes(bigCat.trim());
+                // 【修正】中分類もトリム（前後の空白除去）した上で部分一致させて判定を安定化
+                const mMatch = String(item.midCat).trim().includes(midCat.trim());
                 return bMatch && mMatch;
             });
 
@@ -120,7 +125,7 @@ function render3StepProposalBox(opinions) {
             const midCollapseDiv = document.createElement("div");
             midCollapseDiv.id = midCollapseId;
             midCollapseDiv.className = "accordion-collapse collapse";
-            midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`);
+            midCollapseDiv.setAttribute("data-bs-parent", "#midAccordion-${bigIndex}");
 
             const midBody = document.createElement("div");
             midBody.className = "accordion-body bg-white p-3";
@@ -129,11 +134,8 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // 1. 新統合データの抽出
                 const newMergeItems = matchedItems.filter(item => item.status && String(item.status).trim() === "新統合");
-                // 2. 単独投稿データの抽出
                 const singleItems = matchedItems.filter(item => !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事"));
-                // 3. 元記事データの抽出
                 const originalItems = matchedItems.filter(item => item.status && String(item.status).trim() === "元記事");
 
                 // --- 👑 新統合の描画 ---
@@ -162,7 +164,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // --- 📂 元記事の描画（クリックで全件開閉するアコーディオン構造） ---
+                // --- 📂 元記事の描画 ---
                 if (originalItems.length > 0) {
                     const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
@@ -204,4 +206,40 @@ function render3StepProposalBox(opinions) {
     }
 
     container.appendChild(mainAccordion);
+}
+
+// 🗺️ 【新規追加】アイデアの地図（タブ2）にデータを流し込む連動ロジック
+function renderIdeaMap(opinions) {
+    // 5つの大分類マッピング用キー配列
+    const bigCategories = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
+    
+    bigCategories.forEach((bigCat, index) => {
+        const pillarId = index + 1;
+        const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
+        if (!mapPillar) return;
+        
+        mapPillar.innerHTML = ""; // 初期化
+
+        // この大分類に属する「新統合」データを抽出
+        const mergeItems = opinions.filter(item => {
+            if (!item.category || !item.status) return false;
+            const isBigCat = String(item.category).trim().includes(bigCat);
+            const isMerged = String(item.status).trim() === "新統合";
+            return isBigCat && isMerged;
+        });
+
+        if (mergeItems.length === 0) {
+            mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
+        } else {
+            mergeItems.forEach(item => {
+                mapPillar.innerHTML += `
+                    <div class="p-3 mb-2 border-start border-success border-4 bg-light rounded shadow-sm">
+                        <span class="badge bg-success mb-2">👑 新統合</span>
+                        <h6 class="fw-bold text-success mb-1">${item.title || "無題の統合案"}</h6>
+                        <p class="mb-0 text-secondary small lh-base">${item.summary || ""}</p>
+                    </div>
+                `;
+            });
+        }
+    });
 }
