@@ -19,12 +19,16 @@
             border-radius: 12px;
             background-color: #e2e8f0;
         }
+        /* ローディング表示用のスタイル */
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 </head>
 <body>
 
     <!-- 🖼️ ページ最上部：メインヘッダー画像 -->
-    
     <div class="w-100 overflow-hidden shadow-sm mb-4" style="max-height: 380px; position: relative; background-color: #475569;">
         <img id="mainHeaderImg" src="image/river.jpg" 
              class="img-fluid w-100" 
@@ -43,7 +47,7 @@
         <!-- 📑 タブナビゲーション -->
         <ul class="nav nav-tabs mb-4 justify-content-center" id="myTab" role="tablist" style="font-size: 11pt; font-weight: bold;">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="kabechuchi-tab-btn" data-bs-toggle="tab" data-bs-target="#kabechuchi-tab-pane" type="button" role="tab">✨ 1. AIと壁打ちする</button>
+                <button class="nav-link active" id="kabegami-tab-btn" data-bs-toggle="tab" data-bs-target="#kabechuchi-tab-pane" type="button" role="tab">✨ 1. AIと壁打ちする</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab">🗺️ 2. アイデアの地図</button>
@@ -59,7 +63,7 @@
             <!-- ========================================== -->
             <!-- 🧠 タブ1: AIと壁打ちする                       -->
             <!-- ========================================== -->
-            <div class="tab-pane fade show active" id="kabechuchi-tab-pane" role="tabpanel" aria-labelledby="kabechuchi-tab-btn">
+            <div class="tab-pane fade show active" id="kabechuchi-tab-pane" role="tabpanel" aria-labelledby="kabegami-tab-btn">
                 <div class="mb-4">
                     <img src="image/aiWall.jpg" class="tab-sub-image shadow-sm" alt="壁打ちイメージ" onerror="this.src='https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80'">
                 </div>
@@ -79,14 +83,16 @@
                     </div>
 
                     <div class="col-lg-7">
+                        <!-- AI思考整理エリア（初期状態） -->
                         <div id="aiPlaceholder" class="card shadow-sm border-0 p-4 h-100 text-center d-flex align-items-center justify-content-center bg-white" style="border-radius: 12px; min-height: 400px;">
-                            <div class="text-muted">
+                            <div class="text-muted" id="aiPlaceholderContent">
                                 <div style="font-size: 3rem;" class="mb-2">💡</div>
                                 <p class="fw-bold mb-1">AI思考整理エリア</p>
                                 <p class="small mb-0">左側に意見を入力して送信すると、<br>AIが論点を5つの視点で整理し、タイトルを自動生成します。</p>
                             </div>
                         </div>
 
+                        <!-- AI分析結果表示ボックス -->
                         <div id="aiAssistBox" class="card shadow-sm border-0 p-4 h-100 bg-white d-none flex-column" style="border-radius: 12px;">
                             <div class="p-3 mb-3 bg-light rounded" id="aiSummaryText" style="font-size: 10.5pt; border-left: 4px solid #3b82f6;"></div>
                             <div class="border rounded p-3 mb-3 flex-grow-1 bg-white" style="font-size: 10pt; max-height: 350px; overflow-y: auto;">
@@ -103,6 +109,19 @@
                                     <div id="aiRefinedText" class="text-secondary small ps-1 lh-base"></div>
                                 </div>
                             </div>
+                            
+                            <!-- 分類選択メニュー（GASの仕様上必須となるケースが多いため配置） -->
+                            <div class="mb-3">
+                                <label for="categorySelect" class="form-label small fw-bold text-secondary">📌 投稿する分類を選択してください：</label>
+                                <select class="form-select select-sm" id="categorySelect" style="font-size: 10pt; border-radius: 6px;">
+                                    <option value="主体">🌱 主体的な学び</option>
+                                    <option value="好奇心">🎨 楽しさと好奇心</option>
+                                    <option value="未来">🤝 未来を生き抜く力</option>
+                                    <option value="個性">🌳 個性・才能の開花</option>
+                                    <option value="シームレス">🌐 シームレス成長支援</option>
+                                </select>
+                            </div>
+
                             <button id="btnSubmitToBox" class="btn btn-success w-100 fw-bold py-2" style="border-radius: 8px; background-color: #10b981;">
                                 📥 この内容で提案箱へ正式に投稿する
                             </button>
@@ -111,7 +130,7 @@
                 </div>
             </div>
 
-           <!-- ========================================== -->
+            <!-- ========================================== -->
             <!-- 🗺️ タブ2: アイデアの地図（50対50 最終提案ダッシュボード） -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
@@ -140,7 +159,6 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="row g-4 align-items-stretch">
-                                        <!-- 左側：AIが導き出した提案 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
                                                 <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
@@ -149,7 +167,6 @@
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-主体" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
                                         </div>
-                                        <!-- 右側：50:50 最終提案 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -172,7 +189,6 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="row g-4 align-items-stretch">
-                                        <!-- 左側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
                                                 <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
@@ -181,7 +197,6 @@
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-好奇心" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
                                         </div>
-                                        <!-- 右側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -204,7 +219,6 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="row g-4 align-items-stretch">
-                                        <!-- 左側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
                                                 <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
@@ -213,7 +227,6 @@
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-未来" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
                                         </div>
-                                        <!-- 右側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -236,7 +249,6 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="row g-4 align-items-stretch">
-                                        <!-- 左側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
                                                 <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
@@ -245,7 +257,6 @@
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-個性" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
                                         </div>
-                                        <!-- 右側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -268,7 +279,6 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="row g-4 align-items-stretch">
-                                        <!-- 左側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
                                                 <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
@@ -277,7 +287,6 @@
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-シームレス" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
                                         </div>
-                                        <!-- 右側 -->
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -296,8 +305,9 @@
                     </div>
                 </div>
             </div>
+            
             <!-- ========================================== -->
-            <!-- 📥 タブ3: 届いた提案箱                            -->
+            <!-- 📥 タブ3: 届いた提案箱                             -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab-btn">
                 <div class="mb-4">
