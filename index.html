@@ -11,39 +11,25 @@
             background-color: #f8fafc;
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
         }
-        .category-accordion-item {
-            border: none;
-            overflow: hidden;
-        }
-        .category-accordion-header {
-            transition: background-color 0.2s ease;
-            user-select: none;
-        }
-        .category-accordion-header:hover {
-            opacity: 0.9;
-        }
-        .border-primary-custom {
-            border-left: 4px solid #3b82f6 !important;
-        }
         .tab-sub-image {
             width: 100%;
             max-height: 250px;
             object-fit: cover;
             object-position: center;
             border-radius: 12px;
-            background-color: #e2e8f0; /* 画像が出ない時の背景色 */
+            background-color: #e2e8f0;
         }
     </style>
 </head>
 <body>
 
-    <!-- 🖼️ ページ最上部：メインヘッダー画像（見つからない場合はグレー背景に文字のみ表示） -->
+    <!-- 🖼️ ページ最上部：メインヘッダー画像 -->
     <div class="w-100 overflow-hidden shadow-sm mb-4" style="max-height: 380px; position: relative; background-color: #475569;">
         <img id="mainHeaderImg" src="image/river.jpg" 
              class="img-fluid w-100" 
              style="height: 380px; object-fit: cover; object-position: center;" 
              alt="メインヘッダー"
-             onerror="this.style.display='none';"> <!-- 画像がない場合は枠を隠す安全弁 -->
+             onerror="this.style.display='none';">
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));"></div>
         <div style="position: absolute; bottom: 30px; left: 5%; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.8);">
             <h1 class="fw-bold display-5">未来の幼児教育 意見ひろば</h1>
@@ -66,7 +52,7 @@
             </li>
         </ul>
 
-        <!-- 📦 タブコンテンツ -->
+        <!-- 📦 タブコンテンツ（ここから中身） -->
         <div class="tab-content" id="myTabContent">
 
             <!-- ========================================== -->
@@ -74,7 +60,6 @@
             <!-- ========================================== -->
             <div class="tab-pane fade show active" id="kabechuchi-tab-pane" role="tabpanel" aria-labelledby="kabechuchi-tab-btn">
                 <div class="mb-4">
-                    <!-- 画像読み込みエラー時は自動でダミー画像に切り替えて404を防ぐ処理（altを代用） -->
                     <img src="image/aiWall.jpg" class="tab-sub-image shadow-sm" alt="壁打ちイメージ" onerror="this.src='https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80'">
                 </div>
                 
@@ -126,7 +111,7 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- 🗺️ タブ2: アイデアの地図                        -->
+            <!-- 🗺️ タブ2: アイデアの地図（修正済）               -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
                 <div class="mb-4">
@@ -137,69 +122,74 @@
                     <div class="col-12">
                         <div class="mb-3">
                             <h3 class="fw-bold text-dark mb-1">🗺️ アイデアの地図</h3>
-                            <p class="text-muted small mb-0">※ここには、複数の意見が美しく融合した「新統合」済みの完成形アイデアのみが集約されます。</p>
+                            <p class="text-muted small mb-3">※ここには、最初につくった基礎となる「新統合」済みの中心アイデアが区分けされて集約されます。</p>
                         </div>
                         
+                        <!-- 🧱 5つの柱のアコーディオン構造 -->
                         <div class="accordion" id="ideaMapAccordion">
+                            
                             <!-- 1の柱：主体的な学び -->
                             <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 8px !important;">
                                 <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                                         🌱 1. 探究心を育む知育環境（主体的な学び）
                                     </button>
                                 </h2>
-                                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-white" id="map-pillar-1"></div>
+                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#ideaMapAccordion">
+                                    <div class="accordion-body bg-white" id="map-pillar-1">
+                                        <!-- ここにJSから基礎統合データが流し込まれます -->
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 2の柱：楽しさと好奇心（文言と開閉IDを修正） -->
+                            <!-- 2の柱：楽しさと好奇心 -->
                             <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 8px !important;">
                                 <h2 class="accordion-header" id="headingTwo">
-                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                                         🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）
                                     </button>
                                 </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#ideaMapAccordion">
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#ideaMapAccordion">
                                     <div class="accordion-body bg-white" id="map-pillar-2"></div>
                                 </div>
                             </div>
 
-                            <!-- 3の柱：未来を生き抜く力（文言と開閉IDを修正） -->
+                            <!-- 3の柱：未来を生き抜く力 -->
                             <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 8px !important;">
                                 <h2 class="accordion-header" id="headingThree">
-                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                         🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）
                                     </button>
                                 </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#ideaMapAccordion">
+                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#ideaMapAccordion">
                                     <div class="accordion-body bg-white" id="map-pillar-3"></div>
                                 </div>
                             </div>
 
-                            <!-- 4の柱：個性・才能の開花（文言と開閉IDを修正） -->
+                            <!-- 4の柱：個性・才能の開花 -->
                             <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 8px !important;">
                                 <h2 class="accordion-header" id="headingFour">
-                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                                         🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）
                                     </button>
                                 </h2>
-                                <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#ideaMapAccordion">
+                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#ideaMapAccordion">
                                     <div class="accordion-body bg-white" id="map-pillar-4"></div>
                                 </div>
                             </div>
 
-                            <!-- 5の柱：シームレス成長支援（文言と開閉IDを修正） -->
+                            <!-- 5の柱：シームレス成長支援 -->
                             <div class="accordion-item border rounded shadow-sm overflow-hidden" style="border-radius: 8px !important;">
                                 <h2 class="accordion-header" id="headingFive">
-                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                                    <button class="accordion-button collapsed py-3 bg-light fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
                                         🌐 5. 学校の枠に縛られない個別最適化教育（シームレス成長支援）
                                     </button>
                                 </h2>
-                                <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#ideaMapAccordion">
+                                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#ideaMapAccordion">
                                     <div class="accordion-body bg-white" id="map-pillar-5"></div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -227,6 +217,7 @@
         </div>
     </div>
 
+    <!-- Bootstrap Bundle JS (開閉に必須) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
