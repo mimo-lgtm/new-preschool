@@ -112,7 +112,7 @@
             </div>
 
            <!-- ========================================== -->
-            <!-- 🗺️ タブ2: アイデアの地図（ロジック＆エモーション 50:50対比） -->
+            <!-- 🗺️ タブ2: アイデアの地図（50対50 最終提案ダッシュボード） -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
                 <div class="mb-4">
@@ -121,40 +121,44 @@
 
                 <div class="row g-4">
                     <div class="col-12">
-                        <div class="mb-4 text-center">
-                            <h3 class="fw-bold text-dark mb-2">🗺️ アイデアの地図：5つの進化する大枠</h3>
-                            <p class="text-muted small">
-                                「当初の論理（基礎）」と「市民の感情（生の声）」を50:50の重みでブレンドし、常に進化し続ける**最新の300字の総和（結論）**をリアルタイムに提示します。
+                        <div class="mb-5 text-center">
+                            <h2 class="fw-bold text-dark mb-3" style="letter-spacing: 0.05em;">🌳 アイデアの地図：5つの進化する大枠</h2>
+                            <p class="text-muted fs-6 mx-auto" style="max-width: 800px; line-height: 1.8;">
+                                「AIが導き出した提案」と「市民の皆様の生の声」を**50対50の割合で調整**し、<br>
+                                常にアップデートされ続ける**最新の「最終提案（300字）」**をリアルタイムに提示します。
                             </p>
                         </div>
                         
-                        <!-- 🧱 5つの柱のアコーディオン構造（自動展開＆対比構造） -->
-                        <div class="accordion" id="ideaMapAccordion">
+                        <!-- 🧱 未来型ダイナミック・ツリーカード構造（アコーディオンを廃止し、視覚的インパクトを強化） -->
+                        <div class="d-flex flex-column gap-5">
                             
                             <!-- 1の柱：主体的な学び -->
-                            <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 12px !important;">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                        🌱 1. 探究心を育む知育環境（主体的な学び）
-                                    </button>
-                                </h2>
-                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-light p-4">
-                                        <div class="row g-4 align-items-stretch">
-                                            <!-- 左側：当初の基礎 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #3b82f6 !important;">
-                                                    <h6 class="fw-bold text-primary mb-3 pb-2 border-bottom">🟢 当初の論理・土台 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="base-text-主体" style="font-size: 10.5pt; white-space: pre-wrap;">データを読み込み中...</div>
-                                                </div>
+                            <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
+                                <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                                    <h4 class="fw-bold mb-0 fs-5">🌱 1. 探究心を育む知育環境（主体的な学び）</h4>
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4 align-items-stretch">
+                                        <!-- 左側：AIが導き出した提案 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4 position-relative">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-primary fw-bold fs-1">50%</div>
+                                                <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                                    <span class="me-2">🤖</span> AIが導き出した提案
+                                                </h5>
+                                                <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-主体" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
-                                            <!-- 右側：最新の総和 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #10b981 !important;">
-                                                    <h6 class="fw-bold text-success mb-3 pb-2 border-bottom">🔵 今の感情・市民との総和 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="sum-text-主体" style="font-size: 10.5pt; white-space: pre-wrap;">
-                                                        <span class="text-muted small">市民の声をブレンドした最新の300字要約を自動計算しています...</span>
-                                                    </div>
+                                        </div>
+                                        <!-- 右側：50:50 最終提案 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4 position-relative" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-success fw-bold fs-1">100%</div>
+                                                <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                                    <span class="me-2">✨</span> 50対50の割合で調整した最終提案 (300字)
+                                                </h5>
+                                                <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-主体" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;">
+                                                    <span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -163,29 +167,32 @@
                             </div>
 
                             <!-- 2の柱：楽しさと好奇心 -->
-                            <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 12px !important;">
-                                <h2 class="accordion-header" id="headingTwo">
-                                    <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                        🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）
-                                    </button>
-                                </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-light p-4">
-                                        <div class="row g-4 align-items-stretch">
-                                            <!-- 左側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #3b82f6 !important;">
-                                                    <h6 class="fw-bold text-primary mb-3 pb-2 border-bottom">🟢 当初の論理・土台 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="base-text-好奇心" style="font-size: 10.5pt; white-space: pre-wrap;">データを読み込み中...</div>
-                                                </div>
+                            <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
+                                <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                                    <h4 class="fw-bold mb-0 fs-5">🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）</h4>
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4 align-items-stretch">
+                                        <!-- 左側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4 position-relative">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-primary fw-bold fs-1">50%</div>
+                                                <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                                    <span class="me-2">🤖</span> AIが導き出した提案
+                                                </h5>
+                                                <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-好奇心" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
-                                            <!-- 右側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #10b981 !important;">
-                                                    <h6 class="fw-bold text-success mb-3 pb-2 border-bottom">🔵 今の感情・市民との総和 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="sum-text-好奇心" style="font-size: 10.5pt; white-space: pre-wrap;">
-                                                        <span class="text-muted small">市民の声をブレンドした最新の300字要約を自動計算しています...</span>
-                                                    </div>
+                                        </div>
+                                        <!-- 右側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4 position-relative" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-success fw-bold fs-1">100%</div>
+                                                <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                                    <span class="me-2">✨</span> 50対50の割合で調整した最終提案 (300字)
+                                                </h5>
+                                                <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-好奇心" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;">
+                                                    <span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -194,29 +201,32 @@
                             </div>
 
                             <!-- 3の柱：未来を生き抜く力 -->
-                            <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 12px !important;">
-                                <h2 class="accordion-header" id="headingThree">
-                                    <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                        🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）
-                                    </button>
-                                </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-light p-4">
-                                        <div class="row g-4 align-items-stretch">
-                                            <!-- 左側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #3b82f6 !important;">
-                                                    <h6 class="fw-bold text-primary mb-3 pb-2 border-bottom">🟢 当初の論理・土台 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="base-text-未来" style="font-size: 10.5pt; white-space: pre-wrap;">データを読み込み中...</div>
-                                                </div>
+                            <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
+                                <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                                    <h4 class="fw-bold mb-0 fs-5">🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）</h4>
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4 align-items-stretch">
+                                        <!-- 左側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4 position-relative">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-primary fw-bold fs-1">50%</div>
+                                                <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                                    <span class="me-2">🤖</span> AIが導き出した提案
+                                                </h5>
+                                                <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-未来" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
-                                            <!-- 右側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #10b981 !important;">
-                                                    <h6 class="fw-bold text-success mb-3 pb-2 border-bottom">🔵 今の感情・市民との総和 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="sum-text-未来" style="font-size: 10.5pt; white-space: pre-wrap;">
-                                                        <span class="text-muted small">市民の声をブレンドした最新の300字要約を自動計算しています...</span>
-                                                    </div>
+                                        </div>
+                                        <!-- 右側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4 position-relative" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-success fw-bold fs-1">100%</div>
+                                                <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                                    <span class="me-2">✨</span> 50対50の割合で調整した最終提案 (300字)
+                                                </h5>
+                                                <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-未来" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;">
+                                                    <span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -225,29 +235,32 @@
                             </div>
 
                             <!-- 4の柱：個性・才能の開花 -->
-                            <div class="accordion-item border mb-3 rounded shadow-sm overflow-hidden" style="border-radius: 12px !important;">
-                                <h2 class="accordion-header" id="headingFour">
-                                    <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                                        🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）
-                                    </button>
-                                </h2>
-                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-light p-4">
-                                        <div class="row g-4 align-items-stretch">
-                                            <!-- 左側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #3b82f6 !important;">
-                                                    <h6 class="fw-bold text-primary mb-3 pb-2 border-bottom">🟢 当初の論理・土台 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="base-text-個性" style="font-size: 10.5pt; white-space: pre-wrap;">データを読み込み中...</div>
-                                                </div>
+                            <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
+                                <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                                    <h4 class="fw-bold mb-0 fs-5">🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）</h4>
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4 align-items-stretch">
+                                        <!-- 左側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4 position-relative">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-primary fw-bold fs-1">50%</div>
+                                                <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                                    <span class="me-2">🤖</span> AIが導き出した提案
+                                                </h5>
+                                                <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-個性" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
-                                            <!-- 右側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #10b981 !important;">
-                                                    <h6 class="fw-bold text-success mb-3 pb-2 border-bottom">🔵 今の感情・市民との総和 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="sum-text-個性" style="font-size: 10.5pt; white-space: pre-wrap;">
-                                                        <span class="text-muted small">市民の声をブレンドした最新の300字要約を自動計算しています...</span>
-                                                    </div>
+                                        </div>
+                                        <!-- 右側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4 position-relative" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-success fw-bold fs-1">100%</div>
+                                                <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                                    <span class="me-2">✨</span> 50対50の割合で調整した最終提案 (300字)
+                                                </h5>
+                                                <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-個性" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;">
+                                                    <span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -256,29 +269,32 @@
                             </div>
 
                             <!-- 5の柱：シームレス成長支援 -->
-                            <div class="accordion-item border rounded shadow-sm overflow-hidden" style="border-radius: 12px !important;">
-                                <h2 class="accordion-header" id="headingFive">
-                                    <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                                        🌐 5. 学校の枠に縛られない個別最適化教育（シームレス成長支援）
-                                    </button>
-                                </h2>
-                                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#ideaMapAccordion">
-                                    <div class="accordion-body bg-light p-4">
-                                        <div class="row g-4 align-items-stretch">
-                                            <!-- 左側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #3b82f6 !important;">
-                                                    <h6 class="fw-bold text-primary mb-3 pb-2 border-bottom">🟢 当初の論理・土台 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="base-text-シームレス" style="font-size: 10.5pt; white-space: pre-wrap;">データを読み込み中...</div>
-                                                </div>
+                            <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
+                                <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+                                    <h4 class="fw-bold mb-0 fs-5">🌐 5. 学校の枠に縛られない個別最適化教育（シームレス成長支援）</h4>
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-4 align-items-stretch">
+                                        <!-- 左側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4 position-relative">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-primary fw-bold fs-1">50%</div>
+                                                <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                                    <span class="me-2">🤖</span> AIが導き出した提案
+                                                </h5>
+                                                <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-シームレス" style="white-space: pre-wrap;">データを読み込み中...</div>
                                             </div>
-                                            <!-- 右側 -->
-                                            <div class="col-md-6">
-                                                <div class="p-4 bg-white rounded border h-100 shadow-sm" style="border-top: 4px solid #10b981 !important;">
-                                                    <h6 class="fw-bold text-success mb-3 pb-2 border-bottom">🔵 今の感情・市民との総和 (50%)</h6>
-                                                    <div class="text-dark lh-base font-monospace" id="sum-text-シームレス" style="font-size: 10.5pt; white-space: pre-wrap;">
-                                                        <span class="text-muted small">市民の声をブレンドした最新の300字要約を自動計算しています...</span>
-                                                    </div>
+                                        </div>
+                                        <!-- 右側 -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4 position-relative" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
+                                                <div class="position-absolute top-0 end-0 m-3 opacity-10 text-success fw-bold fs-1">100%</div>
+                                                <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
+                                                    <span class="me-2">✨</span> 50対50の割合で調整した最終提案 (300字)
+                                                </h5>
+                                                <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-シームレス" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;">
+                                                    <span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>
                                                 </div>
                                             </div>
                                         </div>
