@@ -5,11 +5,11 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzl2w3LIhCKFx0Xw-biVr2bEarkPl3mZWGi-wKLahfG_u4EWdDioF0CLpnn1Mjr2FY0/exec";
 
 const MAIN_CATEGORIES = [
-    "シームレス成長支援",
     "主体的な学び",
     "楽しさと好奇心",
+    "未来を生き抜く力",
     "個性・才能の開花",
-    "未来を生き抜く力"
+    "シームレス成長支援"
 ];
 
 const FIXED_MID_CATEGORIES = {
@@ -212,7 +212,9 @@ function renderStructuredIdeas(ideasDataset) {
         // スプレッドシートの「大分類（category）」にキーワードが含まれるデータを抽出
         const pillarIdeas = ideasDataset.filter(item => {
             if (!item.category) return false;
-            return String(item.category).trim().includes(rule.keyword);
+            const catStr = String(item.category).trim();
+            // スプレッドシートの「大分類」の文字の中に、ルールで決めたキーワードが含まれているか判定
+            return catStr.indexOf(rule.keyword) !== -1 || rule.name.indexOf(catStr) !== -1;
         });
         
         // 提案箱（タブ3）用の外枠（セクション）を作成
