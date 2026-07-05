@@ -1,10 +1,10 @@
 // =================================================================
-// 意見ひろば プログラム（スプレッドシート文字強制救済・完全版）
+// 意見ひろば システム連携プログラム（完全同期・根本解決版）
 // =================================================================
 
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzl2w3LIhCKFx0Xw-biVr2bEarkPl3mZWGi-wKLahfG_u4EWdDioF0CLpnn1Mjr2FY0/exec";
 
-// 画面に表示する「5つの柱」の正式名称
+// 1. 画面（HTML）側の5つの柱の正式名称
 const MAIN_CATEGORIES = [
     "🌱 1. 探究心を育む知育環境（主体的な学び）",
     "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）",
@@ -13,20 +13,22 @@ const MAIN_CATEGORIES = [
     "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）"
 ];
 
-// 中分類の定義
-const FIXED_MID_CATEGORIES = {
-    "🌱 1. 探究心を育む知育環境（主体的な学び）": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
-    "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
-    "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
-    "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-    "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
+// 2. GAS（AI）の出力テキストと、画面側の柱を完全に1対1で紐付けるマップ（ここが断絶の根本原因でした）
+const CATEGORY_MAP = {
+    "主体的な学び": "🌱 1. 探究心を育む知育環境（主体的な学び）",
+    "楽しさと好奇心": "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）",
+    "未来を生き抜く力": "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）",
+    "個性・才能の開花": "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）",
+    "個性の開花": "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）",
+    "シームレス成長支援": "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）",
+    "シームレス成長": "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）"
 };
 
 let allOpinions = [];
 let currentAiResult = null;
 
 // ==========================================
-// 2. メイン処理（画面初期化・イベント設定）
+// イベント設定＆初期化
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
     const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
@@ -70,11 +72,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     if (aiPerspectivesText) {
                         aiPerspectivesText.innerHTML = `
-<div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
-<div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
-<div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
-<div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
+                            <div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
+                            <div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
+                            <div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
+                            <div class="mb-3"><strong>d. 懸念点と乗り跨える方法</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
+                            <div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
                         `.trim();
                     }
 
@@ -153,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// データ取得処理
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -169,69 +171,56 @@ async function fetchOpinions() {
         }
         
         renderStructuredIdeas(allOpinions);
-
     } catch (e) {
         console.error("データ取得に失敗しました:", e);
     }
 }
 
-// =================================================================
-// 4. アイデアの地図 ＆ 提案箱の描画ロジック（ここからファイルの最後まで貼り付け）
-// =================================================================
+// ==========================================
+// 根本解決：アイデアの地図 ＆ 提案箱の描画ロジック
+// ==========================================
 function renderStructuredIdeas(ideasDataset) {
-    // 1. 受け皿となるHTML要素を安全に取得
     const proposalContainer = document.getElementById("proposal-container") || document.getElementById("opinions-container") || document.getElementById("list-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
-    // 2. 地図側のエリア（1〜5）を初期化
+    // 1. 地図側のエリア（1〜5）を完全に初期化
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`) || document.getElementById(`pillar-box-${i}`);
         if (mapPillar) mapPillar.innerHTML = "";
     }
 
-    // 3. データが空、または配列でない場合は安全に終了
-    if (!ideasDataset || !Array.isArray(ideasDataset)) {
-        console.warn("データセットが空、または正しくありません。");
-        return;
-    }
+    if (!ideasDataset || !Array.isArray(ideasDataset)) return;
 
-    // 4. 仕分けルール（部分一致の判定を完全に安全化）
-    const pillarRules = [
-        { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
-        { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
-        { id: 3, name: "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）", keyword: "未来" },
-        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）", keyword: "個性" },
-        { id: 5, name: "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）", keyword: "シームレス" }
-    ];
+    // 3. 5つの柱ごとに、完全に同期したマッピング処理を実行
+    MAIN_CATEGORIES.forEach((pillarName, index) => {
+        const pillarId = index + 1;
 
-    pillarRules.forEach(rule => {
-        const pillarId = rule.id;
-        
-        // 【安全化】B列（category）が空欄でも絶対にクラッシュさせない仕分け
+        // B列の分類文字を読み取り、対応する正式な柱名に属するデータだけをフィルタリング
         const pillarIdeas = ideasDataset.filter(item => {
             if (!item || !item.category) return false;
-            const catStr = String(item.category).trim();
-            return catStr.includes(rule.keyword) || rule.keyword.includes(catStr);
+            const rawCat = String(item.category).trim();
+            
+            // マップに登録されている名称、または直接一致を検証
+            const mappedName = CATEGORY_MAP[rawCat] || rawCat;
+            return mappedName === pillarName;
         });
-        
-        // 提案箱用の外枠を生成
+
+        // 提案箱（一覧）側の外枠セクションを生成
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
-        pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.name}</h5>`;
+        pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${pillarName}</h5>`;
 
-        // 【安全化】statusが空欄（null/undefined）であっても絶対にクラッシュしない判定
+        // statusが「元記事」以外のメイン投稿を抽出
         const mainIdeas = pillarIdeas.filter(item => {
             if (!item) return false;
-            const statusStr = item.status ? String(item.status).trim() : "";
-            return statusStr !== "元記事";
+            return item.status ? String(item.status).trim() !== "元記事" : true;
         });
 
-        // アイデアが1件もない場合の表示
         if (mainIdeas.length === 0 && !pillarIdeas.some(item => item && item.status && String(item.status).trim() === "元記事")) {
             pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
         }
 
-        // メインアイデア（新統合 または 表示・単独提案）の描画
+        // メインアイデアのカード描画
         mainIdeas.forEach(idea => {
             let badgeColor = "bg-info text-dark";
             let displayStatus = idea.status ? String(idea.status).trim() : "";
@@ -254,7 +243,7 @@ function renderStructuredIdeas(ideasDataset) {
             `;
             pillarSection.innerHTML += card;
 
-            // 「新統合」であれば地図側（マップ）にもカードを複製して表示
+            // 地図（マップ）側へのカード複製配置
             if (displayStatus === "新統合") {
                 const mapPillar = document.getElementById(`map-pillar-${pillarId}`) || document.getElementById(`pillar-box-${pillarId}`);
                 if (mapPillar) {
@@ -269,7 +258,7 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-        // 「元記事」の折りたたみ（アコーディオン）描画ロジック
+        // 「元記事」の一覧とアコーディオン折りたたみ描画
         const originalIdeas = pillarIdeas.filter(item => item && item.status && String(item.status).trim() === "元記事");
         if (originalIdeas.length > 0) {
             const subAccordionId = `subCollapse-original-${pillarId}`;
@@ -304,6 +293,7 @@ function renderStructuredIdeas(ideasDataset) {
         }
     });
 
+    // マップ側の空枠テキストの補填
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`) || document.getElementById(`pillar-box-${i}`);
         if (mapPillar && mapPillar.innerHTML.trim() === "") {
