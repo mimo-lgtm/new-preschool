@@ -3,6 +3,15 @@
 // ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwhi5dmsG_PlC80sh5Y5_nMeGqf2vcA6PxbZFXvtCnWSYgX1z2tS5fLzY3NFYI36PE/exec";
 
+// HTML側のセレクトボックスの値（value）と、スプレッドシート上の正式名称のマッピング
+const CAT_MAP = {
+    "主体": "主体的な学び",
+    "好奇心": "楽しさと好奇心",
+    "未来": "未来を生き抜く力",
+    "個性": "個性・才能の開花",
+    "シームレス": "シームレス成長支援"
+};
+
 // 厳密に定義された5つの大分類と、それぞれに紐づく中分類
 const STRUC_CONFIG = {
     "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
@@ -13,7 +22,7 @@ const STRUC_CONFIG = {
 };
 
 let allOpinions = [];
-let currentAiResult = null; // ★欠落：AI分析結果を一時保持する変数を追加
+let currentAiResult = null; 
 
 // ==========================================
 // 2. メイン処理（画面初期化・イベント設定）
@@ -22,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // 画面を開いたらスプレッドシートからデータを取得して描画
     fetchOpinions();
 
-    // ★欠落：HTML側の各ボタンや表示エリアの要素を正しく取得
     const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
     const btnSubmitToBox = document.getElementById("btnSubmitToBox");
     const aiPlaceholder = document.getElementById("aiPlaceholder");
@@ -31,8 +39,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiPerspectivesText = document.getElementById("aiPerspectivesText");
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
+    const categorySelect = document.getElementById("categorySelect");
 
-    // ★欠落：1. AI分析（壁打ち）ボタンのクリックイベントを設定
+    // 1. AI分析（壁打ち）ボタンのクリックイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -43,9 +52,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // ボタンをローディング状態にして二重送信を防止
+            // ボタンをローディング状態にする
             btnAiAnalysis.disabled = true;
-            btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
+            btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" style="width:1rem; height:1rem;" role="status"></span> AIが思考を整理中...`;
 
             try {
                 const res = await fetch(GAS_URL, {
@@ -57,10 +66,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (data.status === "success") {
                     currentAiResult = data.result;
-                    const bigCat = currentAiResult["大分類"] || "その他";
+                    const bigCat = currentAiResult["大分類"] || "主体的な学び";
                     const midCat = currentAiResult["中分類"] || "その他";
 
-                    // AI分析結果を画面の各要素に流し込む
+                    // AIの自動判定に合わせて、HTMLのセレクトボックスの選択肢を自動変更する
+                    if (categorySelect) {
+                        for (const [htmlVal, gasVal] of Object.entries(CAT_MAP)) {
+                            if (gasVal === bigCat) {
+                                categorySelect.value = htmlVal;
+                                break;
+                            }
+                        }
+                    }
+
+                    // 画面への流し込み
                     if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${bigCat} ＞ ${midCat}`;
 
                     if (aiPerspectivesText) {
@@ -68,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
 <div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
 <div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
+<div class="mb-3"><strong>d. 懸念点と乗り跨え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
 <div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
                         `.trim();
                     }
@@ -76,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
                     if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
 
-                    // プレースホルダーを隠し、AI分析結果エリアを表示する
+                    // 表示エリアのスイッチング
                     if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
                     if (aiAssistBox) {
                         aiAssistBox.style.setProperty("display", "flex", "important");
@@ -89,18 +108,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error(err);
                 alert("通信エラーが発生しました。");
             } finally {
-                // ボタンの状態を元に戻す
                 btnAiAnalysis.disabled = false;
                 btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
             }
         });
     }
 
-    // ★欠落：2. 提案箱へ正式投稿するボタンのクリックイベントを設定
+    // 2. 提案箱へ正式投稿するボタンのクリックイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
-            const bigCat = currentAiResult["大分類"] || "その他";
+
+            // ユーザーが手動でセレクトボックスを変更している可能性を考慮して取得
+            const selectedShortCat = categorySelect ? categorySelect.value : "主体";
+            const bigCat = CAT_MAP[selectedShortCat] || "主体的な学び";
             const midCat = currentAiResult["中分類"] || "その他";
 
             if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
@@ -109,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const rawText = txtContent ? txtContent.value.trim() : "";
 
             btnSubmitToBox.disabled = true;
-            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
+            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" style="width:1rem; height:1rem;" role="status"></span> 提案箱へ投稿中...`;
 
             try {
                 const res = await fetch(GAS_URL, {
@@ -127,30 +148,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await res.json();
 
                 if (data.status === "success") {
-                    alert(`📥 投稿が完了しました！\n\nあなたのアイデアは\n【大分類：${bigCat}】＞【中分類：${midCat}】\nのプロセス提案箱にリアルタイムに格納されました。`);
+                    alert(`📥 投稿が完了しました！\n\nあなたのアイデアはリアルタイムに格納されました。`);
                     
-                    // 入力欄とAIエリアをクリアして初期状態に戻す
                     if (txtContent) txtContent.value = "";
-                    if (aiAssistBox) aiAssistBox.classList.add("d-none");
+                    if (aiAssistBox) {
+                        aiAssistBox.classList.add("d-none");
+                        aiAssistBox.style.setProperty("display", "none", "important");
+                    }
                     if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
                     currentAiResult = null;
 
-                    // 最新のデータを再取得して地図と提案箱をアップデート
+                    // 再取得と再描画
                     await fetchOpinions();
 
-                    // 投稿完了後、自動的に「3. 届いた提案箱」タブへ移動させる
+                    // 投稿完了後、自動的に「3. 届いた提案箱」タブへ移動
                     const listTabBtn = document.getElementById("list-tab-btn");
-                    if (listTabBtn) {
-                        listTabBtn.click();
-                    }
+                    if (listTabBtn) listTabBtn.click();
                 } else {
                     alert("投稿エラー: " + data.message);
-                    btnSubmitToBox.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
                 alert("送信エラーが発生しました。");
+            } finally {
                 btnSubmitToBox.disabled = false;
+                btnSubmitToBox.innerHTML = `📥 この内容で提案箱へ正式に投稿する`;
             }
         });
     }
@@ -172,10 +194,7 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
-        // 1. 提案箱（タブ3）の3段階アコーディオンを描画
         render3StepProposalBox(allOpinions);
-        
-        // 2. アイデアの地図（タブ2）への描画を連動
         renderIdeaMap(allOpinions);
 
     } catch (e) {
@@ -186,12 +205,12 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン & 件数バッジ付き 描画ロジック（タブ3用）
+// 4. 📦 3段階アコーディオン描画（タブ3用）
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
-    container.innerHTML = ""; // 初期化
+    container.innerHTML = ""; 
 
     const mainAccordion = document.createElement("div");
     mainAccordion.className = "accordion";
@@ -199,7 +218,6 @@ function render3StepProposalBox(opinions) {
 
     let bigIndex = 0;
 
-    // 1段階目：大分類のループ
     for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
         bigIndex++;
         
@@ -236,7 +254,6 @@ function render3StepProposalBox(opinions) {
 
         let midIndex = 0;
 
-        // 2段階目：中分類のループ
         midCatList.forEach(midCat => {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
@@ -266,12 +283,11 @@ function render3StepProposalBox(opinions) {
             const midCollapseDiv = document.createElement("div");
             midCollapseDiv.id = midCollapseId;
             midCollapseDiv.className = "accordion-collapse collapse";
-            midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`); // ★修正：セレクタ記法 (#) のバグを補正
+            midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`); 
 
             const midBody = document.createElement("div");
             midBody.className = "accordion-body bg-white p-3";
 
-            // 3段階目：中分類の中身（新統合、単独投稿、元記事の仕分け表示）
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
@@ -279,7 +295,6 @@ function render3StepProposalBox(opinions) {
                 const singleItems = matchedItems.filter(item => !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事"));
                 const originalItems = matchedItems.filter(item => item.status && String(item.status).trim() === "元記事");
 
-                // --- 👑 新統合の描画 ---
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
@@ -292,7 +307,6 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // --- 🔹 単独投稿の描画 ---
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
@@ -305,7 +319,6 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // --- 📂 元記事の描画 ---
                 if (originalItems.length > 0) {
                     const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
@@ -350,37 +363,49 @@ function render3StepProposalBox(opinions) {
 }
 
 // ==========================================
-// 5. 🗺️ アイデアの地図（タブ2）描画ロジック
+// 5. 🗺️ アイデアの地図（タブ2）連動ロジック
 // ==========================================
 function renderIdeaMap(opinions) {
-    const bigCategories = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
+    // HTML側の各パーツの「日本語IDキー」に対応させる
+    const keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
     
-    bigCategories.forEach((bigCat, index) => {
-        const pillarId = index + 1;
-        const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
-        if (!mapPillar) return;
+    keys.forEach(key => {
+        const gasCategoryName = CAT_MAP[key];
+        const baseEl = document.getElementById(`base-text-${key}`);
+        const sumEl = document.getElementById(`sum-text-${key}`);
         
-        mapPillar.innerHTML = ""; // 初期化
+        if (!baseEl || !sumEl) return;
 
-        const mergeItems = opinions.filter(item => {
-            if (!item.category || !item.status) return false;
-            const isBigCat = String(item.category).trim().includes(bigCat);
-            const isMerged = String(item.status).trim() === "新統合";
-            return isBigCat && isMerged;
+        // 「AIが導き出した提案（初期テンプレートなど）」
+        const singleItems = opinions.filter(item => {
+            if (!item.category) return false;
+            const isCat = String(item.category).trim() === gasCategoryName;
+            const isSingle = !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事");
+            return isCat && isSingle;
         });
 
-        if (mergeItems.length === 0) {
-            mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
+        // 「50対50の割合で調整した最終提案 (新統合)」
+        const mergeItems = opinions.filter(item => {
+            if (!item.category || !item.status) return false;
+            const isCat = String(item.category).trim() === gasCategoryName;
+            const isMerged = String(item.status).trim() === "新統合";
+            return isCat && isMerged;
+        });
+
+        // 1. 左側（AI提案エリア）の書き換え
+        if (singleItems.length > 0) {
+            baseEl.textContent = singleItems[0].summary || "提案データがありません。";
         } else {
-            mergeItems.forEach(item => {
-                mapPillar.innerHTML += `
-                    <div class="p-3 mb-2 border-start border-success border-4 bg-light rounded shadow-sm">
-                        <span class="badge bg-success mb-2">👑 新統合</span>
-                        <h6 class="fw-bold text-success mb-1">${item.title || "無題の統合案"}</h6>
-                        <p class="mb-0 text-secondary small lh-base">${item.summary || ""}</p>
-                    </div>
-                `;
-            });
+            baseEl.textContent = "現在、基本となるAIベース提案が設定されていません。";
+        }
+
+        // 2. 右側（調整された最終提案エリア）の書き換え
+        if (mergeItems.length > 0) {
+            sumEl.textContent = mergeItems[0].summary || "";
+            // ローディング用の薄い文字装飾を解除して黒太文字にする
+            sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
+        } else {
+            sumEl.innerHTML = `<span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>`;
         }
     });
 }
