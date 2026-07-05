@@ -175,56 +175,69 @@ async function fetchOpinions() {
     }
 }
 
-// ==========================================
-// 4. アイデアの地図 ＆ 提案箱の描画ロジック（部分一致超強化版）
-// ==========================================
+// =================================================================
+// 4. アイデアの地図 ＆ 提案箱の描画ロジック（ここからファイルの最後まで貼り付け）
+// =================================================================
 function renderStructuredIdeas(ideasDataset) {
-    const proposalContainer = document.getElementById("proposal-container") || document.getElementById("opinions-container");
+    // 1. 受け皿となるHTML要素を安全に取得
+    const proposalContainer = document.getElementById("proposal-container") || document.getElementById("opinions-container") || document.getElementById("list-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
+    // 2. 地図側のエリア（1〜5）を初期化
     for (let i = 1; i <= 5; i++) {
-        const mapPillar = document.getElementById(`map-pillar-${i}`);
+        const mapPillar = document.getElementById(`map-pillar-${i}`) || document.getElementById(`pillar-box-${i}`);
         if (mapPillar) mapPillar.innerHTML = "";
     }
 
-    // どの文字が含まれていても絶対に仕分けを逃さないキーワード設定
+    // 3. データが空、または配列でない場合は安全に終了
+    if (!ideasDataset || !Array.isArray(ideasDataset)) {
+        console.warn("データセットが空、または正しくありません。");
+        return;
+    }
+
+    // 4. 仕分けルール（部分一致の判定を完全に安全化）
     const pillarRules = [
-        { id: 1, name: MAIN_CATEGORIES[0], keyword: "主体" },
-        { id: 2, name: MAIN_CATEGORIES[1], keyword: "好奇心" },
-        { id: 3, name: MAIN_CATEGORIES[2], keyword: "未来" },
-        { id: 4, name: MAIN_CATEGORIES[3], keyword: "個性" },
-        { id: 5, name: MAIN_CATEGORIES[4], keyword: "シームレス" }
+        { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
+        { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
+        { id: 3, name: "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）", keyword: "未来" },
+        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）", keyword: "個性" },
+        { id: 5, name: "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）", keyword: "シームレス" }
     ];
 
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
         
-        // ✨ ここを完全補正：シート内の文字が途中で切れていても確実に拾い上げる
+        // 【安全化】B列（category）が空欄でも絶対にクラッシュさせない仕分け
         const pillarIdeas = ideasDataset.filter(item => {
-            if (!item.category) return false;
+            if (!item || !item.category) return false;
             const catStr = String(item.category).trim();
-            // シートの文字にキーワードが含まれているか、またはその逆を徹底チェック
-            return catStr.includes(rule.keyword) || rule.keyword.includes(catStr) || catStr.includes(rule.name.substring(0, 5));
+            return catStr.includes(rule.keyword) || rule.keyword.includes(catStr);
         });
         
+        // 提案箱用の外枠を生成
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
         pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.name}</h5>`;
 
+        // 【安全化】statusが空欄（null/undefined）であっても絶対にクラッシュしない判定
         const mainIdeas = pillarIdeas.filter(item => {
-            return String(item.status).trim() !== "元記事";
+            if (!item) return false;
+            const statusStr = item.status ? String(item.status).trim() : "";
+            return statusStr !== "元記事";
         });
-        
-        if (mainIdeas.length === 0 && !pillarIdeas.some(item => String(item.status).trim() === "元記事")) {
+
+        // アイデアが1件もない場合の表示
+        if (mainIdeas.length === 0 && !pillarIdeas.some(item => item && item.status && String(item.status).trim() === "元記事")) {
             pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
         }
 
+        // メインアイデア（新統合 または 表示・単独提案）の描画
         mainIdeas.forEach(idea => {
             let badgeColor = "bg-info text-dark";
-            let displayStatus = String(idea.status).trim();
+            let displayStatus = idea.status ? String(idea.status).trim() : "";
             
             if (displayStatus === "新統合") {
-                badgeColor = "bg-success";
+                badgeColor = "bg-success text-white";
             } else {
                 displayStatus = "単独提案";
                 badgeColor = "bg-info text-dark";
@@ -241,12 +254,13 @@ function renderStructuredIdeas(ideasDataset) {
             `;
             pillarSection.innerHTML += card;
 
+            // 「新統合」であれば地図側（マップ）にもカードを複製して表示
             if (displayStatus === "新統合") {
-                const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
+                const mapPillar = document.getElementById(`map-pillar-${pillarId}`) || document.getElementById(`pillar-box-${pillarId}`);
                 if (mapPillar) {
                     mapPillar.innerHTML += `
                         <div class="p-3 mb-2 border-start border-success border-4 bg-light rounded shadow-sm">
-                            <span class="badge bg-success mb-2">新統合</span>
+                            <span class="badge bg-success text-white mb-2">新統合</span>
                             <h5 class="fw-bold text-success mb-1">${idea.title || "無題の提案"}</h5>
                             <p class="mb-0 text-secondary small">${idea.summary || ""}</p>
                         </div>
@@ -255,8 +269,8 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-        const originalIdeas = pillarIdeas.filter(item => String(item.status).trim() === "元記事");
-
+        // 「元記事」の折りたたみ（アコーディオン）描画ロジック
+        const originalIdeas = pillarIdeas.filter(item => item && item.status && String(item.status).trim() === "元記事");
         if (originalIdeas.length > 0) {
             const subAccordionId = `subCollapse-original-${pillarId}`;
             let originalSectionHtml = `
@@ -291,7 +305,7 @@ function renderStructuredIdeas(ideasDataset) {
     });
 
     for (let i = 1; i <= 5; i++) {
-        const mapPillar = document.getElementById(`map-pillar-${i}`);
+        const mapPillar = document.getElementById(`map-pillar-${i}`) || document.getElementById(`pillar-box-${i}`);
         if (mapPillar && mapPillar.innerHTML.trim() === "") {
             mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
         }
