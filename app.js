@@ -1,23 +1,25 @@
-// ==========================================
-// 1. 設定・定数・グローバル変数定義。
-// ==========================================
-// ⚠️ 新しいGASのURLを取得されている場合は、以下の "" の中に上書きしてください
+// =================================================================
+// 意見ひろば プログラム（大分類名称・仕分けロジック完全統合版）
+// =================================================================
+
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzl2w3LIhCKFx0Xw-biVr2bEarkPl3mZWGi-wKLahfG_u4EWdDioF0CLpnn1Mjr2FY0/exec";
 
+// 🔥 AIの自動仕分け・選択用と、画面表示用の「大分類名」を100%完全一致させました
 const MAIN_CATEGORIES = [
-    "主体的な学び",
-    "楽しさと好奇心",
-    "未来を生き抜く力",
-    "個性・才能の開花",
-    "シームレス成長支援"
+    "🌱 1. 探究心を育む知育環境（主体的な学び）",
+    "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）",
+    "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）",
+    "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）",
+    "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）"
 ];
 
+// 中分類の定義（親となる大分類の文字と完全に一致させて紐付け）
 const FIXED_MID_CATEGORIES = {
-    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"],
-    "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
-    "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
-    "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-    "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"]
+    "🌱 1. 探究心を育む知育環境（主体的な学び）": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
+    "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
+    "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
+    "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
+    "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
 };
 
 let allOpinions = [];
@@ -36,10 +38,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
 
-    // ✨ 最優先でデータを読み込む（画像エラーの巻き添えを防ぐ安全設計）
     fetchOpinions();
 
-    // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
 <div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
 <div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
+<div class="mb-3"><strong>d. 懸念点と乗り跨え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
 <div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
                         `.trim();
                     }
@@ -99,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
@@ -130,17 +129,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await res.json();
 
                 if (data.status === "success") {
-                    alert(`📥 投稿が完了しました！\n\nあなたのアイデアは\n【大分類：${bigCat}】＞【中分類：${midCat}】\nのプロセス提案箱にリアルタイムに格納されました。`);
+                    alert(`📥 投稿が完了しました！\n\nあなたのアイデアは\n【大分類：${bigCat}】\nのプロセス提案箱にリアルタイムに格納されました。`);
                     
                     if (txtContent) txtContent.value = "";
                     if (aiAssistBox) aiAssistBox.classList.add("d-none");
                     if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
                     currentAiResult = null;
 
-                    // データの再読み込みと画面の再描画
                     await fetchOpinions();
 
-                    // 新しいID名（list-tab-btn）に対応して自動でタブを切り替え
                     const listTabBtn = document.getElementById("list-tab-btn");
                     if (listTabBtn) {
                         listTabBtn.click();
@@ -159,15 +156,13 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携（本番仕様版）
+// 3. データ取得・バックエンド連携
 // ==========================================
 async function fetchOpinions() {
     try {
-        // スプレッドシートからデータを取得
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
-        // データ形式を配列に整える
         if (Array.isArray(data)) {
             allOpinions = data;
         } else if (data && data.opinions) {
@@ -176,7 +171,6 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
-        // 取得したデータを地図と提案箱に流し込む
         renderStructuredIdeas(allOpinions);
 
     } catch (e) {
@@ -185,10 +179,9 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. アイデアの地図 ＆ 提案箱の描画ロジック（スプレッドシート完全一致版）
+// 4. アイデアの地図 ＆ 提案箱の描画ロジック（仕分け連動強化版）
 // ==========================================
 function renderStructuredIdeas(ideasDataset) {
-    // 画面の各エリアを初期化
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`);
         if (mapPillar) mapPillar.innerHTML = "";
@@ -196,50 +189,43 @@ function renderStructuredIdeas(ideasDataset) {
     const proposalContainer = document.getElementById("proposal-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
-    // あなた本来の意図に修正した5つの柱の定義
+    // 💡 MAIN_CATEGORIES と完全に連動した仕分け用ルール
     const pillarRules = [
-        { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
-        { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
-        { id: 3, name: "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）", keyword: "未来" },
-        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）", keyword: "個性" },
-        { id: 5, name: "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）", keyword: "シームレス" }
+        { id: 1, name: MAIN_CATEGORIES[0], keyword: "主体" },
+        { id: 2, name: MAIN_CATEGORIES[1], keyword: "好奇心" },
+        { id: 3, name: MAIN_CATEGORIES[2], keyword: "未来" },
+        { id: 4, name: MAIN_CATEGORIES[3], keyword: "個性" },
+        { id: 5, name: MAIN_CATEGORIES[4], keyword: "シームレス" }
     ];
 
-    // 5つの柱ごとにデータを仕分けして描画
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
         
-        // スプレッドシートの「大分類（category）」にキーワードが含まれるデータを抽出
+        // ✨ 新旧どちらの分類文字列がスプレッドシートに入っていても、キーワードで100%確実に拾い上げる頑丈なフィルタ
         const pillarIdeas = ideasDataset.filter(item => {
             if (!item.category) return false;
             const catStr = String(item.category).trim();
-            // スプレッドシートの「大分類」の文字の中に、ルールで決めたキーワードが含まれているか判定
-            return catStr.indexOf(rule.keyword) !== -1 || rule.name.indexOf(catStr) !== -1;
+            return catStr.includes(rule.keyword) || rule.name.includes(catStr);
         });
         
-        // 提案箱（タブ3）用の外枠（セクション）を作成
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
         pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.name}</h5>`;
 
-        // 「元記事」以外のメインアイデア（新統合、または単独提案）
         const mainIdeas = pillarIdeas.filter(item => {
             const statusStr = item.status ? String(item.status).trim() : "";
             return statusStr !== "元記事";
         });
         
-        // 該当データが一切ない場合の表示
         const hasOriginals = pillarIdeas.some(item => String(item.status).trim() === "元記事");
         if (mainIdeas.length === 0 && !hasOriginals) {
             pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
         }
 
-        // メインアイデアの描画処理
         mainIdeas.forEach(idea => {
             let badgeColor = "bg-info text-dark";
             let displayStatus = idea.status ? String(idea.status).trim() : "";
             
-            // H列が「新統合」なら緑バッジ、それ以外（表示・空欄など）なら水色の「単独提案」
             if (displayStatus === "新統合") {
                 badgeColor = "bg-success";
             } else {
@@ -247,7 +233,6 @@ function renderStructuredIdeas(ideasDataset) {
                 badgeColor = "bg-info text-dark";
             }
 
-            // 【提案箱（タブ3）】へカードを追加
             const card = `
                 <div class="card mb-2 shadow-sm border-0">
                     <div class="card-body p-3">
@@ -259,7 +244,6 @@ function renderStructuredIdeas(ideasDataset) {
             `;
             pillarSection.innerHTML += card;
 
-            // 【アイデアの地図（タブ2）】へカードを追加（「新統合」に指定した記事がここに載ります）
             if (displayStatus === "新統合") {
                 const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
                 if (mapPillar) {
@@ -274,7 +258,6 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-        // 「元記事」に指定されたデータをアコーディオン（折りたたみ）形式で格納
         const originalIdeas = pillarIdeas.filter(item => {
             const statusStr = item.status ? String(item.status).trim() : "";
             return statusStr === "元記事";
@@ -293,7 +276,6 @@ function renderStructuredIdeas(ideasDataset) {
             `;
 
             originalIdeas.forEach(orig => {
-                // I列（mergedTo）または L列（aiJson / AI分析深掘り）に入っている統合理由を取得
                 let reasonText = orig.mergedTo ? String(orig.mergedTo).trim() : "";
                 if (!reasonText && orig.aiJson) {
                     reasonText = String(orig.aiJson).trim();
@@ -321,12 +303,10 @@ function renderStructuredIdeas(ideasDataset) {
         }
     });
 
-    // 地図側で新統合データがまだ無い場合のケア表示
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`);
         if (mapPillar && mapPillar.innerHTML.trim() === "") {
             mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
         }
-        　
     }
 }
