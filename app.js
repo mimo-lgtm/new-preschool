@@ -197,16 +197,13 @@ function initializeStaticMap() {
 }
 
 // ==========================================
-// 3. データ取得・バックエンド連携（検証・ログ強化版）
+// 3. データ取得・バックエンド連携（列名チェック版）
 // ==========================================
 async function fetchOpinions() {
     try {
         console.log("GASからデータ取得を開始します...");
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        
-        // データの構造をブラウザのコンソールに丸ごと出力して検証
-        console.log("GASから届いた生データ:", data);
         
         if (data && Array.isArray(data.opinions)) {
             allOpinions = data.opinions;
@@ -218,11 +215,14 @@ async function fetchOpinions() {
         
         console.log(`パース完了。合計 ${allOpinions.length} 件のデータを処理します。`);
         
-        // 16行目〜30行目のデータ（statusが「新統合」のものなど）が本当にあるか確認するログ
-        const testMerged = allOpinions.filter(item => String(item.status).includes("統合"));
-        console.log("【デバッグ】見つかった統合データ件数:", testMerged.length, testMerged);
+        // 【ここを追加】1件目のデータを詳しく調べてコンソールに出す
+        if (allOpinions.length > 0) {
+            console.log("ーーー【重要】GASから届いたデータの列名チェック ーーー");
+            console.log("データの1件目の中身:", allOpinions[0]);
+            console.log("使える列名（キー名）の一覧:", Object.keys(allOpinions[0]));
+            console.log("ーーーーーーーーーーーーーーーーーーーーーーーーーーー");
+        }
 
-        // 描画処理へ渡す
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
 
