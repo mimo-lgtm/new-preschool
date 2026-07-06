@@ -220,7 +220,7 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン描画
+// 4. 📦 3段階アコーディオン描画（修正版）
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
@@ -232,18 +232,27 @@ function render3StepProposalBox(opinions) {
         return;
     }
 
+    // 正しい中分類の表記に修正（「の」に統一）
+    const EXACT_STRUC_CONFIG = {
+        "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
+        "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
+        "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
+        "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
+        "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
+    };
+
     const mainAccordion = document.createElement("div");
     mainAccordion.className = "accordion";
     mainAccordion.id = "mainProposalAccordion";
 
     let bigIndex = 0;
 
-    for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
+    for (const [bigCat, midCatList] of Object.entries(EXACT_STRUC_CONFIG)) {
         bigIndex++;
         
         const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
 
-        // 大分類の一致判定（「1. シームレス〜」などの数字入りも含む部分一致）
+        // 大分類の部分一致
         const bigCatItems = opinions.filter(item => {
             return item.category && item.category.includes(targetKeyword);
         });
@@ -280,13 +289,13 @@ function render3StepProposalBox(opinions) {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
 
-            // 中分類のマッチング
+            // 中分類の正確なマッチング
             const matchedItems = bigCatItems.filter(item => {
                 const itemMid = item.midCat ? item.midCat.trim() : "";
-                if (midCat.trim() === "その他") {
+                if (midCat === "その他") {
                     return itemMid === "その他" || itemMid === "" || !midCatList.includes(itemMid);
                 }
-                return itemMid === midCat.trim();
+                return itemMid === midCat;
             });
 
             const totalMidCount = matchedItems.length;
@@ -314,17 +323,17 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // ステータス「新統合」「表示」の分類
-                const newMergeItems = matchedItems.filter(item => item.status.includes("統合") || item.status === "マージ");
-                const singleItems = matchedItems.filter(item => !item.status.includes("統合") && item.status !== "マージ" && item.status !== "元記事" && item.status !== "元データ");
+                // ステータス（H列）を基準に分類
+                const newMergeItems = matchedItems.filter(item => item.status === "新統合" || item.status === "マージ");
+                const singleItems = matchedItems.filter(item => item.status === "表示" || (!item.status.includes("統合") && item.status !== "元記事" && item.status !== "元データ"));
                 const originalItems = matchedItems.filter(item => item.status === "元記事" || item.status === "元データ");
 
-                // 1. 新統合データを最上位（緑色のカード）で表示（16-30行目のデータ）
+                // 1. 新統合データを最上位（緑色のカード）で表示（バッジを「👑 新統合」に固定修正）
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
                             <div class="card-body p-3">
-                                <span class="badge bg-success mb-1">👑 新統合（集約された施策）</span>
+                                <span class="badge bg-success mb-1">👑 新統合</span>
                                 <h6 class="fw-bold text-success mb-1">${item.title || "無題の統合案"}</h6>
                                 <p class="small text-dark mb-0 lh-base" style="white-space: pre-wrap;">${item.summary || ""}</p>
                             </div>
@@ -332,12 +341,12 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案（「表示」など）
+                // 2. 単独提案（「表示」など。バッジをスプレッドシートの status 文字そのものに修正）
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
                             <div class="card-body p-3">
-                                <span class="badge bg-info text-dark mb-1">${item.status || "提案"}</span>
+                                <span class="badge bg-info text-dark mb-1">${item.status || "単独提案"}</span>
                                 <h6 class="fw-bold text-dark mb-1">${item.title || "無題の提案"}</h6>
                                 <p class="small text-secondary mb-0 lh-base" style="white-space: pre-wrap;">${item.summary || ""}</p>
                             </div>
@@ -361,6 +370,7 @@ function render3StepProposalBox(opinions) {
                     originalItems.forEach(orig => {
                         origWrapper += `
                             <div class="p-2 mb-2 bg-white rounded border-bottom small">
+                                <span class="badge bg-secondary mb-1">元記事</span>
                                 <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title || "無題"}</h6>
                                 <p class="text-danger mb-1" style="font-size: 0.75rem;">🔄 ${orig.reason || "新統合へ集約"}</p>
                                 <p class="text-muted mb-0" style="font-size: 0.8rem;" style="white-space: pre-wrap;">${orig.summary || ""}</p>
@@ -386,7 +396,6 @@ function render3StepProposalBox(opinions) {
 
     container.appendChild(mainAccordion);
 }
-
 // ==========================================
 // 5. 🗺️ アイデアの地図（右側サマリーへの動的反映）
 // ==========================================
