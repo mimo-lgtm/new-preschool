@@ -18,13 +18,10 @@ let allOpinions = [];
 let currentAiResult = null; 
 
 // ==========================================
-// 2. メイン処理（画面初期化・イベント設定）
+// 2. メメイン処理（画面初期化・イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    // 右側マップの初期化状態をセット
     initializeRightMap();
-    
-    // データ取得開始
     fetchOpinions();
 
     const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
@@ -171,16 +168,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function initializeRightMap() {
-    CAT_KEYS.forEach(key => {
-        const sumEl = document.getElementById(`sum-text-${key}`);
-        if (sumEl) {
-            // HTML側の初期表示を壊さないよう、ここではローディングテキストを上書きしません
-        }
-    });
+    // マップ初期状態保持
 }
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得・バックエンド連携（★根本修正箇所）
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -194,21 +186,26 @@ async function fetchOpinions() {
             rawList = data;
         }
 
-        allOpinions = rawList.map(item => {
-            return {
-                category: String(item["大分類"] || item["category"] || "").trim(),
-                midCat: String(item["中分類"] || item["midCat"] || "").trim(),
-                title: String(item["推奨タイトル"] || item["title"] || "").trim(),
-                summary: String(item["200字要約"] || item["summary"] || "").trim(),
-                status: String(item["status"] || item["ステータス"] || "").trim(),
-                reason: String(item["AI分析深掘り(JS統合・配置理由)"] || item["AI分析深掘り(JS統合・配置理由"] || item["reason"] || "").trim(),
-                aiJson: String(item["aiJson"] || "").trim()
-            };
-        });
+        // タイムスタンプが無くても、大分類があれば有効なデータとして16-30行目をすべて救済マッピング
+        allOpinions = rawList
+            .filter(item => (item["大分類"] || item["category"])) // 大分類が入力されている行はすべて対象にする
+            .map(item => {
+                return {
+                    category: String(item["大分類"] || item["category"] || "").trim(),
+                    midCat: String(item["中分類"] || item["midCat"] || "").trim(),
+                    title: String(item["推奨タイトル"] || item["title"] || item["小分類"] || "").trim(), // 小分類もバックアップとして統合
+                    summary: String(item["200字要約"] || item["summary"] || "").trim(),
+                    status: String(item["status"] || item["ステータス"] || "").trim(),
+                    // 実際のM列の列名「統合・配置理由」を正確にマッピング
+                    reason: String(item["統合・配置理由"] || item["AI分析深掘り(JS統合・配置理由)"] || item["reason"] || "").trim(),
+                    aiJson: String(item["AI分析深掘り(JSON)"] || item["aiJson"] || "").trim()
+                };
+            });
         
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
 
+        // プロセスログの描画（M列の「統合・配置理由」を出力）
         const processLogEl = document.getElementById("process-log");
         if (processLogEl) {
             const logs = allOpinions
@@ -246,7 +243,7 @@ function render3StepProposalBox(opinions) {
         
         const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
 
-        // 大分類の一致判定（部分一致）
+        // 大分類の一致判定（「1. シームレス〜」などの数字入りも含む部分一致）
         const bigCatItems = opinions.filter(item => {
             return item.category && item.category.includes(targetKeyword);
         });
@@ -283,7 +280,7 @@ function render3StepProposalBox(opinions) {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
 
-            // 中分類の一致判定（中分類が空、または「その他」の場合はブレを許容）
+            // 中分類のマッチング
             const matchedItems = bigCatItems.filter(item => {
                 const itemMid = item.midCat ? item.midCat.trim() : "";
                 if (midCat.trim() === "その他") {
@@ -317,12 +314,12 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // ステータス判定（新統合、単独提案、元記事のブレをすべて救済）
+                // ステータス「新統合」「表示」の分類
                 const newMergeItems = matchedItems.filter(item => item.status.includes("統合") || item.status === "マージ");
                 const singleItems = matchedItems.filter(item => !item.status.includes("統合") && item.status !== "マージ" && item.status !== "元記事" && item.status !== "元データ");
                 const originalItems = matchedItems.filter(item => item.status === "元記事" || item.status === "元データ");
 
-                // 1. 新統合データを最上位に表示
+                // 1. 新統合データを最上位（緑色のカード）で表示（16-30行目のデータ）
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
@@ -335,7 +332,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案を表示（自分の新規投稿など）
+                // 2. 単独提案（「表示」など）
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
@@ -348,7 +345,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 3. 元記事アコーディオン
+                // 3. 元記事履歴
                 if (originalItems.length > 0) {
                     const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
@@ -391,30 +388,29 @@ function render3StepProposalBox(opinions) {
 }
 
 // ==========================================
-// 5. 🗺️ アイデアの地図（右側サマリーの動的反映）
+// 5. 🗺️ アイデアの地図（右側サマリーへの動的反映）
 // ==========================================
 function renderIdeaMap(opinions) {
     CAT_KEYS.forEach(key => {
         const sumEl = document.getElementById(`sum-text-${key}`);
         if (!sumEl) return;
 
-        // 右側の3,4,5も含め、新統合・単独提案などのデータをしっかり抽出
+        // 指定キーワードを含み、かつ元データ以外の有効なアクティブデータを抽出
         const matchedActiveItems = opinions.filter(item => {
             if (!item.category) return false;
             const isCat = item.category.includes(key);
-            // 元記事（非表示対象）以外をすべて有効データとして処理
             const isActive = !item.status.includes("元記事") && !item.status.includes("元データ");
             return isCat && isActive;
         });
 
         if (matchedActiveItems.length > 0) {
-            // 最も新しい更新データを取得して反映
-            const latestItem = matchedActiveItems[matchedActiveItems.length - 1];
-            sumEl.textContent = latestItem.summary || "";
+            // 新統合データ（16-30行目のマージテストデータ）があればそれを優先抽出し、なければ最新データを反映
+            const mergeItem = matchedActiveItems.find(item => item.status.includes("統合") || item.status === "マージ");
+            const targetItem = mergeItem ? mergeItem : matchedActiveItems[matchedActiveItems.length - 1];
+            
+            sumEl.textContent = targetItem.summary || "";
             sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
             sumEl.style.borderColor = "#bbf7d0";
-        } else {
-            // スプレッドシートからデータが引けなかった場合のフォールバック（HTMLの初期値を維持）
         }
     });
 }
