@@ -21,8 +21,7 @@ let currentAiResult = null;
 // 2. メイン処理（画面初期化・イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    // ※左側マップの300字テキストはHTML直書きに変更されたため、JSからの干渉は一切行いません。
-    // 右側マップの初期化状態のみセットします。
+    // 右側マップの初期化状態をセット
     initializeRightMap();
     
     // データ取得開始
@@ -175,14 +174,13 @@ function initializeRightMap() {
     CAT_KEYS.forEach(key => {
         const sumEl = document.getElementById(`sum-text-${key}`);
         if (sumEl) {
-            sumEl.innerHTML = `<span class="text-muted" style="font-size:0.75rem;">市民の声を収集中...</span>`;
-            sumEl.className = "text-muted small p-2 text-center bg-light rounded";
+            // HTML側の初期表示を壊さないよう、ここではローディングテキストを上書きしません
         }
     });
 }
 
 // ==========================================
-// 3. データ取得・バックエンド連携（完全復活・ヘッダー完全同期）
+// 3. データ取得・バックエンド連携
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -196,7 +194,6 @@ async function fetchOpinions() {
             rawList = data;
         }
 
-        // 画像のヘッダー日本語名から100%安全にマッピング
         allOpinions = rawList.map(item => {
             return {
                 category: String(item["大分類"] || item["category"] || "").trim(),
@@ -204,7 +201,7 @@ async function fetchOpinions() {
                 title: String(item["推奨タイトル"] || item["title"] || "").trim(),
                 summary: String(item["200字要約"] || item["summary"] || "").trim(),
                 status: String(item["status"] || item["ステータス"] || "").trim(),
-                reason: String(item["AI分析深掘り(JS統合・配置理由"] || item["reason"] || "").trim(),
+                reason: String(item["AI分析深掘り(JS統合・配置理由)"] || item["AI分析深掘り(JS統合・配置理由"] || item["reason"] || "").trim(),
                 aiJson: String(item["aiJson"] || "").trim()
             };
         });
@@ -226,7 +223,7 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン描画（新統合・表記ブレ完全救済）
+// 4. 📦 3段階アコーディオン描画
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
@@ -249,7 +246,7 @@ function render3StepProposalBox(opinions) {
         
         const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
 
-        // 大分類の番号（1.など）の有無を部分一致で吸収
+        // 大分類の一致判定（部分一致）
         const bigCatItems = opinions.filter(item => {
             return item.category && item.category.includes(targetKeyword);
         });
@@ -286,8 +283,13 @@ function render3StepProposalBox(opinions) {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
 
+            // 中分類の一致判定（中分類が空、または「その他」の場合はブレを許容）
             const matchedItems = bigCatItems.filter(item => {
-                return item.midCat && item.midCat === midCat.trim();
+                const itemMid = item.midCat ? item.midCat.trim() : "";
+                if (midCat.trim() === "その他") {
+                    return itemMid === "その他" || itemMid === "" || !midCatList.includes(itemMid);
+                }
+                return itemMid === midCat.trim();
             });
 
             const totalMidCount = matchedItems.length;
@@ -315,11 +317,12 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                const newMergeItems = matchedItems.filter(item => item.status === "新統合");
-                const singleItems = matchedItems.filter(item => item.status === "単独提案" || item.status === "表示" || item.status === "");
-                const originalItems = matchedItems.filter(item => item.status === "元記事");
+                // ステータス判定（新統合、単独提案、元記事のブレをすべて救済）
+                const newMergeItems = matchedItems.filter(item => item.status.includes("統合") || item.status === "マージ");
+                const singleItems = matchedItems.filter(item => !item.status.includes("統合") && item.status !== "マージ" && item.status !== "元記事" && item.status !== "元データ");
+                const originalItems = matchedItems.filter(item => item.status === "元記事" || item.status === "元データ");
 
-                // 1. 【16〜30行目の新統合】を一番上に出す
+                // 1. 新統合データを最上位に表示
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
@@ -332,14 +335,14 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案
+                // 2. 単独提案を表示（自分の新規投稿など）
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
                             <div class="card-body p-3">
-                                <span class="badge bg-info text-dark mb-1">単独提案</span>
+                                <span class="badge bg-info text-dark mb-1">${item.status || "提案"}</span>
                                 <h6 class="fw-bold text-dark mb-1">${item.title || "無題の提案"}</h6>
-                                <p class="small text-secondary mb-0 lh-base">${item.summary || ""}</p>
+                                <p class="small text-secondary mb-0 lh-base" style="white-space: pre-wrap;">${item.summary || ""}</p>
                             </div>
                         </div>
                     `;
@@ -363,7 +366,7 @@ function render3StepProposalBox(opinions) {
                             <div class="p-2 mb-2 bg-white rounded border-bottom small">
                                 <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title || "無題"}</h6>
                                 <p class="text-danger mb-1" style="font-size: 0.75rem;">🔄 ${orig.reason || "新統合へ集約"}</p>
-                                <p class="text-muted mb-0" style="font-size: 0.8rem;">${orig.summary || ""}</p>
+                                <p class="text-muted mb-0" style="font-size: 0.8rem;" style="white-space: pre-wrap;">${orig.summary || ""}</p>
                             </div>
                         `;
                     });
@@ -388,27 +391,30 @@ function render3StepProposalBox(opinions) {
 }
 
 // ==========================================
-// 5. 🗺️ アイデアの地図（右側サマリーのみ動的反映）
+// 5. 🗺️ アイデアの地図（右側サマリーの動的反映）
 // ==========================================
 function renderIdeaMap(opinions) {
     CAT_KEYS.forEach(key => {
         const sumEl = document.getElementById(`sum-text-${key}`);
         if (!sumEl) return;
 
+        // 右側の3,4,5も含め、新統合・単独提案などのデータをしっかり抽出
         const matchedActiveItems = opinions.filter(item => {
             if (!item.category) return false;
             const isCat = item.category.includes(key);
-            const isActive = item.status === "新統合" || item.status === "単独提案" || item.status === "表示";
+            // 元記事（非表示対象）以外をすべて有効データとして処理
+            const isActive = !item.status.includes("元記事") && !item.status.includes("元データ");
             return isCat && isActive;
         });
 
         if (matchedActiveItems.length > 0) {
+            // 最も新しい更新データを取得して反映
             const latestItem = matchedActiveItems[matchedActiveItems.length - 1];
             sumEl.textContent = latestItem.summary || "";
-            sumEl.className = "text-dark fw-bold lh-base small bg-white p-2 rounded border border-success";
+            sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
+            sumEl.style.borderColor = "#bbf7d0";
         } else {
-            sumEl.innerHTML = `<span class="text-muted" style="font-size:0.75rem;">市民の声を収集中...</span>`;
-            sumEl.className = "text-muted small p-2 text-center bg-light rounded";
+            // スプレッドシートからデータが引けなかった場合のフォールバック（HTMLの初期値を維持）
         }
     });
 }
