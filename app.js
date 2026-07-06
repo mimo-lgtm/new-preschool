@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbw2iNi6bnur2N0VeGjI59vQcFrWbCesAVbd1IAepuQ-rCQeZnYXcn87zTKNzSa-Egk6/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxFNIThpkI_V0TFPMlmeUsIfvHBoR0XgYMA8nwgupARvUcrAeSHx99r-gfYHOjc918/exec";
 
 // HTML側のセレクトボックスの値（value）と、スプレッドシート上の正式名称のマッピング
 const CAT_MAP = {
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得・バックエンド連携（【修正】クロス分析・ログのリアルタイム反映を追加）
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -194,8 +194,28 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
+        // ① 既存の3段階アコーディオンと地図の描画
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
+
+        // ② 【新規追加】全体クロス分析結果のリアルタイム抽出と描画
+        const mapAnalysisEl = document.getElementById("map-analysis");
+        if (mapAnalysisEl) {
+            // スプレッドシートのL列(aiJson)に全体分析データが蓄積されている行を検索、なければ直近の要約を抽出
+            const latestAnalysis = allOpinions.find(item => item.aiJson && item.aiJson.trim() !== "");
+            mapAnalysisEl.textContent = latestAnalysis ? latestAnalysis.aiJson : "現在、複数の提案を掛け合わせた新しいクロス分析マップを自動生成しています。";
+        }
+
+        // ③ 【新規追加】なぜ統合されたかのプロセスログのリアルタイム描画
+        const processLogEl = document.getElementById("process-log");
+        if (processLogEl) {
+            // スプレッドシートのM列(reason)から統合理由（プロセス経緯）が書かれているものを抽出してリスト化
+            const logs = allOpinions
+                .filter(item => item.reason && item.reason.trim() !== "")
+                .map(item => `◆ [ID:${item.id}] ${item.title}\n   ➔ 統合経緯: ${item.reason}`)
+                .join("\n\n");
+            processLogEl.textContent = logs ? logs : "現在、提案の衝突や類似性を解消するための自動統合プロセスログはありません。";
+        }
 
     } catch (e) {
         console.error("データ取得失敗:", e);
