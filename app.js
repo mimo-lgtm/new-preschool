@@ -1,9 +1,8 @@
 // ==========================================
-// 1. 設定・定数・グローバル変数定義。
+// 1. 設定・定数・グローバル変数定義
 // ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyDV8Ic3jWmDHaWTHrtzf19_aEgTxUAaP9EvM7XinMk1W4ZPFk9NVcdnGtV27LbrPp2/exec";
 
-// 部分一致マッチング用の判定キーワード
 const CAT_KEYS = ["主体", "好奇心", "未来", "個性", "シームレス"];
 
 const STRUC_CONFIG = {
@@ -17,14 +16,13 @@ const STRUC_CONFIG = {
 let allOpinions = [];
 let currentAiResult = null; 
 
-// 全角・半角スペース、改行を完全に除去して比較するためのクレンジング関数
 function cleanString(str) {
     if (!str) return "";
     return String(str).replace(/[\s\u3000\t\r\n]/g, "");
 }
 
 // ==========================================
-// 2. メイン処理（画面初期化・イベント設定）
+// 2. メイン処理（イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
     fetchOpinions();
@@ -173,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得（GASから送られたオブジェクトをそのまま処理）
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -187,19 +185,17 @@ async function fetchOpinions() {
             rawList = data;
         }
 
-        allOpinions = rawList
-            .filter(item => (item["大分類"] || item["category"]))
-            .map(item => {
-                return {
-                    category: String(item["大分類"] || item["category"] || "").trim(),
-                    midCat: String(item["中分類"] || item["midCat"] || "").trim(),
-                    title: String(item["推奨タイトル"] || item["title"] || item["小分類"] || "").trim(),
-                    summary: String(item["200字要約"] || item["summary"] || "").trim(),
-                    status: String(item["status"] || item["ステータス"] || "").trim(),
-                    reason: String(item["統合・配置理由"] || item["AI分析深掘り(JS統合・配置理由)"] || item["reason"] || "").trim(),
-                    aiJson: String(item["AI分析深掘り(JSON)"] || item["aiJson"] || "").trim()
-                };
-            });
+        allOpinions = rawList.map(item => {
+            return {
+                category: String(item.category || "").trim(),
+                midCat: String(item.midCat || "").trim(),
+                title: String(item.title || "").trim(),
+                summary: String(item.summary || "").trim(),
+                status: String(item.status || "").trim(),
+                reason: String(item.reason || "").trim(),
+                content: String(item.content || "").trim()
+            };
+        });
         
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
@@ -213,12 +209,12 @@ async function fetchOpinions() {
             processLogEl.textContent = logs ? logs : "現在、自動統合プロセスログはありません。";
         }
     } catch (e) {
-        console.error("データ取得・描画フェーズエラー:", e);
+        console.error("データ取得エラー:", e);
     }
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン描画（完全検証版）
+// 4. 📦 3段階アコーディオン描画（完全同期版）
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
@@ -240,11 +236,7 @@ function render3StepProposalBox(opinions) {
         bigIndex++;
         
         const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
-
-        // 大分類マッチング
-        const bigCatItems = opinions.filter(item => {
-            return item.category && item.category.includes(targetKeyword);
-        });
+        const bigCatItems = opinions.filter(item => item.category && item.category.includes(targetKeyword));
         const totalBigCount = bigCatItems.length;
 
         const bigCollapseId = `bigCollapse-${bigIndex}`;
@@ -277,14 +269,11 @@ function render3StepProposalBox(opinions) {
         midCatList.forEach(midCat => {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
-
-            // 【超重要】文字列のスペース・改行を完全除去して中分類を比較
             const cleanedConfigMid = cleanString(midCat);
 
             const matchedItems = bigCatItems.filter(item => {
                 const cleanedItemMid = cleanString(item.midCat);
                 if (cleanedConfigMid === "その他") {
-                    // 「その他」枠には、空欄のもの、または定義リストに存在しないものをすべて集約
                     const isKnown = midCatList.some(m => cleanString(m) === cleanedItemMid && cleanString(m) !== "その他");
                     return cleanedItemMid === "その他" || cleanedItemMid === "" || !isKnown;
                 }
@@ -316,12 +305,11 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // ステータス文字列の空白除去をして厳密にグループ分け
                 const newMergeItems = matchedItems.filter(item => cleanString(item.status) === "新統合" || cleanString(item.status) === "マージ");
-                const singleItems = matchedItems.filter(item => cleanString(item.status) === "表示" || (!cleanString(item.status).includes("統合") && cleanString(item.status) !== "元記事" && cleanString(item.status) !== "元データ"));
+                const singleItems = matchedItems.filter(item => cleanString(item.status) !== "新統合" && cleanString(item.status) === "マージ" && cleanString(item.status) !== "元記事" && cleanString(item.status) !== "元データ");
                 const originalItems = matchedItems.filter(item => cleanString(item.status) === "元記事" || cleanString(item.status) === "元データ");
 
-                // 1. 新統合データを最上位（緑カード）で描画。左上バッジは「👑 新統合」に固定
+                // 1. 新統合（緑）
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
@@ -334,7 +322,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案（「表示」など）。左上バッジはシートのstatusを表示
+                // 2. 単独提案
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
@@ -347,7 +335,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 3. 元記事履歴
+                // 3. 元記事
                 if (originalItems.length > 0) {
                     const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
@@ -391,7 +379,7 @@ function render3StepProposalBox(opinions) {
 }
 
 // ==========================================
-// 5. 🗺️ アイデアの地図（ブレンド比率対応）
+// 5. 🗺️ アイデアの地図
 // ==========================================
 function renderIdeaMap(opinions) {
     CAT_KEYS.forEach(key => {
