@@ -1,29 +1,39 @@
 // ==========================================
-// 1. 設定・定数・グローバル変数定義
+// 1. 固定マスター定義（セル位置と混同しないID）
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyDV8Ic3jWmDHaWTHrtzf19_aEgTxUAaP9EvM7XinMk1W4ZPFk9NVcdnGtV27LbrPp2/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxm3ntl_jh78mgk-7Bd1w1D2WpWjGaQueKDMc-7kdCUpAmXlIQwtd30R6cIqIlD_IZM/exec";
 
-const CAT_KEYS = ["主体", "好奇心", "未来", "個性", "シームレス"];
-
-const STRUC_CONFIG = {
-    "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
-    "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
-    "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
-    "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
+const STRUCTURE_MASTER = {
+    "BIG-1": {
+        name: "主体的な学び",
+        short: "主体",
+        mids: { "MID-1": "子ども主導のプロジェクト学習", "MID-2": "選択制のアクティビティ", "MID-3": "デジタルを活用した自己表現", "MID-4": "その他" }
+    },
+    "BIG-2": {
+        name: "楽しさと好奇心",
+        short: "好奇心",
+        mids: { "MID-1": "五感を使う自然体験", "MID-2": "失敗を歓迎する科学遊び", "MID-3": "地域のアート・文化資源の活用", "MID-4": "その他" }
+    },
+    "BIG-3": {
+        name: "未来を生き抜く力",
+        short: "未来",
+        mids: { "MID-1": "非認知能力の育成", "MID-2": "多様な人々と協働する体験", "MID-3": "答えのない問いに挑む力", "MID-4": "その他" }
+    },
+    "BIG-4": {
+        name: "個性・才能の開花",
+        short: "個性",
+        mids: { "MID-1": "個別最適化された学習プラン", "MID-2": "多様な才能を認める評価基準", "MID-3": "特別なニーズを持つ子への支援", "MID-4": "その他" }
+    },
+    "BIG-5": {
+        name: "シームレス成長支援",
+        short: "シームレス",
+        mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" }
+    }
 };
 
 let allOpinions = [];
 let currentAiResult = null; 
 
-function cleanString(str) {
-    if (!str) return "";
-    return String(str).replace(/[\s\u3000\t\r\n]/g, "");
-}
-
-// ==========================================
-// 2. メイン処理（イベント設定）
-// ==========================================
 document.addEventListener("DOMContentLoaded", function () {
     fetchOpinions();
 
@@ -37,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiRefinedText = document.getElementById("aiRefinedText");
     const categorySelect = document.getElementById("categorySelect");
 
+    // 1. AI分析（壁打ち）処理
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -59,28 +70,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await res.json();
 
                 if (data.status === "success" && data.result) {
-                    currentAiResult = data.result;
+                    currentAiResult = data.result; 
                     
-                    const bigCat = currentAiResult["大分類"] || "主体的な学び";
-                    const midCat = currentAiResult["中分類"] || "その他";
+                    const bid = currentAiResult.bigCatId || "BIG-1";
+                    const mid = currentAiResult.midCatId || "MID-4";
+                    const masterBig = STRUCTURE_MASTER[bid] || STRUCTURE_MASTER["BIG-1"];
 
-                    if (categorySelect) {
-                        for (const key of CAT_KEYS) {
-                            if (bigCat.includes(key)) {
-                                categorySelect.value = key;
-                                break;
-                            }
-                        }
+                    if (categorySelect) categorySelect.value = masterBig.short;
+
+                    if (aiSummaryText) {
+                        aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${masterBig.name} ＞ ${masterBig.mids[mid] || "その他"}`;
                     }
-
-                    if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${bigCat} ＞ ${midCat}`;
 
                     if (aiPerspectivesText) {
                         aiPerspectivesText.innerHTML = `
 <div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "データなし"}</span></div>
 <div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "データなし"}</span></div>
 <div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "データなし"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り跨え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "データなし"}</span></div>
+<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "データなし"}</span></div>
 <div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "データなし"}</span></div>
                         `.trim();
                     }
@@ -94,10 +101,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         aiAssistBox.style.setProperty("display", "flex", "important");
                     }
                 } else {
-                    alert("AI分析エラー: " + (data.message || "結果が空です"));
+                    alert("AI分析エラーが発生しました。");
                 }
             } catch (err) {
-                console.error("AI壁打ちエラー:", err);
+                console.error(err);
                 alert("通信エラーが発生しました。");
             } finally {
                 btnAiAnalysis.disabled = false;
@@ -106,18 +113,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // 2. 正式投稿処理
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
 
-            const selectedShortCat = categorySelect ? categorySelect.value : "主体";
-            let bigCat = "主体的な学び";
-            if (selectedShortCat === "好奇心") bigCat = "楽しさと好奇心";
-            if (selectedShortCat === "未来") bigCat = "未来を生き抜く力";
-            if (selectedShortCat === "個性") bigCat = "個性・才能の開花";
-            if (selectedShortCat === "シームレス") bigCat = "シームレス成長支援";
-
-            const midCat = currentAiResult["中分類"] || "その他";
+            const selectedShort = categorySelect ? categorySelect.value : "主体";
+            let finalBid = "BIG-1";
+            for (const [bid, config] of Object.entries(STRUCTURE_MASTER)) {
+                if (config.short === selectedShort) { finalBid = bid; break; }
+            }
 
             if (!confirm(`正式に提案箱へ投稿しますか？`)) return;
 
@@ -125,7 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const rawText = txtContent ? txtContent.value.trim() : "";
 
             btnSubmitToBox.disabled = true;
-            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 投稿中...`;
 
             try {
                 const res = await fetch(GAS_URL, {
@@ -136,8 +140,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         content: rawText,
                         title: currentAiResult["推奨タイトル"],
                         summary: currentAiResult["要約200"],
-                        category: bigCat, 
-                        midCat: midCat
+                        bigCatId: finalBid,
+                        midCatId: currentAiResult.midCatId || "MID-4"
                     })
                 });
                 const data = await res.json();
@@ -156,12 +160,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     const listTabBtn = document.getElementById("list-tab-btn");
                     if (listTabBtn) listTabBtn.click();
-                } else {
-                    alert("投稿エラー: " + data.message);
                 }
             } catch (err) {
                 console.error(err);
-                alert("送信エラーが発生しました。");
             } finally {
                 btnSubmitToBox.disabled = false;
                 btnSubmitToBox.innerHTML = `📥 この内容で提案箱へ正式に投稿する`;
@@ -170,59 +171,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ==========================================
 // 3. データ取得
-// ==========================================
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        
-        let rawList = [];
-        if (data && Array.isArray(data.opinions)) {
-            rawList = data.opinions;
-        } else if (Array.isArray(data)) {
-            rawList = data;
-        }
-
-        allOpinions = rawList.map(item => {
-            return {
-                category: String(item.category || "").trim(),
-                midCat: String(item.midCat || "").trim(),
-                title: String(item.title || "").trim(),
-                summary: String(item.summary || "").trim(),
-                status: String(item.status || "").trim(),
-                reason: String(item.reason || "").trim(),
-                content: String(item.content || "").trim()
-            };
-        });
+        allOpinions = data.opinions || [];
         
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
-
-        const processLogEl = document.getElementById("process-log");
-        if (processLogEl) {
-            const logs = allOpinions
-                .filter(item => item.reason && item.reason.trim() !== "")
-                .map(item => `◆ ${item.title || "統合施策"}\n   ➔ ${item.reason}`)
-                .join("\n\n");
-            processLogEl.textContent = logs ? logs : "現在、自動統合プロセスログはありません。";
-        }
     } catch (e) {
         console.error("データ取得エラー:", e);
     }
 }
 
-// ==========================================
-// 4. 📦 3段階アコーディオン描画（修正完了版）
-// ==========================================
+// 4. 📦 3段階アコーディオン描画（新ID完全一致・堅牢版）
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = ""; 
 
     if (!opinions || opinions.length === 0) {
-        container.innerHTML = `<div class="alert alert-info">届いた提案はまだありません。最初の提案を投稿してみましょう！</div>`;
+        container.innerHTML = `<div class="alert alert-info">届いた提案はまだありません。</div>`;
         return;
     }
 
@@ -230,25 +200,20 @@ function render3StepProposalBox(opinions) {
     mainAccordion.className = "accordion";
     mainAccordion.id = "mainProposalAccordion";
 
-    let bigIndex = 0;
-
-    for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
-        bigIndex++;
-        
-        const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
-        const bigCatItems = opinions.filter(item => item.category && item.category.includes(targetKeyword));
+    for (const [bid, bigConfig] of Object.entries(STRUCTURE_MASTER)) {
+        const bigCatItems = opinions.filter(item => item.bigCatId === bid);
         const totalBigCount = bigCatItems.length;
 
-        const bigCollapseId = `bigCollapse-${bigIndex}`;
+        const bigCollapseId = `bigCollapse-${bid}`;
         const bigAccordionItem = document.createElement("div");
         bigAccordionItem.className = "accordion-item mb-3 shadow-sm border rounded overflow-hidden";
 
         bigAccordionItem.innerHTML = `
             <h2 class="accordion-header position-relative">
                 <button class="accordion-button collapsed py-3 bg-dark text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigCollapseId}">
-                    ${bigCat}
+                    ${bigConfig.name}
                 </button>
-                <span class="position-absolute top-50 end-0 translate-middle-y me-5 badge bg-primary rounded-pill" style="z-index:10; font-size:0.9rem;">${totalBigCount} 件</span>
+                <span class="position-absolute top-50 end-0 translate-middle-y me-5 badge bg-primary rounded-pill" style="z-index:10;">${totalBigCount} 件</span>
             </h2>
         `;
 
@@ -262,25 +227,12 @@ function render3StepProposalBox(opinions) {
 
         const midAccordion = document.createElement("div");
         midAccordion.className = "accordion";
-        midAccordion.id = `midAccordion-${bigIndex}`;
+        midAccordion.id = `midAccordion-${bid}`;
 
-        let midIndex = 0;
-
-        midCatList.forEach(midCat => {
-            midIndex++;
-            const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
-            const cleanedConfigMid = cleanString(midCat);
-
-            const matchedItems = bigCatItems.filter(item => {
-                const cleanedItemMid = cleanString(item.midCat);
-                if (cleanedConfigMid === "その他") {
-                    const isKnown = midCatList.some(m => cleanString(m) === cleanedItemMid && cleanString(m) !== "その他");
-                    return cleanedItemMid === "その他" || cleanedItemMid === "" || !isKnown;
-                }
-                return cleanedItemMid === cleanedConfigMid;
-            });
-
+        for (const [mid, midName] of Object.entries(bigConfig.mids)) {
+            const matchedItems = bigCatItems.filter(item => item.midCatId === mid);
             const totalMidCount = matchedItems.length;
+            const midCollapseId = `midCollapse-${bid}-${mid}`;
 
             const midAccordionItem = document.createElement("div");
             midAccordionItem.className = "accordion-item mb-2 border rounded overflow-hidden";
@@ -288,16 +240,16 @@ function render3StepProposalBox(opinions) {
             midAccordionItem.innerHTML = `
                 <h3 class="accordion-header position-relative">
                     <button class="accordion-button collapsed py-2 bg-secondary text-white small fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${midCollapseId}">
-                        📁 ${midCat}
+                        📁 ${midName}
                     </button>
-                    <span class="position-absolute top-50 end-0 translate-middle-y me-5 badge bg-light text-dark rounded-pill" style="z-index:10; font-size:0.8rem;">${totalMidCount} 件</span>
+                    <span class="position-absolute top-50 end-0 translate-middle-y me-5 badge bg-light text-dark rounded-pill" style="z-index:10;">${totalMidCount} 件</span>
                 </h3>
             `;
 
             const midCollapseDiv = document.createElement("div");
             midCollapseDiv.id = midCollapseId;
             midCollapseDiv.className = "accordion-collapse collapse";
-            midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`); 
+            midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bid}`); 
 
             const midBody = document.createElement("div");
             midBody.className = "accordion-body bg-white p-3";
@@ -305,43 +257,39 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // 【修正箇所】条件を正しく整理し、漏れなく抽出できるようにしました
-                const newMergeItems = matchedItems.filter(item => cleanString(item.status) === "新統合" || cleanString(item.status) === "マージ");
-                const originalItems = matchedItems.filter(item => cleanString(item.status) === "元記事" || cleanString(item.status) === "元データ");
-                const singleItems = matchedItems.filter(item => {
-                    const s = cleanString(item.status);
-                    return s !== "新統合" && s !== "マージ" && s !== "元記事" && s !== "元データ";
-                });
+                const newMergeItems = matchedItems.filter(item => item.status === "新統合" || item.status === "マージ");
+                const originalItems = matchedItems.filter(item => item.status === "元記事" || item.status === "元データ");
+                const singleItems = matchedItems.filter(item => item.status !== "新統合" && item.status !== "マージ" && item.status !== "元記事" && item.status !== "元データ");
 
-                // 1. 新統合（緑）
+                // 1. 新統合の描画
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
                             <div class="card-body p-3">
                                 <span class="badge bg-success mb-1">👑 新統合</span>
-                                <h6 class="fw-bold text-success mb-1">${item.title || "無題の統合案"}</h6>
-                                <p class="small text-dark mb-0 lh-base" style="white-space: pre-wrap;">${item.summary || ""}</p>
+                                <h6 class="fw-bold text-success mb-1">${item.title}</h6>
+                                <p class="small text-dark mb-0 lh-base" style="white-space: pre-wrap;">${item.summary}</p>
                             </div>
                         </div>
                     `;
                 });
 
-                // 2. 単独提案（通常の投稿）
+                // 2. 単独提案の描画
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
                             <div class="card-body p-3">
                                 <span class="badge bg-info text-dark mb-1">${item.status || "単独提案"}</span>
-                                <h6 class="fw-bold text-dark mb-1">${item.title || "無題の提案"}</h6>
-                                <p class="small text-secondary mb-0 lh-base" style="white-space: pre-wrap;">${item.summary || ""}</p>
+                                <h6 class="fw-bold text-dark mb-1">${item.title}</h6>
+                                <p class="small text-secondary mb-0 lh-base" style="white-space: pre-wrap;">${item.summary}</p>
                             </div>
                         </div>
                     `;
                 });
 
-                // 3. 元記事履歴
+                // 3. 統合の元になった市民の声（履歴）の描画
                 if (originalItems.length > 0) {
-                    const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
+                    const origCollapseId = `origCollapse-${bid}-${mid}`;
                     let origWrapper = `
                         <div class="mt-3">
                             <button class="btn btn-sm btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${origCollapseId}">
@@ -351,18 +299,18 @@ function render3StepProposalBox(opinions) {
                             <div class="collapse mt-2" id="${origCollapseId}">
                                 <div class="p-2 border rounded bg-light" style="max-height: 250px; overflow-y: auto;">
                     `;
-
                     originalItems.forEach(orig => {
                         origWrapper += `
                             <div class="p-2 mb-2 bg-white rounded border-bottom small">
                                 <span class="badge bg-secondary mb-1">元記事</span>
-                                <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title || "無題"}</h6>
-                                <p class="text-danger mb-1" style="font-size: 0.75rem;">🔄 ${orig.reason || "新統合へ集約"}</p>
-                                <p class="text-muted mb-0" style="font-size: 0.8rem;" style="white-space: pre-wrap;">${orig.summary || ""}</p>
+                                <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title}</h6>
+                                <p class="text-muted mb-1" style="font-size: 0.8rem; white-space: pre-wrap;">${orig.summary}</p>
+                                <div class="p-2 bg-light rounded text-success border-start border-success border-2" style="font-size: 0.75rem;">
+                                    <strong>💡 配置・統合された理由：</strong>${orig.reason || "包括案へ統合されました。"}
+                                </div>
                             </div>
                         `;
                     });
-
                     origWrapper += `</div></div></div>`;
                     midBody.innerHTML += origWrapper;
                 }
@@ -371,7 +319,7 @@ function render3StepProposalBox(opinions) {
             midCollapseDiv.appendChild(midBody);
             midAccordionItem.appendChild(midCollapseDiv);
             midAccordion.appendChild(midAccordionItem);
-        });
+        }
 
         bigBody.appendChild(midAccordion);
         bigCollapseDiv.appendChild(bigBody);
@@ -382,28 +330,21 @@ function render3StepProposalBox(opinions) {
     container.appendChild(mainAccordion);
 }
 
-// ==========================================
-// 5. 🗺️ アイデアの地図
-// ==========================================
+// 5. 🗺️ アイデアの地図の描画
 function renderIdeaMap(opinions) {
-    CAT_KEYS.forEach(key => {
-        const sumEl = document.getElementById(`sum-text-${key}`);
-        if (!sumEl) return;
+    for (const [bid, bigConfig] of Object.entries(STRUCTURE_MASTER)) {
+        const sumEl = document.getElementById(`sum-text-${bigConfig.short}`);
+        if (!sumEl) continue;
 
-        const matchedActiveItems = opinions.filter(item => {
-            if (!item.category) return false;
-            const isCat = item.category.includes(key);
-            const isActive = !cleanString(item.status).includes("元記事") && !cleanString(item.status).includes("元データ");
-            return isCat && isActive;
-        });
+        const activeItems = opinions.filter(item => item.bigCatId === bid && item.status !== "元記事" && item.status !== "元データ");
 
-        if (matchedActiveItems.length > 0) {
-            const mergeItem = matchedActiveItems.find(item => cleanString(item.status) === "新統合" || cleanString(item.status) === "マージ");
-            const targetItem = mergeItem ? mergeItem : matchedActiveItems[matchedActiveItems.length - 1];
+        if (activeItems.length > 0) {
+            const mergeItem = activeItems.find(item => item.status === "新統合" || item.status === "マージ");
+            const targetItem = mergeItem ? mergeItem : activeItems[activeItems.length - 1];
             
             sumEl.textContent = targetItem.summary || "";
             sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
             sumEl.style.borderColor = "#bbf7d0";
         }
-    });
+    }
 }
