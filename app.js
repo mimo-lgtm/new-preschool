@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得（GASから送られたオブジェクトをそのまま処理）
+// 3. データ取得
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -214,7 +214,7 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン描画（完全同期版）
+// 4. 📦 3段階アコーディオン描画（修正完了版）
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
@@ -305,9 +305,13 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
+                // 【修正箇所】条件を正しく整理し、漏れなく抽出できるようにしました
                 const newMergeItems = matchedItems.filter(item => cleanString(item.status) === "新統合" || cleanString(item.status) === "マージ");
-                const singleItems = matchedItems.filter(item => cleanString(item.status) !== "新統合" && cleanString(item.status) === "マージ" && cleanString(item.status) !== "元記事" && cleanString(item.status) !== "元データ");
                 const originalItems = matchedItems.filter(item => cleanString(item.status) === "元記事" || cleanString(item.status) === "元データ");
+                const singleItems = matchedItems.filter(item => {
+                    const s = cleanString(item.status);
+                    return s !== "新統合" && s !== "マージ" && s !== "元記事" && s !== "元データ";
+                });
 
                 // 1. 新統合（緑）
                 newMergeItems.forEach(item => {
@@ -322,7 +326,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案
+                // 2. 単独提案（通常の投稿）
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
@@ -335,7 +339,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 3. 元記事
+                // 3. 元記事履歴
                 if (originalItems.length > 0) {
                     const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
