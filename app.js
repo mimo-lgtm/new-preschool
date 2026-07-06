@@ -3,11 +3,11 @@
 // ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyDV8Ic3jWmDHaWTHrtzf19_aEgTxUAaP9EvM7XinMk1W4ZPFk9NVcdnGtV27LbrPp2/exec";
 
-// マッチング用の判定キーワード（部分一致に対応させるためシンプル化）
+// 部分一致マッチング用の判定キーワード
 const CAT_KEYS = ["主体", "好奇心", "未来", "個性", "シームレス"];
 
 const STRUC_CONFIG = {
-    "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
+    "主体的な学び": ["子ども主導 of プロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
     "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
     "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
     "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
@@ -21,8 +21,8 @@ let currentAiResult = null;
 // 2. メイン処理（画面初期化・イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    // ※左側マップの300字テキストは、HTML側に直接記述して固定してください。
-    // JS側からは初期化等の干渉をせず、右側マップの初期化のみ行います。
+    // ※左側マップの300字テキストはHTML直書きに変更されたため、JSからの干渉は一切行いません。
+    // 右側マップの初期化状態のみセットします。
     initializeRightMap();
     
     // データ取得開始
@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     const midCat = currentAiResult["中分類"] || "その他";
 
                     if (categorySelect) {
-                        // プルダウンの選択肢（主体、好奇心など）に部分一致したら選択
                         for (const key of CAT_KEYS) {
                             if (bigCat.includes(key)) {
                                 categorySelect.value = key;
@@ -113,7 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!currentAiResult) return;
 
             const selectedShortCat = categorySelect ? categorySelect.value : "主体";
-            // スプレッドシート側のヘッダーに合わせるためのフルネーム補完
             let bigCat = "主体的な学び";
             if (selectedShortCat === "好奇心") bigCat = "楽しさと好奇心";
             if (selectedShortCat === "未来") bigCat = "未来を生き抜く力";
@@ -173,7 +171,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// 右側の地図エリアのみを初期化する
 function initializeRightMap() {
     CAT_KEYS.forEach(key => {
         const sumEl = document.getElementById(`sum-text-${key}`);
@@ -185,7 +182,7 @@ function initializeRightMap() {
 }
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得・バックエンド連携（完全復活・ヘッダー完全同期）
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -199,25 +196,22 @@ async function fetchOpinions() {
             rawList = data;
         }
 
-        // スプレッドシートの実際のヘッダー日本語名から安全にプロパティを標準化
+        // 画像のヘッダー日本語名から100%安全にマッピング
         allOpinions = rawList.map(item => {
             return {
-                category: item["大分類"] || item["category"] || "",
-                midCat: item["中分類"] || item["midCat"] || "",
-                title: item["推奨タイトル"] || item["title"] || "",
-                summary: item["200字要約"] || item["summary"] || "",
-                status: item["status"] || item["ステータス"] || "",
-                reason: item["AI分析深掘り(JS統合・配置理由"] || item["reason"] || "",
-                aiJson: item["aiJson"] || ""
+                category: String(item["大分類"] || item["category"] || "").trim(),
+                midCat: String(item["中分類"] || item["midCat"] || "").trim(),
+                title: String(item["推奨タイトル"] || item["title"] || "").trim(),
+                summary: String(item["200字要約"] || item["summary"] || "").trim(),
+                status: String(item["status"] || item["ステータス"] || "").trim(),
+                reason: String(item["AI分析深掘り(JS統合・配置理由"] || item["reason"] || "").trim(),
+                aiJson: String(item["aiJson"] || "").trim()
             };
         });
-
-        console.log(`データ正規化完了: ${allOpinions.length}件を処理します。`);
         
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
 
-        // ログエリアの描画
         const processLogEl = document.getElementById("process-log");
         if (processLogEl) {
             const logs = allOpinions
@@ -232,7 +226,7 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 📦 3段階アコーディオン描画（表記ブレ完全吸収版）
+// 4. 📦 3段階アコーディオン描画（新統合・表記ブレ完全救済）
 // ==========================================
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
@@ -253,12 +247,11 @@ function render3StepProposalBox(opinions) {
     for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
         bigIndex++;
         
-        // 判定キーワードの抽出（例: 「主体的な学び」から「主体」を取得）
         const targetKeyword = CAT_KEYS.find(k => bigCat.includes(k)) || bigCat;
 
-        // 大分類の一致判定（「1. シームレス...」と「シームレス...」の両方を部分一致で救済）
+        // 大分類の番号（1.など）の有無を部分一致で吸収
         const bigCatItems = opinions.filter(item => {
-            return item.category && String(item.category).includes(targetKeyword);
+            return item.category && item.category.includes(targetKeyword);
         });
         const totalBigCount = bigCatItems.length;
 
@@ -293,9 +286,8 @@ function render3StepProposalBox(opinions) {
             midIndex++;
             const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
 
-            // 大分類（部分一致）かつ 中分類（完全一致）のデータを抽出
             const matchedItems = bigCatItems.filter(item => {
-                return item.midCat && String(item.midCat).trim() === midCat.trim();
+                return item.midCat && item.midCat === midCat.trim();
             });
 
             const totalMidCount = matchedItems.length;
@@ -323,15 +315,11 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                // 各ステータスのデータ抽出（前後のスペースを確実に除去）
-                const newMergeItems = matchedItems.filter(item => item.status && String(item.status).trim() === "新統合");
-                const singleItems = matchedItems.filter(item => {
-                    const s = item.status ? String(item.status).trim() : "";
-                    return s === "単独提案" || s === "表示" || s === "";
-                });
-                const originalItems = matchedItems.filter(item => item.status && String(item.status).trim() === "元記事");
+                const newMergeItems = matchedItems.filter(item => item.status === "新統合");
+                const singleItems = matchedItems.filter(item => item.status === "単独提案" || item.status === "表示" || item.status === "");
+                const originalItems = matchedItems.filter(item => item.status === "元記事");
 
-                // 1. 👑 新統合（16行目〜30行目のデータ）を一番上に最優先で描画
+                // 1. 【16〜30行目の新統合】を一番上に出す
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-success border-4 mb-2 shadow-sm bg-success-subtle">
@@ -344,7 +332,7 @@ function render3StepProposalBox(opinions) {
                     `;
                 });
 
-                // 2. 単独提案 または 初期表示データ
+                // 2. 単独提案
                 singleItems.forEach(item => {
                     midBody.innerHTML += `
                         <div class="card border-start border-info border-4 mb-2 shadow-sm">
@@ -400,23 +388,20 @@ function render3StepProposalBox(opinions) {
 }
 
 // ==========================================
-// 5. 🗺️ アイデアの地図（右側マッピング処理）
+// 5. 🗺️ アイデアの地図（右側サマリーのみ動的反映）
 // ==========================================
 function renderIdeaMap(opinions) {
     CAT_KEYS.forEach(key => {
         const sumEl = document.getElementById(`sum-text-${key}`);
         if (!sumEl) return;
 
-        // 右側用：該当カテゴリ（部分一致）の「新統合」または「単独提案」「表示」データを抽出
         const matchedActiveItems = opinions.filter(item => {
             if (!item.category) return false;
-            const isCat = String(item.category).includes(key);
-            const s = item.status ? String(item.status).trim() : "";
-            const isActive = s === "新統合" || s === "単独提案" || s === "表示";
+            const isCat = item.category.includes(key);
+            const isActive = item.status === "新統合" || item.status === "単独提案" || item.status === "表示";
             return isCat && isActive;
         });
 
-        // 該当するデータが存在する場合、その最新のサマリーを右側に反映
         if (matchedActiveItems.length > 0) {
             const latestItem = matchedActiveItems[matchedActiveItems.length - 1];
             sumEl.textContent = latestItem.summary || "";
