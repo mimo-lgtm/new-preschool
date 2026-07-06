@@ -197,12 +197,16 @@ function initializeStaticMap() {
 }
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得・バックエンド連携（検証・ログ強化版）
 // ==========================================
 async function fetchOpinions() {
     try {
+        console.log("GASからデータ取得を開始します...");
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
+        
+        // データの構造をブラウザのコンソールに丸ごと出力して検証
+        console.log("GASから届いた生データ:", data);
         
         if (data && Array.isArray(data.opinions)) {
             allOpinions = data.opinions;
@@ -212,28 +216,20 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
+        console.log(`パース完了。合計 ${allOpinions.length} 件のデータを処理します。`);
+        
+        // 16行目〜30行目のデータ（statusが「新統合」のものなど）が本当にあるか確認するログ
+        const testMerged = allOpinions.filter(item => String(item.status).includes("統合"));
+        console.log("【デバッグ】見つかった統合データ件数:", testMerged.length, testMerged);
+
+        // 描画処理へ渡す
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
 
-        const mapAnalysisEl = document.getElementById("map-analysis");
-        if (mapAnalysisEl && allOpinions.length > 0) {
-            const firstWithAiJson = allOpinions.find(item => item.aiJson && item.aiJson.trim() !== "");
-            mapAnalysisEl.textContent = firstWithAiJson ? firstWithAiJson.aiJson : "現在、複数の提案を掛け合わせた新しいクロス分析マップを自動生成しています。";
-        }
-
-        const processLogEl = document.getElementById("process-log");
-        if (processLogEl) {
-            const logs = allOpinions
-                .filter(item => item.reason && item.reason.trim() !== "")
-                .map(item => `◆ ${item.title || "統合施策"}\n   ➔ ${item.reason}`)
-                .join("\n\n");
-            processLogEl.textContent = logs ? logs : "現在、自動統合プロセスログはありません。";
-        }
     } catch (e) {
-        console.error("データ取得・描画フェーズエラー:", e);
+        console.error("データ取得フェーズでエラーが発生しました:", e);
     }
 }
-
 // ==========================================
 // 4. 📦 3段階アコーディオン描画（新統合対応版）
 // ==========================================
