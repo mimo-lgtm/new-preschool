@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuaWKPtRGhb7SjywJ52NTcudng9HEujK4WE550-ikjUM8U9TtpHMnQj59MAaQRJ24/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycby-GdAE4036FJpFvovBRVbpfkeuDBaZVmp3JK7THiBhiWy6QSAFVujK19HbZNX753It/exec";
 
 // HTML側のセレクトボックスの値（value）と、スプレッドシート上の正式名称のマッピング
 const CAT_MAP = {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
 <div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
 <div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り跨え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
+<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
 <div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
                         `.trim();
                     }
@@ -119,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
 
-            // ユーザーが手動でセレクトボックスを変更している可能性を考慮して取得
             const selectedShortCat = categorySelect ? categorySelect.value : "主体";
             const bigCat = CAT_MAP[selectedShortCat] || "主体的な学び";
             const midCat = currentAiResult["中分類"] || "その他";
@@ -179,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携（【修正】クロス分析・ログのリアルタイム反映を追加）
+// 3. データ取得・バックエンド連携
 // ==========================================
 async function fetchOpinions() {
     try {
@@ -198,18 +197,16 @@ async function fetchOpinions() {
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
 
-        // ② 【新規追加】全体クロス分析結果のリアルタイム抽出と描画
+        // ② 全体クロス分析結果のリアルタイム抽出と描画
         const mapAnalysisEl = document.getElementById("map-analysis");
         if (mapAnalysisEl) {
-            // スプレッドシートのL列(aiJson)に全体分析データが蓄積されている行を検索、なければ直近の要約を抽出
             const latestAnalysis = allOpinions.find(item => item.aiJson && item.aiJson.trim() !== "");
             mapAnalysisEl.textContent = latestAnalysis ? latestAnalysis.aiJson : "現在、複数の提案を掛け合わせた新しいクロス分析マップを自動生成しています。";
         }
 
-        // ③ 【新規追加】なぜ統合されたかのプロセスログのリアルタイム描画
+        // ③ なぜ統合されたかのプロセスログのリアルタイム描画
         const processLogEl = document.getElementById("process-log");
         if (processLogEl) {
-            // スプレッドシートのM列(reason)から統合理由（プロセス経緯）が書かれているものを抽出してリスト化
             const logs = allOpinions
                 .filter(item => item.reason && item.reason.trim() !== "")
                 .map(item => `◆ [ID:${item.id}] ${item.title}\n   ➔ 統合経緯: ${item.reason}`)
@@ -386,7 +383,6 @@ function render3StepProposalBox(opinions) {
 // 5. 🗺️ アイデアの地図（タブ2）連動ロジック
 // ==========================================
 function renderIdeaMap(opinions) {
-    // HTML側の各パーツの「日本語IDキー」に対応させる
     const keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
     
     keys.forEach(key => {
@@ -396,7 +392,6 @@ function renderIdeaMap(opinions) {
         
         if (!baseEl || !sumEl) return;
 
-        // 「AIが導き出した提案（初期テンプレートなど）」
         const singleItems = opinions.filter(item => {
             if (!item.category) return false;
             const isCat = String(item.category).trim() === gasCategoryName;
@@ -404,7 +399,6 @@ function renderIdeaMap(opinions) {
             return isCat && isSingle;
         });
 
-        // 「50対50の割合で調整した最終提案 (新統合)」
         const mergeItems = opinions.filter(item => {
             if (!item.category || !item.status) return false;
             const isCat = String(item.category).trim() === gasCategoryName;
@@ -422,7 +416,6 @@ function renderIdeaMap(opinions) {
         // 2. 右側（調整された最終提案エリア）の書き換え
         if (mergeItems.length > 0) {
             sumEl.textContent = mergeItems[0].summary || "";
-            // ローディング用の薄い文字装飾を解除して黒太文字にする
             sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
         } else {
             sumEl.innerHTML = `<span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>`;
