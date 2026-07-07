@@ -60,14 +60,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({ 
+                    // 【書き換え箇所】
+// 既存の body: JSON.stringify({...}) の中身に以下を足すだけです
+body: JSON.stringify({ 
     action: "add", 
     title: aiTitleText.value, 
     summary: aiSummaryText.value, 
     content: aiRefinedText.value, 
     bigCatId: categorySelect.value, 
-    midCatId: "MID-4", // これを追加
-    status: "単独提案"   // これを追加
+    midCatId: "MID-4", // ←追加
+    status: "単独提案"   // ←追加
 })
                 const data = await res.json();
 
