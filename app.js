@@ -226,9 +226,6 @@ async function fetchOpinions() {
         } else {
             allOpinions = [];
         }
-        
-        //render3StepProposalBox(allOpinions);
-        //renderIdeaMap(allOpinions);
     } catch (e) {
         console.error("データ取得失敗:", e);
         var container = document.getElementById("proposal-container");
