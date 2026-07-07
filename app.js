@@ -3,33 +3,7 @@
 // ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxm3ntl_jh78mgk-7Bd1w1D2WpWjGaQueKDMc-7kdCUpAmXlIQwtd30R6cIqIlD_IZM/exec";
 
-const STRUCTURE_MASTER = {
-    "BIG-1": {
-        name: "主体的な学び",
-        short: "主体",
-        mids: { "MID-1": "子ども主導のプロジェクト学習", "MID-2": "選択制のアクティビティ", "MID-3": "デジタルを活用した自己表現", "MID-4": "その他" }
-    },
-    "BIG-2": {
-        name: "楽しさと好奇心",
-        short: "好奇心",
-        mids: { "MID-1": "五感を使う自然体験", "MID-2": "失敗を歓迎する科学遊び", "MID-3": "地域のアート・文化資源の活用", "MID-4": "その他" }
-    },
-    "BIG-3": {
-        name: "未来を生き抜く力",
-        short: "未来",
-        mids: { "MID-1": "非認知能力の育成", "MID-2": "多様な人々と協働する体験", "MID-3": "答えのない問いに挑む力", "MID-4": "その他" }
-    },
-    "BIG-4": {
-        name: "個性・才能の開花",
-        short: "個性",
-        mids: { "MID-1": "個別最適化された学習プラン", "MID-2": "多様な才能を認める評価基準", "MID-3": "特別なニーズを持つ子への支援", "MID-4": "その他" }
-    },
-    "BIG-5": {
-        name: "シームレス成長支援",
-        short: "シームレス",
-        mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" }
-    }
-};
+const masterBig = STRUCTURE_MASTER[bid] || { name: "その他", short: "その他", mids: { "MID-4": "その他" } };
 
 let allOpinions = [];
 let currentAiResult = null; 
