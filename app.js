@@ -75,8 +75,8 @@ body: JSON.stringify({
 
                 if (data.status === "success") {
                     currentAiResult = data.result;
-                    const bigCat = currentAiResult["大分類"] || "主体的な学び";
-                    const midCat = currentAiResult["中分類"] || "その他";
+                    var bigCat = currentAiResult["大分類"] || "主体的な学び";
+                    var midCat = currentAiResult["中分類"] || "その他";
 
                     // AIの自動判定に合わせて、HTMLのセレクトボックスの選択肢を自動変更する
                     if (categorySelect) {
@@ -294,7 +294,7 @@ function render3StepProposalBox(opinions) {
             midCollapseDiv.className = "accordion-collapse collapse";
             midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`); 
 
-            const midBody = document.createElement("div");
+            var midBody = document.createElement("div");
             midBody.className = "accordion-body bg-white p-3";
 
             if (matchedItems.length === 0) {
@@ -329,7 +329,7 @@ function render3StepProposalBox(opinions) {
                 });
 
                 if (originalItems.length > 0) {
-                    const origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
+                    var origCollapseId = `origCollapse-${bigIndex}-${midIndex}`;
                     let origWrapper = `
                         <div class="mt-3">
                             <button class="btn btn-sm btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${origCollapseId}">
