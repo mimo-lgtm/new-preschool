@@ -1,10 +1,10 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxm3ntl_jh78mgk-7Bd1w1D2WpWjGaQueKDMc-7kdCUpAmXlIQwtd30R6cIqIlD_IZM/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxm3ntl_jh78mgk-7Bd1w1D2WpWjGaQueKDMc-7kdCUpAmXlIQwtd30R6cIqIlD_IZM/exec";
 
 // HTML側のセレクトボックスの値（value）と、スプレッドシート上の正式名称のマッピング
-const CAT_MAP = {
+var CAT_MAP = {
     "主体": "主体的な学び",
     "好奇心": "楽しさと好奇心",
     "未来": "未来を生き抜く力",
@@ -13,7 +13,7 @@ const CAT_MAP = {
 };
 
 // 厳密に定義された5つの大分類と、それぞれに紐づく中分類
-const STRUC_CONFIG = {
+var STRUC_CONFIG = {
     "主体的な学び": ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"],
     "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
     "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"],
@@ -31,21 +31,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // 画面を開いたらスプレッドシートからデータを取得して描画
     fetchOpinions();
 
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
-    const btnSubmitToBox = document.getElementById("btnSubmitToBox");
-    const aiPlaceholder = document.getElementById("aiPlaceholder");
-    const aiAssistBox = document.getElementById("aiAssistBox");
-    const aiSummaryText = document.getElementById("aiSummaryText");
-    const aiPerspectivesText = document.getElementById("aiPerspectivesText");
-    const aiTitleText = document.getElementById("aiTitleText");
-    const aiRefinedText = document.getElementById("aiRefinedText");
-    const categorySelect = document.getElementById("categorySelect");
+    var btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
+    var btnSubmitToBox = document.getElementById("btnSubmitToBox");
+    var aiPlaceholder = document.getElementById("aiPlaceholder");
+    var aiAssistBox = document.getElementById("aiAssistBox");
+    var aiSummaryText = document.getElementById("aiSummaryText");
+    var aiPerspectivesText = document.getElementById("aiPerspectivesText");
+    var aiTitleText = document.getElementById("aiTitleText");
+    var aiRefinedText = document.getElementById("aiRefinedText");
+    var categorySelect = document.getElementById("categorySelect");
 
     // 1. AI分析（壁打ち）ボタンのクリックイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
-            const txtContent = document.getElementById("content");
-            const contentValue = txtContent ? txtContent.value.trim() : "";
+            var txtContent = document.getElementById("content");
+            var contentValue = txtContent ? txtContent.value.trim() : "";
 
             if (!contentValue) {
                 alert("あなたの想いやアイデアを自由に入力してください。");
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" style="width:1rem; height:1rem;" role="status"></span> AIが思考を整理中...`;
 
             try {
-                const res = await fetch(GAS_URL, {
+                var res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     // 【書き換え箇所】
@@ -71,7 +71,7 @@ body: JSON.stringify({
     midCatId: "MID-4", 
     status: "単独提案" 
 })
-                const data = await res.json();
+                var data = await res.json();
 
                 if (data.status === "success") {
                     currentAiResult = data.result;
@@ -80,7 +80,7 @@ body: JSON.stringify({
 
                     // AIの自動判定に合わせて、HTMLのセレクトボックスの選択肢を自動変更する
                     if (categorySelect) {
-                        for (const [htmlVal, gasVal] of Object.entries(CAT_MAP)) {
+                        for (var [htmlVal, gasVal] of Object.entries(CAT_MAP)) {
                             if (gasVal === bigCat) {
                                 categorySelect.value = htmlVal;
                                 break;
@@ -129,20 +129,20 @@ body: JSON.stringify({
             if (!currentAiResult) return;
 
             // ユーザーが手動でセレクトボックスを変更している可能性を考慮して取得
-            const selectedShortCat = categorySelect ? categorySelect.value : "主体";
-            const bigCat = CAT_MAP[selectedShortCat] || "主体的な学び";
-            const midCat = currentAiResult["中分類"] || "その他";
+            var selectedShortCat = categorySelect ? categorySelect.value : "主体";
+            var bigCat = CAT_MAP[selectedShortCat] || "主体的な学び";
+            var midCat = currentAiResult["中分類"] || "その他";
 
             if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
 
-            const txtContent = document.getElementById("content");
-            const rawText = txtContent ? txtContent.value.trim() : "";
+            var txtContent = document.getElementById("content");
+            var rawText = txtContent ? txtContent.value.trim() : "";
 
             btnSubmitToBox.disabled = true;
             btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" style="width:1rem; height:1rem;" role="status"></span> 提案箱へ投稿中...`;
 
             try {
-                const res = await fetch(GAS_URL, {
+                var res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify({
@@ -154,7 +154,7 @@ body: JSON.stringify({
                         midCat: midCat
                     })
                 });
-                const data = await res.json();
+                var data = await res.json();
 
                 if (data.status === "success") {
                     alert(`📥 投稿が完了しました！\n\nあなたのアイデアはリアルタイムに格納されました。`);
@@ -171,7 +171,7 @@ body: JSON.stringify({
                     await fetchOpinions();
 
                     // 投稿完了後、自動的に「3. 届いた提案箱」タブへ移動
-                    const listTabBtn = document.getElementById("list-tab-btn");
+                    var listTabBtn = document.getElementById("list-tab-btn");
                     if (listTabBtn) listTabBtn.click();
                 } else {
                     alert("投稿エラー: " + data.message);
@@ -192,8 +192,8 @@ body: JSON.stringify({
 // ==========================================
 async function fetchOpinions() {
     try {
-        const res = await fetch(GAS_URL + "?action=get");
-        const data = await res.json();
+        var res = await fetch(GAS_URL + "?action=get");
+        var data = await res.json();
         
         if (Array.isArray(data)) {
             allOpinions = data;
@@ -208,7 +208,7 @@ async function fetchOpinions() {
 
     } catch (e) {
         console.error("データ取得失敗:", e);
-        const container = document.getElementById("proposal-container");
+        var container = document.getElementById("proposal-container");
         if (container) container.innerHTML = `<p class="text-danger">データの読み込みに失敗しました。</p>`;
     }
 }
@@ -217,26 +217,26 @@ async function fetchOpinions() {
 // 4. 📦 3段階アコーディオン描画（タブ3用）
 // ==========================================
 function render3StepProposalBox(opinions) {
-    const container = document.getElementById("proposal-container");
+    var container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = ""; 
 
-    const mainAccordion = document.createElement("div");
+    var mainAccordion = document.createElement("div");
     mainAccordion.className = "accordion";
     mainAccordion.id = "mainProposalAccordion";
 
     let bigIndex = 0;
 
-    for (const [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
+    for (var [bigCat, midCatList] of Object.entries(STRUC_CONFIG)) {
         bigIndex++;
         
-        const totalBigCount = opinions.filter(item => {
+        var totalBigCount = opinions.filter(item => {
             if (!item.category) return false;
             return String(item.category).trim().includes(bigCat.trim());
         }).length;
 
-        const bigCollapseId = `bigCollapse-${bigIndex}`;
-        const bigAccordionItem = document.createElement("div");
+        var bigCollapseId = `bigCollapse-${bigIndex}`;
+        var bigAccordionItem = document.createElement("div");
         bigAccordionItem.className = "accordion-item mb-3 shadow-sm border rounded overflow-hidden";
         bigAccordionItem.style.borderRadius = "8px";
 
@@ -249,15 +249,15 @@ function render3StepProposalBox(opinions) {
             </h2>
         `;
 
-        const bigCollapseDiv = document.createElement("div");
+        var bigCollapseDiv = document.createElement("div");
         bigCollapseDiv.id = bigCollapseId;
         bigCollapseDiv.className = "accordion-collapse collapse";
         bigCollapseDiv.setAttribute("data-bs-parent", "#mainProposalAccordion");
 
-        const bigBody = document.createElement("div");
+        var bigBody = document.createElement("div");
         bigBody.className = "accordion-body bg-light p-3";
 
-        const midAccordion = document.createElement("div");
+        var midAccordion = document.createElement("div");
         midAccordion.className = "accordion";
         midAccordion.id = `midAccordion-${bigIndex}`;
 
@@ -265,18 +265,18 @@ function render3StepProposalBox(opinions) {
 
         midCatList.forEach(midCat => {
             midIndex++;
-            const midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
+            var midCollapseId = `midCollapse-${bigIndex}-${midIndex}`;
 
-            const matchedItems = opinions.filter(item => {
+            var matchedItems = opinions.filter(item => {
                 if (!item.category || !item.midCat) return false;
-                const bMatch = String(item.category).trim().includes(bigCat.trim());
-                const mMatch = String(item.midCat).trim().includes(midCat.trim());
+                var bMatch = String(item.category).trim().includes(bigCat.trim());
+                var mMatch = String(item.midCat).trim().includes(midCat.trim());
                 return bMatch && mMatch;
             });
 
-            const totalMidCount = matchedItems.length;
+            var totalMidCount = matchedItems.length;
 
-            const midAccordionItem = document.createElement("div");
+            var midAccordionItem = document.createElement("div");
             midAccordionItem.className = "accordion-item mb-2 border rounded overflow-hidden";
             midAccordionItem.style.borderRadius = "6px";
 
@@ -289,7 +289,7 @@ function render3StepProposalBox(opinions) {
                 </h3>
             `;
 
-            const midCollapseDiv = document.createElement("div");
+            var midCollapseDiv = document.createElement("div");
             midCollapseDiv.id = midCollapseId;
             midCollapseDiv.className = "accordion-collapse collapse";
             midCollapseDiv.setAttribute("data-bs-parent", `#midAccordion-${bigIndex}`); 
@@ -300,9 +300,9 @@ function render3StepProposalBox(opinions) {
             if (matchedItems.length === 0) {
                 midBody.innerHTML = `<p class="text-muted small mb-0">この分類の投稿はまだありません。</p>`;
             } else {
-                const newMergeItems = matchedItems.filter(item => item.status && String(item.status).trim() === "新統合");
-                const singleItems = matchedItems.filter(item => !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事"));
-                const originalItems = matchedItems.filter(item => item.status && String(item.status).trim() === "元記事");
+                var newMergeItems = matchedItems.filter(item => item.status && String(item.status).trim() === "新統合");
+                var singleItems = matchedItems.filter(item => !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事"));
+                var originalItems = matchedItems.filter(item => item.status && String(item.status).trim() === "元記事");
 
                 newMergeItems.forEach(item => {
                     midBody.innerHTML += `
@@ -376,28 +376,28 @@ function render3StepProposalBox(opinions) {
 // ==========================================
 function renderIdeaMap(opinions) {
     // HTML側の各パーツの「日本語IDキー」に対応させる
-    const keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
+    var keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
     
     keys.forEach(key => {
-        const gasCategoryName = CAT_MAP[key];
-        const baseEl = document.getElementById(`base-text-${key}`);
-        const sumEl = document.getElementById(`sum-text-${key}`);
+        var gasCategoryName = CAT_MAP[key];
+        var baseEl = document.getElementById(`base-text-${key}`);
+        var sumEl = document.getElementById(`sum-text-${key}`);
         
         if (!baseEl || !sumEl) return;
 
         // 「AIが導き出した提案（初期テンプレートなど）」
-        const singleItems = opinions.filter(item => {
+        var singleItems = opinions.filter(item => {
             if (!item.category) return false;
-            const isCat = String(item.category).trim() === gasCategoryName;
-            const isSingle = !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事");
+            var isCat = String(item.category).trim() === gasCategoryName;
+            var isSingle = !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事");
             return isCat && isSingle;
         });
 
         // 「50対50の割合で調整した最終提案 (新統合)」
-        const mergeItems = opinions.filter(item => {
+        var mergeItems = opinions.filter(item => {
             if (!item.category || !item.status) return false;
-            const isCat = String(item.category).trim() === gasCategoryName;
-            const isMerged = String(item.status).trim() === "新統合";
+            var isCat = String(item.category).trim() === gasCategoryName;
+            var isMerged = String(item.status).trim() === "新統合";
             return isCat && isMerged;
         });
 
