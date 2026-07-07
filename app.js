@@ -2,7 +2,7 @@
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
 // ⚠️ 新しいGASのURLを取得されている場合は、以下の "" の中に上書きしてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzBM5m79VXjZSVBAnOveNpsfT6Aw-9hb6SgZOxfiIhusSJleqq-L0ehLFuuAWSMbW5-/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwYQbN2IG9CXJQcAsp3Bb14qcvVvHdO3Cht4pMBU1djjJ5l-sDNM0rIGHJsG1o5BHet/exec";
 
 const MAIN_CATEGORIES = [
     "シームレス成長支援",
@@ -35,6 +35,51 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiPerspectivesText = document.getElementById("aiPerspectivesText");
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
+
+    // 1. AI分析（壁打ち）ボタンの処理
+    btnAiAnalysis.addEventListener("click", async () => {
+        const content = document.getElementById("content").value;
+        if (!content) return alert("内容を入力してください");
+        
+        const res = await fetch(GAS_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "analyze", content: content }) 
+        });
+        const data = await res.json();
+        if(data.status === "success") {
+            currentAiResult = data.result;
+            // 画面への反映処理（元のコードのロジックをそのまま使用）
+            aiTitleText.innerText = currentAiResult["推奨タイトル"];
+            aiSummaryText.innerText = currentAiResult["要約200"];
+            aiAssistBox.style.display = "block";
+            aiPlaceholder.style.display = "none";
+        }
+    });
+
+    // 2. 投稿ボタンの処理（★ここをスプレッドシートの項目に合わせて調整しました）
+    btnSubmitToBox.addEventListener("click", async () => {
+        const content = document.getElementById("content").value;
+        
+        const payload = {
+            action: "submit",
+            category: currentAiResult["大分類"],
+            midCat: currentAiResult["中分類"],
+            smallCat: currentAiResult["小分類"],
+            title: currentAiResult["推奨タイトル"],
+            summary: currentAiResult["要約200"],
+            content: content,
+            aiResult: currentAiResult
+        };
+
+        await fetch(GAS_URL, { 
+            method: "POST", 
+            body: JSON.stringify(payload) 
+        });
+        
+        alert("投稿が完了しました");
+        fetchDataAndRender(); // 一覧の再読み込み
+    });
+});
 
     // ✨ 最優先でデータを読み込む（画像エラーの巻き添えを防ぐ安全設計）
     fetchOpinions();
