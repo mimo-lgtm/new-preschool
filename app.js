@@ -229,14 +229,12 @@ async function fetchOpinions() {
         
         render3StepProposalBox(allOpinions);
         renderIdeaMap(allOpinions);
-
     } catch (e) {
         console.error("データ取得失敗:", e);
         var container = document.getElementById("proposal-container");
         if (container) container.innerHTML = `<p class="text-danger">データの読み込みに失敗しました。</p>`;
     }
 }
-
 // ==========================================
 // 4. 📦 3段階アコーディオン描画（タブ3用）
 // ==========================================
