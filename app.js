@@ -399,7 +399,6 @@ function render3StepProposalBox(opinions) {
 // 5. 🗺️ アイデアの地図（タブ2）連動ロジック
 // ==========================================
 function renderIdeaMap(opinions) {
-    // HTML側の各パーツの「日本語IDキー」に対応させる
     var keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
     
     keys.forEach(key => {
@@ -409,37 +408,33 @@ function renderIdeaMap(opinions) {
         
         if (!baseEl || !sumEl) return;
 
-        // 「AIが導き出した提案（初期テンプレートなど）」
+        // 1. 基本提案の抽出
         var singleItems = opinions.filter(item => {
             if (!item.category) return false;
-            var isCat = String(item.category).trim() === gasCategoryName;
-            var isSingle = !item.status || (String(item.status).trim() !== "新統合" && String(item.status).trim() !== "元記事");
-            return isCat && isSingle;
+            return String(item.category).trim() === gasCategoryName;
         });
 
-        // 「50対50の割合で調整した最終提案 (新統合)」
-        var mergeItems = opinions.filter(item => {
-            if (!item.category || !item.status) return false;
-            var isCat = String(item.category).trim() === gasCategoryName;
-            var isMerged = String(item.status).trim() === "新統合";
-            return isCat && isMerged;
-        });
-
-        // 1. 左側（AI提案エリア）の書き換え
-        // 「AIが導き出した提案」
-        var singleItems = opinions.filter(item => {
-            if (!item.category) return false;
-            var isCat = String(item.category).trim() === gasCategoryName;
-            // statusのチェックを外して表示されやすくする
-            return isCat; 
-        });
-
-        // 「50対50の割合で調整した最終提案」
+        // 2. 最終提案の抽出
         var mergeItems = opinions.filter(item => {
             if (!item.category) return false;
             var isCat = String(item.category).trim() === gasCategoryName;
-            // statusが「新統合」のものだけを抽出
-            var isMerged = String(item.status).trim() === "新統合";
+            var isMerged = item.status && String(item.status).trim() === "新統合";
             return isCat && isMerged;
         });
+
+        // 3. 左側（AI提案エリア）への書き込み
+        if (singleItems.length > 0) {
+            baseEl.textContent = singleItems[0].summary || "提案データがありません。";
+        } else {
+            baseEl.textContent = "現在、基本となるAIベース提案が設定されていません。";
+        }
+
+        // 4. 右側（調整された最終提案エリア）への書き込み
+        if (mergeItems.length > 0) {
+            sumEl.textContent = mergeItems[0].summary || "";
+            sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
+        } else {
+            sumEl.innerHTML = `<span class="text-muted small fw-normal">最新の最終提案を自動生成中...</span>`;
+        }
+    });
 }
