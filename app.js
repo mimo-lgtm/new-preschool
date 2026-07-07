@@ -30,9 +30,9 @@ let currentAiResult = null;
 document.addEventListener("DOMContentLoaded", async function () {
     console.log("初期化開始");
     
-    // 1. データの読み込み（エラーが起きても後続を止めない）
+    // 1. データの読み込み（await を追加して正しく待ちます）
     try {
-      await fetchOpinions();
+        await fetchOpinions();
     } catch (e) {
         console.error("fetchOpinionsでエラー:", e);
     }
