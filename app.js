@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btnAiAnalysis.disabled = true;
             btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" style="width:1rem; height:1rem;" role="status"></span> AIが思考を整理中...`;
 
-            try {
+try {
                 var res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
@@ -71,7 +71,6 @@ body: JSON.stringify({
     midCatId: "MID-4", 
     status: "単独提案" 
 })
-                var data = await res.json();
 
                 if (data.status === "success") {
                     currentAiResult = data.result;
