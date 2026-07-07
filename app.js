@@ -171,59 +171,51 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// 3. データ取得
-// 🌐 GASから届いた日本語の大分類・中分類を正しく画面に認識させる
+// 3. データ取得（堅牢版）
+// 🌐 GASから届いた大分類・中分類を「そのまま」画面に反映させます
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
         if (data.status === "success" && Array.isArray(data.opinions)) {
-            allOpinions = data.opinions.map(op => {
-                
-                // 💡 送られてきた大分類（B列の文字列）を画面のID（BIG-1〜5）に変換する
-                let bid = "BIG-1";
-                const bStr = String(op.bigCatId);
-                if (bStr.includes("主体")) bid = "BIG-1";
-                else if (bStr.includes("好奇心") || bStr.includes("楽しさ")) bid = "BIG-2";
-                else if (bStr.includes("未来")) bid = "BIG-3";
-                else if (bStr.includes("個性") || bStr.includes("才能")) bid = "BIG-4";
-                else if (bStr.includes("シームレス") || bStr.includes("成長")) bid = "BIG-5";
-
-                // 💡 送られてきた中分類（F列の文字列）を画面のID（MID-1〜4）に変換する
-                let mid = "MID-4"; // 基本はその他
-                const mStr = String(op.midCatId);
-                const config = STRUCTURE_MASTER[bid];
-                if (config && config.mids) {
-                    for (const [mKey, mName] of Object.entries(config.mids)) {
-                        if (mStr.includes(mName) || mName.includes(mStr)) {
-                            mid = mKey;
-                            break;
-                        }
-                    }
-                }
-
-                // 画面が表示できるようにデータを整形して戻す
-                return {
-                    title: op.title,
-                    summary: op.summary,
-                    content: op.content,
-                    bigCatId: bid,  // 整形したIDを入れる
-                    midCatId: mid,  // 整形したIDを入れる
-                    status: op.status,
-                    reason: op.reason
-                };
-            });
-        } else {
-            allOpinions = [];
+            // 💡 ID判定をやめ、GASから届いた文字列をそのまま使う
+            allOpinions = data.opinions.map(op => ({
+                title: op.title,
+                summary: op.summary,
+                content: op.content,
+                bigCatId: op.bigCategory, // GASから来た大分類名
+                midCatId: op.midCategory, // GASから来た中分類名
+                status: op.status,
+                reason: op.reason
+            }));
+            
+            // 画面のレンダリングへ
+            render3StepProposalBox(allOpinions);
+            renderIdeaMap(allOpinions);
         }
-        
-        // 画面のレンダリングへ
-        render3StepProposalBox(allOpinions);
-        renderIdeaMap(allOpinions);
     } catch (e) {
         console.error("データ取得エラー:", e);
     }
+}
+
+// 4. 📦 3段階アコーディオン描画（修正版）
+function render3StepProposalBox(opinions) {
+    const container = document.getElementById("proposal-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    // 💡 大分類ごとにグループ化
+    const bigCategories = [...new Set(opinions.map(o => o.bigCatId))];
+
+    bigCategories.forEach(bid => {
+        const bigCatItems = opinions.filter(item => item.bigCatId === bid);
+        const bigCollapseId = `bigCollapse-${bid.replace(/\s+/g, '')}`;
+        
+        // （以下、アコーディオン描画処理）
+        // ... ※ここは既存のコードとほぼ同じで動きますが、
+        // 今後のために「ID」でフィルタリングしている箇所を「名前」で比較するように変更が必要です
+    });
 }
 // 4. 📦 3段階アコーディオン描画（新ID完全一致・堅牢版）
 function render3StepProposalBox(opinions) {
