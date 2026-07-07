@@ -203,8 +203,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("送信エラーが発生しました。");
                 btnSubmitToBox.disabled = false;
             }
-        });
-    }
+        }); // ← ここで btnSubmitToBox のイベントリスナーが閉じる
+    } // ← ここで if (btnSubmitToBox) が閉じる
+}); // ← ここで DOMContentLoaded が閉じる
 // ==========================================
 // 3. データ取得・バックエンド連携（本番仕様版）
 // ==========================================
