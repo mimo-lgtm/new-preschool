@@ -69,18 +69,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 const data = await res.json();
 
-                if (data.status === "success" && data.result) {
-                    currentAiResult = data.result; 
-                    
-                    const bid = currentAiResult.bigCatId || "BIG-1";
-                    const mid = currentAiResult.midCatId || "MID-4";
-                    const masterBig = STRUCTURE_MASTER[bid] || STRUCTURE_MASTER["BIG-1"];
-
-                    if (categorySelect) categorySelect.value = masterBig.short;
-
-                    if (aiSummaryText) {
-                        aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${masterBig.name} ＞ ${masterBig.mids[mid] || "その他"}`;
-                    }
+                // AI分析結果の処理部分（app.js）
+if (data.status === "success" && data.result) {
+    currentAiResult = data.result;
+    
+    // 💡 ID（BIG-1など）に依存せず、送られてきた結果をそのまま表示する
+    if (aiSummaryText) {
+        aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${currentAiResult.bigCatId || "未分類"} ＞ ${currentAiResult.midCatId || "その他"}`;
+    }
+    // 以下、タイトルや懸念点の表示処理はそのまま
+}
 
                     if (aiPerspectivesText) {
                         aiPerspectivesText.innerHTML = `
@@ -170,15 +168,24 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-// 3. データ取得（スプレッドシートの文字をそのまま信頼する版）
+// 3. データ取得（固定マスターを介さずスプレッドシートの値をそのまま表示する）
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
         if (data.status === "success" && Array.isArray(data.opinions)) {
-            // 文字列を変換せず、そのままオブジェクトとして保持
-            allOpinions = data.opinions; 
+            // スプレッドシートから届いたデータをそのまま使用
+            allOpinions = data.opinions.map(op => ({
+                title: op.title,
+                summary: op.summary,
+                content: op.content,
+                bigCatId: op.bigCategory || "その他",
+                midCatId: op.midCategory || "その他",
+                status: op.status || "単独提案",
+                reason: op.reason
+            }));
+            
             render3StepProposalBox(allOpinions);
             renderIdeaMap(allOpinions);
         }
@@ -187,44 +194,41 @@ async function fetchOpinions() {
     }
 }
 
-// 4. アコーディオン描画（動的グルーピング版）
+// 4. 📦 アコーディオン描画（動的グルーピング版）
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = "";
 
-    // 大分類(bigCategory)でグループ化
-    const bigGroups = [...new Set(opinions.map(o => o.bigCategory))];
+    // データから大分類と中分類を自動抽出
+    const bigCats = [...new Set(opinions.map(o => o.bigCatId))];
 
-    bigGroups.forEach(bigName => {
-        const bigItems = opinions.filter(o => o.bigCategory === bigName);
+    bigCats.forEach(bigName => {
+        const bigCatItems = opinions.filter(item => item.bigCatId === bigName);
         const bigId = btoa(bigName).slice(0, 10);
         
-        const bigItem = document.createElement("div");
-        bigItem.className = "accordion-item mb-3";
-        bigItem.innerHTML = `
+        const bigAccordionItem = document.createElement("div");
+        bigAccordionItem.className = "accordion-item mb-3";
+        bigAccordionItem.innerHTML = `
             <h2 class="accordion-header">
-                <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${bigId}">
-                    ${bigName} (${bigItems.length}件)
+                <button class="accordion-button collapsed bg-dark text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#col-${bigId}">
+                    ${bigName} (${bigCatItems.length}件)
                 </button>
             </h2>
-            <div id="collapse${bigId}" class="accordion-collapse collapse">
-                <div class="accordion-body" id="body-${bigId}"></div>
+            <div id="col-${bigId}" class="accordion-collapse collapse" data-bs-parent="#proposal-container">
+                <div class="accordion-body bg-light" id="body-${bigId}"></div>
             </div>`;
-        container.appendChild(bigItem);
+        container.appendChild(bigAccordionItem);
 
-        // 中分類(midCategory)でグループ化
-        const midGroups = [...new Set(bigItems.map(o => o.midCategory))];
-        const bodyDiv = bigItem.querySelector(`#body-${bigId}`);
-        
-        midGroups.forEach(midName => {
-            const midItems = bigItems.filter(o => o.midCategory === midName);
+        const bodyDiv = bigAccordionItem.querySelector(`#body-${bigId}`);
+        const mids = [...new Set(bigCatItems.map(o => o.midCatId))];
+
+        mids.forEach(midName => {
+            const matchedItems = bigCatItems.filter(item => item.midCatId === midName);
             bodyDiv.innerHTML += `
                 <div class="card mb-2">
-                    <div class="card-header bg-secondary text-white">${midName} (${midItems.length}件)</div>
-                    <div class="card-body">
-                        ${midItems.map(item => `<div class="p-2 border-bottom"><strong>${item.title}</strong><br><small>${item.summary}</small></div>`).join('')}
-                    </div>
+                    <div class="card-header bg-secondary text-white small fw-bold">📁 ${midName} (${matchedItems.length}件)</div>
+                    <div class="card-body p-2">${matchedItems.map(item => `<div class="p-2 border-bottom small"><strong>${item.title}</strong><br>${item.summary}</div>`).join('')}</div>
                 </div>`;
         });
     });
