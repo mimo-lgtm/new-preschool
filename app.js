@@ -227,8 +227,8 @@ async function fetchOpinions() {
             allOpinions = [];
         }
         
-        render3StepProposalBox(allOpinions);
-        renderIdeaMap(allOpinions);
+        //render3StepProposalBox(allOpinions);
+        //renderIdeaMap(allOpinions);
     } catch (e) {
         console.error("データ取得失敗:", e);
         var container = document.getElementById("proposal-container");
@@ -238,7 +238,7 @@ async function fetchOpinions() {
 // ==========================================
 // 4. 📦 3段階アコーディオン描画（タブ3用）
 // ==========================================
-function render3StepProposalBox(opinions) {
+/*　function render3StepProposalBox(opinions) {
     var container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = ""; 
@@ -412,4 +412,4 @@ async function renderIdeaMap(opinions) { // ここに async を追加
         baseEl.textContent = singleItems.length > 0 ? singleItems[0].summary : "提案データがありません。";
         sumEl.textContent = mergeItems.length > 0 ? mergeItems[0].summary : "最新の最終提案を自動生成中...";
     }
-}
+}*/
