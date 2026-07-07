@@ -9,7 +9,10 @@ async function fetchData() {
     try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
-        console.log("データ取得成功:", data);
+        
+        // 取得したデータを表示関数に渡す
+        displayOpinions(data); 
+        
     } catch (err) {
         console.error("取得エラー:", err);
     }
