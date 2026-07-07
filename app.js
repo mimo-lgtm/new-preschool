@@ -170,7 +170,65 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+// 3. データ取得（スプレッドシートの文字をそのまま信頼する版）
+async function fetchOpinions() {
+    try {
+        const res = await fetch(GAS_URL + "?action=get");
+        const data = await res.json();
+        
+        if (data.status === "success" && Array.isArray(data.opinions)) {
+            // 文字列を変換せず、そのままオブジェクトとして保持
+            allOpinions = data.opinions; 
+            render3StepProposalBox(allOpinions);
+            renderIdeaMap(allOpinions);
+        }
+    } catch (e) {
+        console.error("データ取得エラー:", e);
+    }
+}
 
+// 4. アコーディオン描画（動的グルーピング版）
+function render3StepProposalBox(opinions) {
+    const container = document.getElementById("proposal-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    // 大分類(bigCategory)でグループ化
+    const bigGroups = [...new Set(opinions.map(o => o.bigCategory))];
+
+    bigGroups.forEach(bigName => {
+        const bigItems = opinions.filter(o => o.bigCategory === bigName);
+        const bigId = btoa(bigName).slice(0, 10);
+        
+        const bigItem = document.createElement("div");
+        bigItem.className = "accordion-item mb-3";
+        bigItem.innerHTML = `
+            <h2 class="accordion-header">
+                <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${bigId}">
+                    ${bigName} (${bigItems.length}件)
+                </button>
+            </h2>
+            <div id="collapse${bigId}" class="accordion-collapse collapse">
+                <div class="accordion-body" id="body-${bigId}"></div>
+            </div>`;
+        container.appendChild(bigItem);
+
+        // 中分類(midCategory)でグループ化
+        const midGroups = [...new Set(bigItems.map(o => o.midCategory))];
+        const bodyDiv = bigItem.querySelector(`#body-${bigId}`);
+        
+        midGroups.forEach(midName => {
+            const midItems = bigItems.filter(o => o.midCategory === midName);
+            bodyDiv.innerHTML += `
+                <div class="card mb-2">
+                    <div class="card-header bg-secondary text-white">${midName} (${midItems.length}件)</div>
+                    <div class="card-body">
+                        ${midItems.map(item => `<div class="p-2 border-bottom"><strong>${item.title}</strong><br><small>${item.summary}</small></div>`).join('')}
+                    </div>
+                </div>`;
+        });
+    });
+}
 
 // 5. 🗺️ アイデアの地図の描画
 function renderIdeaMap(opinions) {
