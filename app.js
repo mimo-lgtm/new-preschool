@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義
 // ==========================================
-var GAS_URL = "https://script.google.com/macros/s/AKfycbxm3ntl_jh78mgk-7Bd1w1D2WpWjGaQueKDMc-7kdCUpAmXlIQwtd30R6cIqIlD_IZM/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbxfFGQi4R5e3Adm9RLg4RjSTXCGk4XIuABDfpEIz0Ne2w_baiYgr_X4jx88QOFOlePL/exec";
 
 // HTML側のセレクトボックスの値（value）と、スプレッドシート上の正式名称のマッピング
 var CAT_MAP = {
