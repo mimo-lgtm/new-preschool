@@ -27,7 +27,7 @@ let currentAiResult = null;
 // ==========================================
 // 2. メイン処理（画面初期化・イベント設定）
 // ==========================================
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     console.log("初期化開始");
     
     // 1. データの読み込み（エラーが起きても後続を止めない）
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 3. 安全なイベント設定
     if (btnAiAnalysis) {
-        btnAiAnalysis.addEventListener("click", function() {
+        btnAiAnalysis.addEventListener("click", async function() {
             // ここにAI分析の処理
         });
     }
@@ -426,19 +426,20 @@ function renderIdeaMap(opinions) {
         });
 
         // 1. 左側（AI提案エリア）の書き換え
-        if (singleItems.length > 0) {
-            baseEl.textContent = singleItems[0].summary || "提案データがありません。";
-        } else {
-            baseEl.textContent = "現在、基本となるAIベース提案が設定されていません。";
-        }
+        // 「AIが導き出した提案」
+        var singleItems = opinions.filter(item => {
+            if (!item.category) return false;
+            var isCat = String(item.category).trim() === gasCategoryName;
+            // statusのチェックを外して表示されやすくする
+            return isCat; 
+        });
 
-        // 2. 右側（調整された最終提案エリア）の書き換え
-        if (mergeItems.length > 0) {
-            sumEl.textContent = mergeItems[0].summary || "";
-            // ローディング用の薄い文字装飾を解除して黒太文字にする
-            sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
-        } else {
-            sumEl.innerHTML = `<span class="text-muted small fw-normal">市民の皆様の生の声を集計し、最新の最終提案を自動生成しています...</span>`;
-        }
-    });
+        // 「50対50の割合で調整した最終提案」
+        var mergeItems = opinions.filter(item => {
+            if (!item.category) return false;
+            var isCat = String(item.category).trim() === gasCategoryName;
+            // statusが「新統合」のものだけを抽出
+            var isMerged = String(item.status).trim() === "新統合";
+            return isCat && isMerged;
+        });
 }
