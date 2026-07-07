@@ -68,8 +68,8 @@ body: JSON.stringify({
     summary: aiSummaryText.value, 
     content: aiRefinedText.value, 
     bigCatId: categorySelect.value, 
-    midCatId: "MID-4", // ←追加
-    status: "単独提案"   // ←追加
+    midCatId: "MID-4", 
+    status: "単独提案" 
 })
                 const data = await res.json();
 
