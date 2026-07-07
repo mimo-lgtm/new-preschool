@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     
     // 1. データの読み込み（エラーが起きても後続を止めない）
     try {
-        fetchOpinions();
+      await fetchOpinions();
     } catch (e) {
         console.error("fetchOpinionsでエラー:", e);
     }
