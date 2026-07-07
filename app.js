@@ -144,12 +144,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📤 提案箱へ正式投稿するボタンのイベント
+     // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
             const bigCat = currentAiResult["大分類"] || "その他";
             const midCat = currentAiResult["中分類"] || "その他";
+            // 追加：小分類も取得
+            const smallCat = currentAiResult["小分類"] || "";
 
             if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
 
@@ -163,19 +165,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
+                    // ★ここを修正：全ての項目を網羅しました
                     body: JSON.stringify({
                         action: "submit",
                         content: rawText,
                         title: currentAiResult["推奨タイトル"],
                         summary: currentAiResult["要約200"],
                         category: bigCat, 
-                        midCat: midCat
+                        midCat: midCat,
+                        smallCat: smallCat,
+                        aiResult: currentAiResult
                     })
                 });
                 const data = await res.json();
 
                 if (data.status === "success") {
-                    alert(`📥 投稿が完了しました！\n\nあなたのアイデアは\n【大分類：${bigCat}】＞【中分類：${midCat}】\nのプロセス提案箱にリアルタイムに格納されました。`);
+                    alert(`📥 投稿が完了しました！`);
                     
                     if (txtContent) txtContent.value = "";
                     if (aiAssistBox) aiAssistBox.classList.add("d-none");
@@ -185,7 +190,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     // データの再読み込みと画面の再描画
                     await fetchOpinions();
 
-                    // 新しいID名（list-tab-btn）に対応して自動でタブを切り替え
                     const listTabBtn = document.getElementById("list-tab-btn");
                     if (listTabBtn) {
                         listTabBtn.click();
@@ -201,8 +205,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-});
-
 // ==========================================
 // 3. データ取得・バックエンド連携（本番仕様版）
 // ==========================================
