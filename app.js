@@ -28,29 +28,54 @@ let currentAiResult = null;
 // 2. メイン処理（画面初期化・イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    // 画面を開いたらスプレッドシートからデータを取得して描画
-    fetchOpinions();
+    console.log("初期化開始");
+    
+    // 1. データの読み込み（エラーが起きても後続を止めない）
+    try {
+        fetchOpinions();
+    } catch (e) {
+        console.error("fetchOpinionsでエラー:", e);
+    }
 
-    var btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
+    // 2. ボタン要素の取得
+    var btnAiAnalysis = document.getElementById("btnAiAnalysis");
     var btnSubmitToBox = document.getElementById("btnSubmitToBox");
-    var aiPlaceholder = document.getElementById("aiPlaceholder");
-    var aiAssistBox = document.getElementById("aiAssistBox");
-    var aiSummaryText = document.getElementById("aiSummaryText");
-    var aiPerspectivesText = document.getElementById("aiPerspectivesText");
-    var aiTitleText = document.getElementById("aiTitleText");
-    var aiRefinedText = document.getElementById("aiRefinedText");
-    var categorySelect = document.getElementById("categorySelect");
 
-    // 1. AI分析（壁打ち）ボタンのクリックイベント
+    // 3. 安全なイベント設定
     if (btnAiAnalysis) {
-        btnAiAnalysis.addEventListener("click", async function () {
-            var txtContent = document.getElementById("content");
-            var contentValue = txtContent ? txtContent.value.trim() : "";
+        btnAiAnalysis.addEventListener("click", function() {
+            // ここにAI分析の処理
+        });
+    }
 
-            if (!contentValue) {
-                alert("あなたの想いやアイデアを自由に入力してください。");
-                return;
+    if (btnSubmitToBox) {
+        btnSubmitToBox.addEventListener("click", async function () {
+            // 送信内容をコンソールに出して確認できるようにする
+            console.log("送信開始");
+            try {
+                var res = await fetch(GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        action: "add", 
+                        title: document.getElementById("aiTitleText").value, 
+                        summary: document.getElementById("aiSummaryText").value, 
+                        content: document.getElementById("aiRefinedText").value, 
+                        bigCatId: document.getElementById("categorySelect").value, 
+                        midCatId: "MID-4", 
+                        status: "単独提案" 
+                    })
+                });
+                var data = await res.json();
+                console.log("送信完了:", data);
+                alert("投稿が完了しました");
+            } catch (err) {
+                console.error("送信エラー:", err);
+                alert("送信に失敗しました");
             }
+        });
+    }
+});
 
             // ボタンをローディング状態にする
             btnAiAnalysis.disabled = true;
