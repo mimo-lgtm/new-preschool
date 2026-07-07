@@ -168,22 +168,22 @@ if (data.status === "success" && data.result) {
         });
     }
 });
-// 3. データ取得（固定マスターを介さずスプレッドシートの値をそのまま表示する）
+// 3. データ取得（安定版）
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
         if (data.status === "success" && Array.isArray(data.opinions)) {
-            // スプレッドシートから届いたデータをそのまま使用
+            // スプレッドシートの生の値をそのまま使用し、マスターとの不一致でエラーにならないようにする
             allOpinions = data.opinions.map(op => ({
                 title: op.title,
                 summary: op.summary,
                 content: op.content,
-                bigCatId: op.bigCategory || "その他",
-                midCatId: op.midCategory || "その他",
+                bigCatId: op.bigCatId || "BIG-1",
+                midCatId: op.midCatId || "MID-4",
                 status: op.status || "単独提案",
-                reason: op.reason
+                reason: op.reason || ""
             }));
             
             render3StepProposalBox(allOpinions);
@@ -194,46 +194,41 @@ async function fetchOpinions() {
     }
 }
 
-// 4. 📦 アコーディオン描画（動的グルーピング版）
+// 4. 📦 アコーディオン描画（固定マスター依存版）
 function render3StepProposalBox(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
     container.innerHTML = "";
 
-    // データから大分類と中分類を自動抽出
-    const bigCats = [...new Set(opinions.map(o => o.bigCatId))];
+    const mainAccordion = document.createElement("div");
+    mainAccordion.className = "accordion";
+    mainAccordion.id = "mainProposalAccordion";
 
-    bigCats.forEach(bigName => {
-        const bigCatItems = opinions.filter(item => item.bigCatId === bigName);
-        const bigId = btoa(bigName).slice(0, 10);
+    for (const [bid, bigConfig] of Object.entries(STRUCTURE_MASTER)) {
+        const bigCatItems = opinions.filter(item => item.bigCatId === bid);
+        const bigCollapseId = `bigCollapse-${bid}`;
         
         const bigAccordionItem = document.createElement("div");
-        bigAccordionItem.className = "accordion-item mb-3";
+        bigAccordionItem.className = "accordion-item mb-3 shadow-sm border rounded";
         bigAccordionItem.innerHTML = `
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed bg-dark text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#col-${bigId}">
-                    ${bigName} (${bigCatItems.length}件)
-                </button>
-            </h2>
-            <div id="col-${bigId}" class="accordion-collapse collapse" data-bs-parent="#proposal-container">
-                <div class="accordion-body bg-light" id="body-${bigId}"></div>
+            <h2 class="accordion-header"><button class="accordion-button collapsed bg-dark text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigCollapseId}">${bigConfig.name}</button></h2>
+            <div id="${bigCollapseId}" class="accordion-collapse collapse" data-bs-parent="#mainProposalAccordion">
+                <div class="accordion-body bg-light p-3" id="body-${bigCollapseId}"></div>
             </div>`;
-        container.appendChild(bigAccordionItem);
+        mainAccordion.appendChild(bigAccordionItem);
 
-        const bodyDiv = bigAccordionItem.querySelector(`#body-${bigId}`);
-        const mids = [...new Set(bigCatItems.map(o => o.midCatId))];
-
-        mids.forEach(midName => {
-            const matchedItems = bigCatItems.filter(item => item.midCatId === midName);
+        const bodyDiv = bigAccordionItem.querySelector(`#body-${bigCollapseId}`);
+        for (const [mid, midName] of Object.entries(bigConfig.mids)) {
+            const matchedItems = bigCatItems.filter(item => item.midCatId === mid);
             bodyDiv.innerHTML += `
                 <div class="card mb-2">
                     <div class="card-header bg-secondary text-white small fw-bold">📁 ${midName} (${matchedItems.length}件)</div>
                     <div class="card-body p-2">${matchedItems.map(item => `<div class="p-2 border-bottom small"><strong>${item.title}</strong><br>${item.summary}</div>`).join('')}</div>
                 </div>`;
-        });
-    });
+        }
+    }
+    container.appendChild(mainAccordion);
 }
-
 // 5. 🗺️ アイデアの地図の描画
 function renderIdeaMap(opinions) {
     for (const [bid, bigConfig] of Object.entries(STRUCTURE_MASTER)) {
