@@ -393,46 +393,23 @@ function render3StepProposalBox(opinions) {
     container.appendChild(mainAccordion);
 }
 
-// ==========================================
 // 5. 🗺️ アイデアの地図（タブ2）連動ロジック
-// ==========================================
-function renderIdeaMap(opinions) {
+async function renderIdeaMap(opinions) { // ここに async を追加
     var keys = ["主体", "好奇心", "未来", "個性", "シームレス"];
     
-    keys.forEach(key => {
+    for (var key of keys) { // forEachを for...of に変更
         var gasCategoryName = CAT_MAP[key];
         var baseEl = document.getElementById(`base-text-${key}`);
         var sumEl = document.getElementById(`sum-text-${key}`);
         
-        if (!baseEl || !sumEl) return;
+        if (!baseEl || !sumEl) continue;
 
-        // 1. 基本提案の抽出
-        var singleItems = opinions.filter(item => {
-            if (!item.category) return false;
-            return String(item.category).trim() === gasCategoryName;
-        });
+        // データの抽出処理
+        var singleItems = opinions.filter(item => item.category && String(item.category).trim() === gasCategoryName);
+        var mergeItems = opinions.filter(item => item.category && String(item.category).trim() === gasCategoryName && String(item.status).trim() === "新統合");
 
-        // 2. 最終提案の抽出
-        var mergeItems = opinions.filter(item => {
-            if (!item.category) return false;
-            var isCat = String(item.category).trim() === gasCategoryName;
-            var isMerged = item.status && String(item.status).trim() === "新統合";
-            return isCat && isMerged;
-        });
-
-        // 3. 左側（AI提案エリア）への書き込み
-        if (singleItems.length > 0) {
-            baseEl.textContent = singleItems[0].summary || "提案データがありません。";
-        } else {
-            baseEl.textContent = "現在、基本となるAIベース提案が設定されていません。";
-        }
-
-        // 4. 右側（調整された最終提案エリア）への書き込み
-        if (mergeItems.length > 0) {
-            sumEl.textContent = mergeItems[0].summary || "";
-            sumEl.className = "text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border";
-        } else {
-            sumEl.innerHTML = `<span class="text-muted small fw-normal">最新の最終提案を自動生成中...</span>`;
-        }
-    });
+        // 表示処理
+        baseEl.textContent = singleItems.length > 0 ? singleItems[0].summary : "提案データがありません。";
+        sumEl.textContent = mergeItems.length > 0 ? mergeItems[0].summary : "最新の最終提案を自動生成中...";
+    }
 }
