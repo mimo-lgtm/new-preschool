@@ -188,11 +188,6 @@ async function fetchOpinions() {
 // 4. 描画ロジック
 // ==========================================
 function renderStructuredIdeas(ideasDataset) {
-    // 初期化
-    for (let i = 1; i <= 5; i++) {
-        const mapPillar = document.getElementById(`map-pillar-${i}`);
-        if (mapPillar) mapPillar.innerHTML = "";
-    }
     const proposalContainer = document.getElementById("proposal-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
@@ -200,24 +195,17 @@ function renderStructuredIdeas(ideasDataset) {
         { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
         { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
         { id: 3, name: "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）", keyword: "未来" },
-        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（才能の応援）", keyword: "個性" },
-        { id: 5, name: "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）", keyword: "シームレス" }
+        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）", keyword: "個性" },
+        { id: 5, name: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）", keyword: "シームレス" }
     ];
 
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
         
-        // フィルタリングを緩く修正
         const pillarIdeas = ideasDataset.filter(item => {
             if (!item) return false;
-            
-            const cat = String(item.category || item.bigCatId || item.bigCat || "").trim();
-            const name = String(item.name || "").trim();
-            
-            return cat.includes(rule.keyword) || 
-                   name.includes(rule.keyword) ||
-                   cat.includes(rule.name) ||
-                   rule.name.includes(cat);
+            const cat = String(item.bigCatId || item.category || item.B || "").trim();
+            return cat.includes(rule.keyword) || cat === rule.name || rule.name.includes(cat);
         });
 
         const pillarSection = document.createElement("div");
@@ -238,17 +226,11 @@ function renderStructuredIdeas(ideasDataset) {
         }
 
         mainIdeas.forEach(idea => {
-            let displayStatus = String(idea.status || "").trim();
-            let badgeColor = "bg-info text-dark";
+            let displayStatus = String(idea.status || "単独提案").trim();
+            let badgeColor = displayStatus === "新統合" ? "bg-success" : "bg-info text-dark";
 
-            if (displayStatus === "新統合") {
-                badgeColor = "bg-success";
-            } else {
-                displayStatus = "単独提案";
-            }
-
-            const card = `
-                <div class="card mb-2 shadow-sm border-0">
+            const cardHtml = `
+                <div class="card mb-2 shadow-sm border-0 cursor-pointer" onclick="showIdeaDetail(${JSON.stringify(idea).replace(/"/g, '&quot;')})">
                     <div class="card-body p-3">
                         <span class="badge ${badgeColor} mb-2">${displayStatus}</span>
                         <h6 class="fw-bold text-dark mb-1">${idea.title || "無題の提案"}</h6>
@@ -256,23 +238,10 @@ function renderStructuredIdeas(ideasDataset) {
                     </div>
                 </div>
             `;
-            pillarSection.innerHTML += card;
-
-            if (displayStatus === "新統合") {
-                const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
-                if (mapPillar) {
-                    mapPillar.innerHTML += `
-                        <div class="p-3 mb-2 border-start border-success border-4 bg-light rounded shadow-sm">
-                            <span class="badge bg-success mb-2">新統合</span>
-                            <h5 class="fw-bold text-success mb-1">${idea.title || "無題の提案"}</h5>
-                            <p class="mb-0 text-secondary small">${idea.summary || ""}</p>
-                        </div>
-                    `;
-                }
-            }
+            pillarSection.innerHTML += cardHtml;
         });
 
-        // 元記事
+        // 元記事一覧（アコーディオン）← 残しています
         const originalIdeas = pillarIdeas.filter(item => 
             String(item.status || "").trim() === "元記事"
         );
@@ -290,7 +259,7 @@ function renderStructuredIdeas(ideasDataset) {
             `;
 
             originalIdeas.forEach(orig => {
-                let reasonText = orig.reason || orig.mergedTo || orig.aiJson || '類似した投稿のため、新統合記事へ集約されました。';
+                let reasonText = orig.reason || orig.mergedTo || '類似した投稿のため、新統合記事へ集約されました。';
                 originalSectionHtml += `
                     <div class="p-2 mb-2 border-bottom last-border-0 bg-light-subtle rounded">
                         <span class="badge bg-secondary mb-1">元記事</span>
@@ -310,11 +279,25 @@ function renderStructuredIdeas(ideasDataset) {
         }
     });
 
-    // 地図の空欄対応
+    // 空欄対応
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`);
         if (mapPillar && mapPillar.innerHTML.trim() === "") {
             mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
         }
     }
+}
+
+// 詳細ポップアップ
+function showIdeaDetail(idea) {
+    const detail = `
+【${idea.title || "無題"}】
+分類: ${idea.bigCatId || idea.category || ""} > ${idea.midCatId || idea.midCat || ""}
+
+${idea.summary || ""}
+
+${idea.content ? "\n【原文】\n" + idea.content : ""}
+    `.trim();
+    
+    alert(detail);
 }
