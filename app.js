@@ -1,7 +1,6 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
-// ⚠️ 新しいGASのURLを取得されている場合は、以下の "" の中に上書きしてください
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5dxWvHxyk6zVB4bekkeeFsoBV7FkdYgZi3PtAANdRwj5da4JWrBasRUWhrwj6oCq/exec";
 
 const MAIN_CATEGORIES = [
@@ -42,7 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
-            // ...（ここは元の長いAI分析処理をそのまま残す）
             const txtContent = document.getElementById("content");
             const contentValue = txtContent ? txtContent.value.trim() : "";
 
@@ -103,7 +101,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
-            // ...（ここも元の長い投稿処理をそのまま残す）
             if (!currentAiResult) return;
             const bigCat = currentAiResult["大分類"] || "その他";
             const midCat = currentAiResult["中分類"] || "その他";
@@ -157,38 +154,29 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-}); // ← DOMContentLoaded の正しい終了位置（ここだけ）
+});
+
 // ==========================================
-// 3. データ取得・バックエンド連携（本番仕様版）
+// 3. データ取得・バックエンド連携
 // ==========================================
 async function fetchOpinions() {
     try {
-        // スプレッドシートからデータを取得
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
-        // データ形式を配列に整える
-        if (Array.isArray(data)) {
-            allOpinions = data;
-        } else if (data && data.opinions) {
-            allOpinions = data.opinions;
-        } else {
-            allOpinions = [];
-        }
+        allOpinions = Array.isArray(data) ? data : (data?.opinions || []);
         
-        // 取得したデータを地図と提案箱に流し込む
         renderStructuredIdeas(allOpinions);
-
     } catch (e) {
         console.error("データ取得に失敗しました:", e);
     }
 }
 
 // ==========================================
-// 4. アイデアの地図 ＆ 提案箱の描画ロジック（スプレッドシート完全一致版）
+// 4. 描画ロジック
 // ==========================================
 function renderStructuredIdeas(ideasDataset) {
-    // 画面の各エリアを初期化
+    // 初期化
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`);
         if (mapPillar) mapPillar.innerHTML = "";
@@ -196,7 +184,6 @@ function renderStructuredIdeas(ideasDataset) {
     const proposalContainer = document.getElementById("proposal-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
-    // あなた本来の意図に修正した5つの柱の定義
     const pillarRules = [
         { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
         { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
@@ -205,47 +192,39 @@ function renderStructuredIdeas(ideasDataset) {
         { id: 5, name: "🌐 5. 学校の枠に縛られない個別最適化教育（自由な学び）", keyword: "シームレス" }
     ];
 
-    // 5つの柱ごとにデータを仕分けして描画
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
-        
-        // スプレッドシートの「大分類（category）」にキーワードが含まれるデータを抽出
-        const pillarIdeas = ideasDataset.filter(item => {
-            if (!item.category) return false;
-            return String(item.category).trim().includes(rule.keyword);
-        });
-        
-        // 提案箱（タブ3）用の外枠（セクション）を作成
+        const pillarIdeas = ideasDataset.filter(item => 
+            item.category && String(item.category).trim().includes(rule.keyword)
+        );
+
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
         pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.name}</h5>`;
 
-        // 「元記事」以外のメインアイデア（新統合、または単独提案）
-        const mainIdeas = pillarIdeas.filter(item => {
-            const statusStr = item.status ? String(item.status).trim() : "";
-            return statusStr !== "元記事";
-        });
-        
-        // 該当データが一切ない場合の表示
-        const hasOriginals = pillarIdeas.some(item => String(item.status).trim() === "元記事");
+        // メインアイデア
+        const mainIdeas = pillarIdeas.filter(item => 
+            String(item.status || "").trim() !== "元記事"
+        );
+
+        const hasOriginals = pillarIdeas.some(item => 
+            String(item.status || "").trim() === "元記事"
+        );
+
         if (mainIdeas.length === 0 && !hasOriginals) {
             pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
         }
 
-        // メインアイデアの描画処理
         mainIdeas.forEach(idea => {
+            let displayStatus = String(idea.status || "").trim();
             let badgeColor = "bg-info text-dark";
-            let displayStatus = idea.status ? String(idea.status).trim() : "";
-            
-            // H列が「新統合」なら緑バッジ、それ以外（表示・空欄など）なら水色の「単独提案」
+
             if (displayStatus === "新統合") {
                 badgeColor = "bg-success";
             } else {
                 displayStatus = "単独提案";
-                badgeColor = "bg-info text-dark";
             }
 
-            // 【提案箱（タブ3）】へカードを追加
             const card = `
                 <div class="card mb-2 shadow-sm border-0">
                     <div class="card-body p-3">
@@ -257,7 +236,7 @@ function renderStructuredIdeas(ideasDataset) {
             `;
             pillarSection.innerHTML += card;
 
-            // 【アイデアの地図（タブ2）】へカードを追加（「新統合」に指定した記事がここに載ります）
+            // 地図に新統合を表示
             if (displayStatus === "新統合") {
                 const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
                 if (mapPillar) {
@@ -272,11 +251,11 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-       // 「元記事」に指定されたデータをアコーディオン（折りたたみ）形式で格納
-        const originalIdeas = pillarIdeas.filter(item => {
-            const statusStr = item.status ? String(item.status).trim() : "";
-            return statusStr === "元記事";
-        });
+        // 元記事（アコーディオン）
+        const originalIdeas = pillarIdeas.filter(item => 
+            String(item.status || "").trim() === "元記事"
+        );
+
         if (originalIdeas.length > 0) {
             const subAccordionId = `subCollapse-original-${pillarId}`;
             let originalSectionHtml = `
@@ -288,15 +267,9 @@ function renderStructuredIdeas(ideasDataset) {
                     <div class="collapse mt-2" id="${subAccordionId}">
                         <div class="p-2 border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
             `;
-            originalIdeas.forEach(orig => {
-                let reasonText = orig.mergedTo ? String(orig.mergedTo).trim() : "";
-                if (!reasonText && orig.aiJson) {
-                    reasonText = String(orig.aiJson).trim();
-                }
-                if (!reasonText) {
-                    reasonText = '類似した投稿のため、新統合記事へ集約されました。';
-                }
 
+            originalIdeas.forEach(orig => {
+                let reasonText = orig.mergedTo || orig.aiJson || '類似した投稿のため、新統合記事へ集約されました。';
                 originalSectionHtml += `
                     <div class="p-2 mb-2 border-bottom last-border-0 bg-light-subtle rounded">
                         <span class="badge bg-secondary mb-1">元記事</span>
@@ -314,15 +287,13 @@ function renderStructuredIdeas(ideasDataset) {
         if (proposalContainer) {
             proposalContainer.appendChild(pillarSection);
         }
-    }); // pillarRules.forEach の終了
+    });
 
-    // 地図側で新統合データがまだ無い場合のケア表示
+    // 地図の空欄対応
     for (let i = 1; i <= 5; i++) {
         const mapPillar = document.getElementById(`map-pillar-${i}`);
         if (mapPillar && mapPillar.innerHTML.trim() === "") {
             mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
         }
     }
-} // renderStructuredIdeas 関数の終了
-
-}); // DOMContentLoaded の終了
+}
