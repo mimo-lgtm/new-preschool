@@ -134,12 +134,13 @@ if (!confirm(message)) {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     // 修正対象: 投稿時の body 送信部分
+// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
 body: JSON.stringify({
     action: "submit",
     content: rawText,
     title: currentAiResult["推奨タイトル"] || "無題の提案",
     summary: currentAiResult["要約200"] || "",
-    // IDを一切排除し、名称のみを固定のキーで送る
+    // 【強制上書き】AIの結果がない場合でも「その他」とする
     bigCatName: currentAiResult["大分類"] || "その他",
     midCatName: currentAiResult["中分類"] || "その他",
     aiResult: currentAiResult
