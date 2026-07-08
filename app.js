@@ -191,12 +191,62 @@ function renderStructuredIdeas(ideasDataset) {
     const proposalContainer = document.getElementById("proposal-container");
     if (proposalContainer) proposalContainer.innerHTML = "";
 
-    const pillarRules = [
-        { id: 1, name: "🌱 1. 探究心を育む知育環境（主体的な学び）", keyword: "主体" },
-        { id: 2, name: "🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）", keyword: "好奇心" },
-        { id: 3, name: "🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）", keyword: "未来" },
-        { id: 4, name: "🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）", keyword: "個性" },
-        { id: 5, name: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）", keyword: "シームレス" }
+        const pillarRules = [
+        { 
+            id: 1, 
+            bigName: "🌱 1. 探究心を育む知育環境（主体的な学び）",
+            bigId: "BIG-1",
+            mids: {
+                "MID-1": "子ども主導のプロジェクト学習",
+                "MID-2": "選択制のアクティビティ",
+                "MID-3": "デジタルを活用した自己表現",
+                "MID-4": "その他"
+            }
+        },
+        { 
+            id: 2, 
+            bigName: "🎨 2. 感性を磨くアートと表現（楽しさと好奇心）",
+            bigId: "BIG-2",
+            mids: {
+                "MID-1": "五感を使う自然体験",
+                "MID-2": "失敗を歓迎する科学遊び",
+                "MID-3": "地域のアート・文化資源の活用",
+                "MID-4": "その他"
+            }
+        },
+        { 
+            id: 3, 
+            bigName: "🤝 3. 協調性を養うグループワーク（未来を生き抜く力）",
+            bigId: "BIG-3",
+            mids: {
+                "MID-1": "非認知能力の育成",
+                "MID-2": "多様な人々と協働する体験",
+                "MID-3": "答えのない問いに挑む力",
+                "MID-4": "その他"
+            }
+        },
+        { 
+            id: 4, 
+            bigName: "🌳 4. 心身を健やかに育てる自然体験（個性・才能の開花）",
+            bigId: "BIG-4",
+            mids: {
+                "MID-1": "個別最適化された学習プラン",
+                "MID-2": "多様な才能を認める評価基準",
+                "MID-3": "特別なニーズを持つ子への支援",
+                "MID-4": "その他"
+            }
+        },
+        { 
+            id: 5, 
+            bigName: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）",
+            bigId: "BIG-5",
+            mids: {
+                "MID-1": "保幼小の連携強化",
+                "MID-2": "切れ目のない相談窓口",
+                "MID-3": "育児休業からの復職支援",
+                "MID-4": "その他"
+            }
+        }
     ];
 
     pillarRules.forEach(rule => {
