@@ -187,12 +187,13 @@ async function fetchOpinions() {
 // ==========================================
 // 4. 描画ロジック（アコーディオン式・名前表示版）
 // ==========================================
-const CATEGORY_MASTER = {
-  "BIG-1": { name: "主体的な学び", mids: { "MID-1": "子ども主導のプロジェクト学習", "MID-2": "選択制のアクティビティ", "MID-3": "デジタルを活用した自己表現", "MID-4": "その他" } },
-  "BIG-2": { name: "楽しさと好奇心", mids: { "MID-1": "五感を使う自然体験", "MID-2": "失敗を歓迎する科学遊び", "MID-3": "地域のアート・文化資源の活用", "MID-4": "その他" } },
-  "BIG-3": { name: "未来を生き抜く力", mids: { "MID-1": "非認知能力の育成", "MID-2": "多様な人々と協働する体験", "MID-3": "答えのない問いに挑む力", "MID-4": "その他" } },
-  "BIG-4": { name: "個性・才能の開花", mids: { "MID-1": "個別最適化された学習プラン", "MID-2": "多様な才能を認める評価基準", "MID-3": "特別なニーズを持つ子への支援", "MID-4": "その他" } },
-  "BIG-5": { name: "シームレス成長支援", mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" } }
+// 名称だけで構成された構造定義（IDは含みません）
+const CATEGORY_STRUCTURE = {
+    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"],
+    "主体的な学び": ["探究心を育む知育環境", "子ども主導のプロジェクト学習", "デジタルを活用した自己表現", "その他"],
+    "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
+    "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
+    "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"]
 };
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
@@ -200,54 +201,56 @@ function renderStructuredIdeas(ideasDataset) {
     const container = document.getElementById("proposal-container");
     container.innerHTML = "";
 
-    // 階層定義を「名称」で直接管理
-    const CATEGORIES = {
-        "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"],
-        "主体的な学び": ["探究心を育む知育環境", "子ども主導のプロジェクト学習", "デジタルを活用した自己表現", "その他"],
-        "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
-        "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-        "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"]
-    };
-
     const accordion = document.createElement("div");
     accordion.className = "accordion shadow-sm";
     accordion.id = "mainAccordion";
 
-    Object.entries(CATEGORIES).forEach(([bigName, midNames], bIndex) => {
-        const bigId = `collapseBig${bIndex}`;
+    // CATEGORY_STRUCTURE を直接回す（IDは一切不要）
+    Object.entries(CATEGORY_STRUCTURE).forEach(([bigName, midNames], bIndex) => {
+        const bigId = `big${bIndex}`;
         const bigItem = document.createElement("div");
-        bigItem.className = "accordion-item border-0 mb-2";
+        bigItem.className = "accordion-item border-0 mb-3";
         bigItem.innerHTML = `
-            <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigId}">${bigName}</button></h2>
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold fs-4 bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#${bigId}">
+                    ${bigName}
+                </button>
+            </h2>
             <div id="${bigId}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
-                <div class="accordion-body bg-light" id="midContainer${bIndex}"></div>
+                <div class="accordion-body bg-white" id="midContainer${bIndex}"></div>
             </div>
         `;
         accordion.appendChild(bigItem);
 
         const midContainer = bigItem.querySelector(`#midContainer${bIndex}`);
         midNames.forEach((midName, mIndex) => {
-            // ここで「名称」が一致するデータを抽出
+            // 名称一致でフィルタリング
             const filtered = ideasDataset.filter(i => i.bigCatName === bigName && i.midCatName === midName);
             
-            const midId = `cMid${bIndex}${mIndex}`;
+            // 並び替え：新統合(status === '新統合') を一番上にする
+            filtered.sort((a, b) => (b.status === '新統合') - (a.status === '新統合'));
+
+            const midId = `mid${bIndex}${mIndex}`;
             const midItem = document.createElement("div");
-            midItem.className = "accordion-item border-0 mb-1";
+            midItem.className = "accordion-item border-0 mb-2";
             midItem.innerHTML = `
-                <h2 class="accordion-header"><button class="accordion-button collapsed btn-sm bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#${midId}">${midName} (${filtered.length})</button></h2>
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${midId}">
+                        ${midName} (${filtered.length})
+                    </button>
+                </h2>
                 <div id="${midId}" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        ${filtered.length > 0 ? filtered.map(idea => `
-                            <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : idea.status === '元記事' ? 'border-secondary' : 'border-primary'}">
-                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : idea.status === '元記事' ? 'bg-secondary text-white' : 'bg-primary text-white'}">
-                                    ${idea.status === '新統合' ? '★ 新統合：' : idea.status === '元記事' ? '元記事：' : '提案：'}${idea.title}
+                        ${filtered.map(idea => `
+                            <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : 'border-primary'}">
+                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : 'bg-primary text-white'}">
+                                    ${idea.status === '新統合' ? '★ ' : ''}${idea.status}：${idea.title}
                                 </div>
                                 <div class="card-body">
-                                    <p>${idea.content || idea.summary}</p>
-                                    ${idea.reason ? `<small class="text-danger">理由: ${idea.reason}</small>` : ''}
+                                    <p class="card-text">${idea.content || idea.summary}</p>
                                 </div>
                             </div>
-                        `).join('') : '<p class="text-muted small">記事はありません。</p>'}
+                        `).join('')}
                     </div>
                 </div>
             `;
