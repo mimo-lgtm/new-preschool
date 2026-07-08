@@ -173,7 +173,11 @@ async function fetchOpinions() {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
         
-        allOpinions = Array.isArray(data) ? data : (data?.opinions || []);
+        console.log("取得したデータ:", data); // デバッグ用
+
+        allOpinions = Array.isArray(data) ? data : (data?.opinions || data || []);
+        
+        console.log("allOpinionsに格納:", allOpinions.length, "件");
         
         renderStructuredIdeas(allOpinions);
     } catch (e) {
@@ -203,9 +207,19 @@ function renderStructuredIdeas(ideasDataset) {
 
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
-        const pillarIdeas = ideasDataset.filter(item => 
-            item.category && String(item.category).trim().includes(rule.keyword)
-        );
+        
+        // フィルタリングを緩く修正
+        const pillarIdeas = ideasDataset.filter(item => {
+            if (!item) return false;
+            
+            const cat = String(item.category || item.bigCatId || item.bigCat || "").trim();
+            const name = String(item.name || "").trim();
+            
+            return cat.includes(rule.keyword) || 
+                   name.includes(rule.keyword) ||
+                   cat.includes(rule.name) ||
+                   rule.name.includes(cat);
+        });
 
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
@@ -245,7 +259,6 @@ function renderStructuredIdeas(ideasDataset) {
             `;
             pillarSection.innerHTML += card;
 
-            // 地図に新統合を表示
             if (displayStatus === "新統合") {
                 const mapPillar = document.getElementById(`map-pillar-${pillarId}`);
                 if (mapPillar) {
@@ -260,7 +273,7 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-        // 元記事（アコーディオン）
+        // 元記事
         const originalIdeas = pillarIdeas.filter(item => 
             String(item.status || "").trim() === "元記事"
         );
@@ -278,7 +291,7 @@ function renderStructuredIdeas(ideasDataset) {
             `;
 
             originalIdeas.forEach(orig => {
-                let reasonText = orig.mergedTo || orig.aiJson || '類似した投稿のため、新統合記事へ集約されました。';
+                let reasonText = orig.reason || orig.mergedTo || orig.aiJson || '類似した投稿のため、新統合記事へ集約されました。';
                 originalSectionHtml += `
                     <div class="p-2 mb-2 border-bottom last-border-0 bg-light-subtle rounded">
                         <span class="badge bg-secondary mb-1">元記事</span>
