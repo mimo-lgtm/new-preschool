@@ -195,6 +195,7 @@ const CATEGORY_MASTER = {
   "BIG-5": { name: "シームレス成長支援", mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" } }
 };
 
+// 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
 function renderStructuredIdeas(ideasDataset) {
     const container = document.getElementById("proposal-container");
     container.innerHTML = "";
@@ -203,49 +204,38 @@ function renderStructuredIdeas(ideasDataset) {
     accordion.className = "accordion shadow-sm";
     accordion.id = "mainAccordion";
 
-    Object.keys(CATEGORY_MASTER).forEach((bigId, bIndex) => {
-        const bigCat = CATEGORY_MASTER[bigId];
-        const bigName = bigCat.name;
-
-        // データ内の bigCatName が一致するもの、またはデータが「その他」のもの
+    // 1. カテゴリマスターから大分類・中分類をループ生成
+    Object.entries(CATEGORY_MASTER).forEach(([bigId, bigCat], bIndex) => {
+        const bigAccordionId = `collapseBig${bIndex}`;
         const bigItem = document.createElement("div");
-        bigItem.className = "accordion-item border-0 mb-2 shadow-sm";
+        bigItem.className = "accordion-item border-0 mb-2";
         bigItem.innerHTML = `
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBig${bIndex}">${bigName}</button>
-            </h2>
-            <div id="collapseBig${bIndex}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+            <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigAccordionId}">${bigCat.name}</button></h2>
+            <div id="${bigAccordionId}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                 <div class="accordion-body bg-light" id="midContainer${bIndex}"></div>
             </div>
         `;
         accordion.appendChild(bigItem);
 
         const midContainer = bigItem.querySelector(`#midContainer${bIndex}`);
-        Object.keys(bigCat.mids).forEach((midId, mIndex) => {
-            const midName = bigCat.mids[midId];
-            
-            // フィルタリング: 名称が一致するもの。名前がない場合は「その他」に含める
-            const filteredIdeas = ideasDataset.filter(item => {
-                const itemBig = item.bigCatName || "その他";
-                const itemMid = item.midCatName || "その他";
-                return itemBig === bigName && itemMid === midName;
-            });
+        Object.entries(bigCat.mids).forEach(([midId, midName], mIndex) => {
+            // ここでフィルタリング：データ側の名前とマスターを比較
+            const filtered = ideasDataset.filter(i => i.bigCatName === bigCat.name && i.midCatName === midName);
 
+            const midAccordionId = `cMid${bIndex}${mIndex}`;
             const midItem = document.createElement("div");
             midItem.className = "accordion-item border-0 mb-1";
             midItem.innerHTML = `
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#cMid${bIndex}${mIndex}">${midName} (${filteredIdeas.length})</button>
-                </h2>
-                <div id="cMid${bIndex}${mIndex}" class="accordion-collapse collapse">
+                <h2 class="accordion-header"><button class="accordion-button collapsed btn-sm bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#${midAccordionId}">${midName} (${filtered.length})</button></h2>
+                <div id="${midAccordionId}" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        ${filteredIdeas.length > 0 ? filteredIdeas.map(idea => `
+                        ${filtered.length > 0 ? filtered.map((idea, oIdx) => `
                             <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : idea.status === '元記事' ? 'border-secondary' : 'border-primary'}">
                                 <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : idea.status === '元記事' ? 'bg-secondary text-white' : 'bg-primary text-white'}">
                                     ${idea.status === '新統合' ? '★ ' : ''}${idea.status}：${idea.title}
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">${idea.content || idea.summary || '内容なし'}</p>
+                                    <p>${idea.content || idea.summary || '内容なし'}</p>
                                 </div>
                             </div>
                         `).join('') : '<p class="text-muted small">記事はありません。</p>'}
