@@ -125,18 +125,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify({
-                        action: "submit",
-                        content: rawText,
-                        title: currentAiResult["推奨タイトル"] || currentAiResult.推奨タイトル,
-                        summary: currentAiResult["要約200"] || currentAiResult.要約200,
-                        bigCatId: bigCat,           // GAS側が使うキー
-                        midCatId: midCat,           // GAS側が使うキー
-                        category: bigCat,           // 互換性確保
-                        midCat: midCat,
-                        smallCat: smallCat,
-                        selectedCategory: selectedCategory,
-                        aiResult: currentAiResult
-                    })
+    action: "submit",
+    content: rawText,
+    title: currentAiResult["推奨タイトル"] || currentAiResult.推奨タイトル || "無題の提案",
+    summary: currentAiResult["要約200"] || currentAiResult.要約200 || "",
+    bigCatId: bigCat,
+    midCatId: midCat,
+    category: bigCat, 
+    midCat: midCat,
+    smallCat: smallCat,
+    aiResult: currentAiResult
+})
                 });
                 const data = await res.json();
 
