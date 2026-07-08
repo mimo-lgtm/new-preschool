@@ -139,13 +139,9 @@ body: JSON.stringify({
     content: rawText,
     title: currentAiResult["推奨タイトル"] || "無題の提案",
     summary: currentAiResult["要約200"] || "",
-    
-    // 【重要】以下のように「名称」だけを送るように変更
-    bigCatId: bigCat, // ここにIDではなく名称が入るようにする
-    midCatId: midCat, // ここにIDではなく名称が入るようにする
-    category: bigCat, 
-    midCat: midCat,
-    smallCat: smallCat,
+    // IDを一切排除し、名称のみを固定のキーで送る
+    bigCatName: currentAiResult["大分類"] || "その他",
+    midCatName: currentAiResult["中分類"] || "その他",
     aiResult: currentAiResult
 })
                 });
