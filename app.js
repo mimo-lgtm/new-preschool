@@ -292,9 +292,11 @@ function renderStructuredIdeas(ideasDataset) {
         });
 
         // 元記事一覧（アコーディオン）← 残しています
-        const originalIdeas = pillarIdeas.filter(item => 
-            String(item.status || "").trim() === "元記事"
-        );
+               const pillarIdeas = ideasDataset.filter(item => {
+            if (!item) return false;
+            const cat = String(item.bigCatId || item.category || item.B || "").trim();
+            return cat === rule.bigId || cat.includes(rule.keyword) || rule.name.includes(cat);
+        });
 
         if (originalIdeas.length > 0) {
             const subAccordionId = `subCollapse-original-${pillarId}`;
