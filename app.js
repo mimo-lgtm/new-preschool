@@ -99,12 +99,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 📤 提案箱へ正式投稿するボタンのイベント
+        // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
-            const bigCat = currentAiResult["大分類"] || "その他";
-            const midCat = currentAiResult["中分類"] || "その他";
+
+            const bigCat = currentAiResult["大分類"] || currentAiResult.bigCatId || "その他";
+            const midCat = currentAiResult["中分類"] || currentAiResult.midCatId || "その他";
             const smallCat = currentAiResult["小分類"] || "";
+
+            // 手動分類選択（HTMLのselect）
+            const selectedCategory = document.getElementById("categorySelect") ? 
+                document.getElementById("categorySelect").value : "主体";
 
             if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
 
@@ -121,11 +127,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     body: JSON.stringify({
                         action: "submit",
                         content: rawText,
-                        title: currentAiResult["推奨タイトル"],
-                        summary: currentAiResult["要約200"],
-                        category: bigCat, 
+                        title: currentAiResult["推奨タイトル"] || currentAiResult.推奨タイトル,
+                        summary: currentAiResult["要約200"] || currentAiResult.要約200,
+                        bigCatId: bigCat,           // GAS側が使うキー
+                        midCatId: midCat,           // GAS側が使うキー
+                        category: bigCat,           // 互換性確保
                         midCat: midCat,
                         smallCat: smallCat,
+                        selectedCategory: selectedCategory,
                         aiResult: currentAiResult
                     })
                 });
@@ -144,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const listTabBtn = document.getElementById("list-tab-btn");
                     if (listTabBtn) listTabBtn.click();
                 } else {
-                    alert("投稿エラー: " + data.message);
+                    alert("投稿エラー: " + (data.message || "不明なエラー"));
                     btnSubmitToBox.disabled = false;
                 }
             } catch (err) {
