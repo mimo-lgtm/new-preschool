@@ -110,11 +110,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const smallCat = currentAiResult["小分類"] || "";
 
             // 手動分類選択（HTMLのselect）
-            const selectedCategory = document.getElementById("categorySelect") ? 
-                document.getElementById("categorySelect").value : "主体";
+            // カテゴリの取得（既存の処理）
+const selectedCategory = document.getElementById("categorySelect") ? 
+                         document.getElementById("categorySelect").value : "主体";
 
-            if (!// 【修正後：名称のみにする】
-confirm(`正式に提案箱へ投稿しますか？\n(大分類「${result.big}」 > 中分類「${result.mid}」へ格納されます)`); return;
+// 投稿の確認ダイアログの生成と判定
+const message = `正式に提案箱へ投稿しますか？\n(大分類「${result.big}」 > 中分類「${result.mid}」へ格納されます)`;
+
+if (!confirm(message)) {
+    return; // キャンセルされた場合は処理を中断
+}
 
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
