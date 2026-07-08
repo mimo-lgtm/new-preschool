@@ -131,13 +131,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({
+                    // 修正対象: 投稿時の body 送信部分
+body: JSON.stringify({
     action: "submit",
     content: rawText,
-    title: currentAiResult["推奨タイトル"] || currentAiResult.推奨タイトル || "無題の提案",
-    summary: currentAiResult["要約200"] || currentAiResult.要約200 || "",
-    bigCatId: bigCat,
-    midCatId: midCat,
+    title: currentAiResult["推奨タイトル"] || "無題の提案",
+    summary: currentAiResult["要約200"] || "",
+    
+    // 【重要】以下のように「名称」だけを送るように変更
+    bigCatId: bigCat, // ここにIDではなく名称が入るようにする
+    midCatId: midCat, // ここにIDではなく名称が入るようにする
     category: bigCat, 
     midCat: midCat,
     smallCat: smallCat,
