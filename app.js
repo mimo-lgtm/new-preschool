@@ -2,7 +2,7 @@
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
 // ⚠️ 新しいGASのURLを取得されている場合は、以下の "" の中に上書きしてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwYQbN2IG9CXJQcAsp3Bb14qcvVvHdO3Cht4pMBU1djjJ5l-sDNM0rIGHJsG1o5BHet/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5dxWvHxyk6zVB4bekkeeFsoBV7FkdYgZi3PtAANdRwj5da4JWrBasRUWhrwj6oCq/exec";
 
 const MAIN_CATEGORIES = [
     "シームレス成長支援",
