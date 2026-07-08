@@ -115,7 +115,8 @@ const selectedCategory = document.getElementById("categorySelect") ?
                          document.getElementById("categorySelect").value : "主体";
 
 // 投稿の確認ダイアログの生成と判定
-const message = `正式に提案箱へ投稿しますか？\n(大分類「${result.big}」 > 中分類「${result.mid}」へ格納されます)`;
+// 117行目付近のメッセージ生成部分をこのように修正してください
+const message = `正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`;
 
 if (!confirm(message)) {
     return; // キャンセルされた場合は処理を中断
