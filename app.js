@@ -113,7 +113,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const selectedCategory = document.getElementById("categorySelect") ? 
                 document.getElementById("categorySelect").value : "主体";
 
-            if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
+            if (!// 【修正後：名称のみにする】
+confirm(`正式に提案箱へ投稿しますか？\n(大分類「${result.big}」 > 中分類「${result.mid}」へ格納されます)`); return;
 
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
