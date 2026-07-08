@@ -36,57 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
 
-    // 1. AI分析（壁打ち）ボタンの処理
-    btnAiAnalysis.addEventListener("click", async () => {
-        const content = document.getElementById("content").value;
-        if (!content) return alert("内容を入力してください");
-        
-        const res = await fetch(GAS_URL, { 
-            method: "POST", 
-            body: JSON.stringify({ action: "analyze", content: content }) 
-        });
-        const data = await res.json();
-        if(data.status === "success") {
-            currentAiResult = data.result;
-            // 画面への反映処理（元のコードのロジックをそのまま使用）
-            aiTitleText.innerText = currentAiResult["推奨タイトル"];
-            aiSummaryText.innerText = currentAiResult["要約200"];
-            aiAssistBox.style.display = "block";
-            aiPlaceholder.style.display = "none";
-        }
-    });
-
-    // 2. 投稿ボタンの処理（★ここをスプレッドシートの項目に合わせて調整しました）
-    btnSubmitToBox.addEventListener("click", async () => {
-        const content = document.getElementById("content").value;
-        
-        const payload = {
-            action: "submit",
-            category: currentAiResult["大分類"],
-            midCat: currentAiResult["中分類"],
-            smallCat: currentAiResult["小分類"],
-            title: currentAiResult["推奨タイトル"],
-            summary: currentAiResult["要約200"],
-            content: content,
-            aiResult: currentAiResult
-        };
-
-        await fetch(GAS_URL, { 
-            method: "POST", 
-            body: JSON.stringify(payload) 
-        });
-        
-        alert("投稿が完了しました");
-        fetchDataAndRender(); // 一覧の再読み込み
-    });
-});
-
-    // ✨ 最優先でデータを読み込む（画像エラーの巻き添えを防ぐ安全設計）
+    // ✨ 最優先でデータを読み込む
     fetchOpinions();
 
     // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
+            // ...（ここは元の長いAI分析処理をそのまま残す）
             const txtContent = document.getElementById("content");
             const contentValue = txtContent ? txtContent.value.trim() : "";
 
@@ -144,13 +100,13 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-     // 📤 提案箱へ正式投稿するボタンのイベント
+    // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
+            // ...（ここも元の長い投稿処理をそのまま残す）
             if (!currentAiResult) return;
             const bigCat = currentAiResult["大分類"] || "その他";
             const midCat = currentAiResult["中分類"] || "その他";
-            // 追加：小分類も取得
             const smallCat = currentAiResult["小分類"] || "";
 
             if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
@@ -165,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    // ★ここを修正：全ての項目を網羅しました
                     body: JSON.stringify({
                         action: "submit",
                         content: rawText,
@@ -187,13 +142,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
                     currentAiResult = null;
 
-                    // データの再読み込みと画面の再描画
                     await fetchOpinions();
 
                     const listTabBtn = document.getElementById("list-tab-btn");
-                    if (listTabBtn) {
-                        listTabBtn.click();
-                    }
+                    if (listTabBtn) listTabBtn.click();
                 } else {
                     alert("投稿エラー: " + data.message);
                     btnSubmitToBox.disabled = false;
@@ -203,9 +155,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("送信エラーが発生しました。");
                 btnSubmitToBox.disabled = false;
             }
-        }); // ← ここで btnSubmitToBox のイベントリスナーが閉じる
-    } // ← ここで if (btnSubmitToBox) が閉じる
- // ← ここで DOMContentLoaded が閉じる
+        });
+    }
+}); // ← DOMContentLoaded の正しい終了位置（ここだけ）
 // ==========================================
 // 3. データ取得・バックエンド連携（本番仕様版）
 // ==========================================
