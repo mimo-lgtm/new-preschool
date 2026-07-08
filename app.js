@@ -111,15 +111,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 手動分類選択（HTMLのselect）
             // カテゴリの取得（既存の処理）
-            //const selectedCategory = document.getElementById("categorySelect") ? 
-                                     //document.getElementById("categorySelect").value : "主体";
-
+            // 削除の代わりに、AIの判定結果（bigCat, midCat）をそのまま使用する
+// これにより、手動選択のロジックを完全に排除します
+const finalBigCat = bigCat; // AIが判定した大分類名称
+const finalMidCat = midCat; // AIが判定した中分類名称
             // 投稿の確認ダイアログの生成と判定
-            const message = `正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`;
+           // 投稿の確認ダイアログ（名称のみを使用）
+const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
 
-            if (!confirm(message)) {
-                return; // キャンセルされた場合は処理を中断
-            }
+if (!confirm(message)) {
+    return; // キャンセル
+}
 
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
