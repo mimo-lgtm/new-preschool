@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwYzZWBe5LRyo7BzvRQ2qzaBnRcxs4hQJ2IMw2kf6_zTYcuDKSWai-6BIKi-_bWB5uY/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxmM8xb0WjGw32yLSVacv30nz2y1LabmGu0aKfFa9DBPRJUw6R_U9Q6odT5HA1A-t2I/exec";
 
 const MAIN_CATEGORIES = [
     "シームレス成長支援",
