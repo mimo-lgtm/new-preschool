@@ -320,12 +320,11 @@ function renderStructuredIdeas(ideasDataset) {
             }
         });
 
-        // 「元記事」に指定されたデータをアコーディオン（折りたたみ）形式で格納
+       // 「元記事」に指定されたデータをアコーディオン（折りたたみ）形式で格納
         const originalIdeas = pillarIdeas.filter(item => {
             const statusStr = item.status ? String(item.status).trim() : "";
             return statusStr === "元記事";
         });
-
         if (originalIdeas.length > 0) {
             const subAccordionId = `subCollapse-original-${pillarId}`;
             let originalSectionHtml = `
@@ -337,9 +336,7 @@ function renderStructuredIdeas(ideasDataset) {
                     <div class="collapse mt-2" id="${subAccordionId}">
                         <div class="p-2 border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
             `;
-
             originalIdeas.forEach(orig => {
-                // I列（mergedTo）または L列（aiJson / AI分析深掘り）に入っている統合理由を取得
                 let reasonText = orig.mergedTo ? String(orig.mergedTo).trim() : "";
                 if (!reasonText && orig.aiJson) {
                     reasonText = String(orig.aiJson).trim();
@@ -365,7 +362,7 @@ function renderStructuredIdeas(ideasDataset) {
         if (proposalContainer) {
             proposalContainer.appendChild(pillarSection);
         }
-    });
+    }); // pillarRules.forEach の終了
 
     // 地図側で新統合データがまだ無い場合のケア表示
     for (let i = 1; i <= 5; i++) {
@@ -374,4 +371,6 @@ function renderStructuredIdeas(ideasDataset) {
             mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
         }
     }
-});
+} // renderStructuredIdeas 関数の終了
+
+}); // DOMContentLoaded の終了
