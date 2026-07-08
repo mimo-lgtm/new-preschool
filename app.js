@@ -185,63 +185,76 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 描画ロジック
+// 4. 描画ロジック（アコーディオン式・名前表示版）
 // ==========================================
 function renderStructuredIdeas(ideasDataset) {
-    const proposalContainer = document.getElementById("proposal-container");
-    if (proposalContainer) proposalContainer.innerHTML = "";
+    const container = document.getElementById("proposal-container");
+    container.innerHTML = ""; // 初期化
 
-    const pillarRules = [
-        { id: 1, bigName: "🌱 1. 探究心を育む知育環境（主体的な学び）", bigId: "BIG-1" },
-        { id: 2, bigName: "🎨 2. 感性を磨くアートと表現（楽しさと好奇心）", bigId: "BIG-2" },
-        { id: 3, bigName: "🤝 3. 協調性を養うグループワーク（未来を生き抜く力）", bigId: "BIG-3" },
-        { id: 4, bigName: "🌳 4. 心身を健やかに育てる自然体験（個性・才能の開花）", bigId: "BIG-4" },
-        { id: 5, bigName: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）", bigId: "BIG-5" }
-    ];
+    // 階層構造（大分類 -> 中分類 -> 記事）で構築
+    const accordion = document.createElement("div");
+    accordion.className = "accordion shadow-sm";
+    accordion.id = "mainAccordion";
 
-    pillarRules.forEach(rule => {
-        const pillarId = rule.id;
-        
-        const pillarIdeas = ideasDataset.filter(item => {
-            if (!item) return false;
-            const cat = String(item.bigCatId || item.category || item.B || "").trim();
-            return cat === rule.bigId || rule.bigName.includes(cat);
-        });
+    // 大分類のループ (CATEGORY_MASTERに基づく)
+    Object.keys(CATEGORY_MASTER).forEach((bigId, bIndex) => {
+        const bigCat = CATEGORY_MASTER[bigId];
+        const bigName = bigCat.name;
 
-        const pillarSection = document.createElement("div");
-        pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
-        pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.bigName}</h5>`;
+        const bigAccordionId = `collapseBig${bIndex}`;
+        const bigItem = document.createElement("div");
+        bigItem.className = "accordion-item border-0 mb-2 shadow-sm";
+        bigItem.innerHTML = `
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigAccordionId}">
+                    ${bigName}
+                </button>
+            </h2>
+            <div id="${bigAccordionId}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+                <div class="accordion-body bg-light" id="midContainer${bIndex}"></div>
+            </div>
+        `;
+        accordion.appendChild(bigItem);
 
-        const mainIdeas = pillarIdeas.filter(item => 
-            String(item.status || "").trim() !== "元記事"
-        );
+        // 中分類のループ
+        const midContainer = bigItem.querySelector(`#midContainer${bIndex}`);
+        Object.keys(bigCat.mids).forEach((midId, mIndex) => {
+            const midName = bigCat.mids[midId];
+            
+            // この中分類に該当するアイデアをフィルタリング（名称で判定）
+            const filteredIdeas = ideasDataset.filter(item => 
+                (item.bigCatName === bigName || item.bigCatId === bigId) && 
+                (item.midCatName === midName || item.midCatId === midId)
+            );
 
-        if (mainIdeas.length === 0) {
-            pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
-        }
-
-        mainIdeas.forEach(idea => {
-            let displayStatus = String(idea.status || "単独提案").trim();
-            let badgeColor = displayStatus === "新統合" ? "bg-success" : "bg-info text-dark";
-
-            const cardHtml = `
-                <div class="card mb-2 shadow-sm border-0 cursor-pointer" onclick="showIdeaDetail(${JSON.stringify(idea).replace(/"/g, '&quot;')})">
-                    <div class="card-body p-3">
-                        <span class="badge ${badgeColor} mb-2">${displayStatus}</span>
-                        <h6 class="fw-bold text-dark mb-1">${idea.title || "無題の提案"}</h6>
-                        <p class="small text-secondary mb-0">${idea.summary || ""}</p>
+            const midAccordionId = `collapseMid${bIndex}${mIndex}`;
+            const midItem = document.createElement("div");
+            midItem.className = "accordion-item border-0 mb-1";
+            midItem.innerHTML = `
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#${midAccordionId}">
+                        ${midName} (${filteredIdeas.length}件)
+                    </button>
+                </h2>
+                <div id="${midAccordionId}" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        ${filteredIdeas.length > 0 ? filteredIdeas.map(idea => `
+                            <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : idea.status === '元記事' ? 'border-secondary' : 'border-primary'}">
+                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : idea.status === '元記事' ? 'bg-secondary text-white' : 'bg-primary text-white'} d-flex justify-content-between">
+                                    <span>${idea.status === '新統合' ? '★ ' : ''}${idea.status}</span>
+                                    <small>${idea.title}</small>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">${idea.content || idea.summary || '内容なし'}</p>
+                                    ${idea.reason ? `<p class="text-danger small mt-2">統合理由: ${idea.reason}</p>` : ''}
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-muted small">現在、このカテゴリに記事はありません。</p>'}
                     </div>
                 </div>
             `;
-            pillarSection.innerHTML += cardHtml;
+            midContainer.appendChild(midItem);
         });
-
-        if (proposalContainer) {
-            proposalContainer.appendChild(pillarSection);
-        }
     });
-}
-
-function showIdeaDetail(idea) {
-    alert(`【${idea.title || "無題"}】\n\n${idea.summary || ""}`);
+    container.appendChild(accordion);
 }
