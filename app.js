@@ -187,69 +187,68 @@ async function fetchOpinions() {
 // ==========================================
 // 4. 描画ロジック（アコーディオン式・名前表示版）
 // ==========================================
+const CATEGORY_MASTER = {
+  "BIG-1": { name: "主体的な学び", mids: { "MID-1": "子ども主導のプロジェクト学習", "MID-2": "選択制のアクティビティ", "MID-3": "デジタルを活用した自己表現", "MID-4": "その他" } },
+  "BIG-2": { name: "楽しさと好奇心", mids: { "MID-1": "五感を使う自然体験", "MID-2": "失敗を歓迎する科学遊び", "MID-3": "地域のアート・文化資源の活用", "MID-4": "その他" } },
+  "BIG-3": { name: "未来を生き抜く力", mids: { "MID-1": "非認知能力の育成", "MID-2": "多様な人々と協働する体験", "MID-3": "答えのない問いに挑む力", "MID-4": "その他" } },
+  "BIG-4": { name: "個性・才能の開花", mids: { "MID-1": "個別最適化された学習プラン", "MID-2": "多様な才能を認める評価基準", "MID-3": "特別なニーズを持つ子への支援", "MID-4": "その他" } },
+  "BIG-5": { name: "シームレス成長支援", mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" } }
+};
+
 function renderStructuredIdeas(ideasDataset) {
     const container = document.getElementById("proposal-container");
-    container.innerHTML = ""; // 初期化
+    container.innerHTML = "";
 
-    // 階層構造（大分類 -> 中分類 -> 記事）で構築
     const accordion = document.createElement("div");
     accordion.className = "accordion shadow-sm";
     accordion.id = "mainAccordion";
 
-    // 大分類のループ (CATEGORY_MASTERに基づく)
     Object.keys(CATEGORY_MASTER).forEach((bigId, bIndex) => {
         const bigCat = CATEGORY_MASTER[bigId];
         const bigName = bigCat.name;
 
-        const bigAccordionId = `collapseBig${bIndex}`;
+        // データ内の bigCatName が一致するもの、またはデータが「その他」のもの
         const bigItem = document.createElement("div");
         bigItem.className = "accordion-item border-0 mb-2 shadow-sm";
         bigItem.innerHTML = `
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${bigAccordionId}">
-                    ${bigName}
-                </button>
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBig${bIndex}">${bigName}</button>
             </h2>
-            <div id="${bigAccordionId}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+            <div id="collapseBig${bIndex}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                 <div class="accordion-body bg-light" id="midContainer${bIndex}"></div>
             </div>
         `;
         accordion.appendChild(bigItem);
 
-        // 中分類のループ
         const midContainer = bigItem.querySelector(`#midContainer${bIndex}`);
         Object.keys(bigCat.mids).forEach((midId, mIndex) => {
             const midName = bigCat.mids[midId];
             
-            // この中分類に該当するアイデアをフィルタリング（名称で判定）
-            const filteredIdeas = ideasDataset.filter(item => 
-                (item.bigCatName === bigName || item.bigCatId === bigId) && 
-                (item.midCatName === midName || item.midCatId === midId)
-            );
+            // フィルタリング: 名称が一致するもの。名前がない場合は「その他」に含める
+            const filteredIdeas = ideasDataset.filter(item => {
+                const itemBig = item.bigCatName || "その他";
+                const itemMid = item.midCatName || "その他";
+                return itemBig === bigName && itemMid === midName;
+            });
 
-            const midAccordionId = `collapseMid${bIndex}${mIndex}`;
             const midItem = document.createElement("div");
             midItem.className = "accordion-item border-0 mb-1";
             midItem.innerHTML = `
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#${midAccordionId}">
-                        ${midName} (${filteredIdeas.length}件)
-                    </button>
+                    <button class="accordion-button collapsed btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#cMid${bIndex}${mIndex}">${midName} (${filteredIdeas.length})</button>
                 </h2>
-                <div id="${midAccordionId}" class="accordion-collapse collapse">
+                <div id="cMid${bIndex}${mIndex}" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         ${filteredIdeas.length > 0 ? filteredIdeas.map(idea => `
                             <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : idea.status === '元記事' ? 'border-secondary' : 'border-primary'}">
-                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : idea.status === '元記事' ? 'bg-secondary text-white' : 'bg-primary text-white'} d-flex justify-content-between">
-                                    <span>${idea.status === '新統合' ? '★ ' : ''}${idea.status}</span>
-                                    <small>${idea.title}</small>
+                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : idea.status === '元記事' ? 'bg-secondary text-white' : 'bg-primary text-white'}">
+                                    ${idea.status === '新統合' ? '★ ' : ''}${idea.status}：${idea.title}
                                 </div>
                                 <div class="card-body">
                                     <p class="card-text">${idea.content || idea.summary || '内容なし'}</p>
-                                    ${idea.reason ? `<p class="text-danger small mt-2">統合理由: ${idea.reason}</p>` : ''}
                                 </div>
                             </div>
-                        `).join('') : '<p class="text-muted small">現在、このカテゴリに記事はありません。</p>'}
+                        `).join('') : '<p class="text-muted small">記事はありません。</p>'}
                     </div>
                 </div>
             `;
