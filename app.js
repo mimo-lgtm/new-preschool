@@ -192,62 +192,31 @@ function renderStructuredIdeas(ideasDataset) {
     if (proposalContainer) proposalContainer.innerHTML = "";
 
     const pillarRules = [
-        { 
-            id: 1, 
-            bigName: "🌱 1. 探究心を育む知育環境（主体的な学び）",
-            bigId: "BIG-1",
-            mids: { "MID-1": "子ども主導のプロジェクト学習", "MID-2": "選択制のアクティビティ", "MID-3": "デジタルを活用した自己表現", "MID-4": "その他" }
-        },
-        { 
-            id: 2, 
-            bigName: "🎨 2. 感性を磨くアートと表現（楽しさと好奇心）",
-            bigId: "BIG-2",
-            mids: { "MID-1": "五感を使う自然体験", "MID-2": "失敗を歓迎する科学遊び", "MID-3": "地域のアート・文化資源の活用", "MID-4": "その他" }
-        },
-        { 
-            id: 3, 
-            bigName: "🤝 3. 協調性を養うグループワーク（未来を生き抜く力）",
-            bigId: "BIG-3",
-            mids: { "MID-1": "非認知能力の育成", "MID-2": "多様な人々と協働する体験", "MID-3": "答えのない問いに挑む力", "MID-4": "その他" }
-        },
-        { 
-            id: 4, 
-            bigName: "🌳 4. 心身を健やかに育てる自然体験（個性・才能の開花）",
-            bigId: "BIG-4",
-            mids: { "MID-1": "個別最適化された学習プラン", "MID-2": "多様な才能を認める評価基準", "MID-3": "特別なニーズを持つ子への支援", "MID-4": "その他" }
-        },
-        { 
-            id: 5, 
-            bigName: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）",
-            bigId: "BIG-5",
-            mids: { "MID-1": "保幼小の連携強化", "MID-2": "切れ目のない相談窓口", "MID-3": "育児休業からの復職支援", "MID-4": "その他" }
-        }
+        { id: 1, bigName: "🌱 1. 探究心を育む知育環境（主体的な学び）", bigId: "BIG-1" },
+        { id: 2, bigName: "🎨 2. 感性を磨くアートと表現（楽しさと好奇心）", bigId: "BIG-2" },
+        { id: 3, bigName: "🤝 3. 協調性を養うグループワーク（未来を生き抜く力）", bigId: "BIG-3" },
+        { id: 4, bigName: "🌳 4. 心身を健やかに育てる自然体験（個性・才能の開花）", bigId: "BIG-4" },
+        { id: 5, bigName: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）", bigId: "BIG-5" }
     ];
 
     pillarRules.forEach(rule => {
         const pillarId = rule.id;
         
-        // フィルタリング
         const pillarIdeas = ideasDataset.filter(item => {
             if (!item) return false;
             const cat = String(item.bigCatId || item.category || item.B || "").trim();
-            return cat === rule.bigId || cat.includes(rule.bigName) || rule.bigName.includes(cat);
+            return cat === rule.bigId || rule.bigName.includes(cat);
         });
 
         const pillarSection = document.createElement("div");
         pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
         pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.bigName}</h5>`;
 
-        // メインアイデア
         const mainIdeas = pillarIdeas.filter(item => 
             String(item.status || "").trim() !== "元記事"
         );
 
-        const hasOriginals = pillarIdeas.some(item => 
-            String(item.status || "").trim() === "元記事"
-        );
-
-        if (mainIdeas.length === 0 && !hasOriginals) {
+        if (mainIdeas.length === 0) {
             pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
         }
 
@@ -267,55 +236,12 @@ function renderStructuredIdeas(ideasDataset) {
             pillarSection.innerHTML += cardHtml;
         });
 
-        // 元記事一覧
-        const originalIdeas = pillarIdeas.filter(item => 
-            String(item.status || "").trim() === "元記事"
-        );
-
-        if (originalIdeas.length > 0) {
-            const subAccordionId = `subCollapse-original-${pillarId}`;
-            let originalSectionHtml = `
-                <div class="mt-3">
-                    <button class="btn btn-sm btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${subAccordionId}">
-                        <span>📂 この分野の「元記事」一覧 (${originalIdeas.length}件)</span>
-                        <small class="text-muted">クリックで開閉</small>
-                    </button>
-                    <div class="collapse mt-2" id="${subAccordionId}">
-                        <div class="p-2 border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
-            `;
-
-            originalIdeas.forEach(orig => {
-                let reasonText = orig.reason || orig.mergedTo || '類似した投稿のため、新統合記事へ集約されました。';
-                originalSectionHtml += `
-                    <div class="p-2 mb-2 border-bottom last-border-0 bg-light-subtle rounded">
-                        <span class="badge bg-secondary mb-1">元記事</span>
-                        <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title || "無題の提案"}</h6>
-                        <p class="text-danger small mb-1" style="font-size: 0.75rem; font-weight: 500;">🔄 統合理由: ${reasonText}</p>
-                        <p class="small text-muted mb-0">${orig.summary || ""}</p>
-                    </div>
-                `;
-            });
-
-            originalSectionHtml += `</div></div></div>`;
-            pillarSection.innerHTML += originalSectionHtml;
-        }
-
         if (proposalContainer) {
             proposalContainer.appendChild(pillarSection);
         }
     });
-
-    // 地図の空欄対応
-    for (let i = 1; i <= 5; i++) {
-        const mapPillar = document.getElementById(`map-pillar-${i}`);
-        if (mapPillar && mapPillar.innerHTML.trim() === "") {
-            mapPillar.innerHTML = `<p class="text-muted small mb-0">現在、この分野の「新統合」アイデアはありません。</p>`;
-        }
-    }
 }
 
-// 詳細表示
 function showIdeaDetail(idea) {
-    const detail = `【${idea.title || "無題の提案"}】\n\n${idea.summary || ""}\n\n${idea.content ? "【原文】\n" + idea.content : ""}`;
-    alert(detail);
+    alert(`【${idea.title || "無題"}】\n\n${idea.summary || ""}`);
 }
