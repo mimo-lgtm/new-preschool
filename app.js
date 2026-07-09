@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✨ 最優先でデータを読み込む
     fetchOpinions();
 
-    // 📄 AI分析（壁打ち）ボタンのイベント
+       // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -54,24 +54,10 @@ document.addEventListener("DOMContentLoaded", function () {
             btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
 
             try {
-                const res = await // 【修正前】
-fetch(GAS_URL,{ 
-    method: "POST", // ここにも { が足りない可能性が高いです
-
-// 【修正後】
-fetch(GAS_URL,{ 
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        action: "submit",
-        content: rawText,
-        title: currentAiResult["推奨タイトル"] || "無題の提案",
-        summary: currentAiResult["要約200"] || "",
-        bigCatName: globalBigCat, 
-        midCatName: globalMidCat
-    })
-
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ action: "analyze", content: contentValue })
                 });
                 const data = await res.json();
 
