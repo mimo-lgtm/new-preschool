@@ -211,54 +211,97 @@ async function fetchOpinions() {
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
 function renderStructuredIdeas(opinions){
-   alert(JSON.stringify(opinions, null, 2));
 
     const container=document.getElementById("proposal-container");
     if(!container) return;
 
-    container.innerHTML =
-"<pre style='white-space:pre-wrap;font-size:12px'>" +
-JSON.stringify(tree, null, 2) +
-"</pre>";
-return;
-    // -----------------------------
-    // 大分類
-    // -----------------------------
+    container.innerHTML="";
 
-    const tree={};
+    //==========================
+    // 固定ツリー
+    //==========================
 
-    opinions.forEach(op=>{
+    const CATEGORY={
 
-        const big=op.bigCatName||"その他";
-        const mid=op.midCatName||"その他";
+        "探究心を育む知育環境（主体的な学び）":[
+            "子ども主導のプロジェクト学習",
+            "選択制のアクティビティ",
+            "デジタルを活用した自己表現",
+            "その他"
+        ],
 
-        if(!tree[big]) tree[big]={};
+        "感性を磨くアートと表現（楽しさと好奇心）":[
+            "五感を使う自然体験",
+            "失敗を歓迎する科学遊び",
+            "地域のアート・文化資源の活用",
+            "その他"
+        ],
 
-        if(!tree[big][mid]) tree[big][mid]=[];
+        "協調性を養うグループワーク（未来を生き抜く力）":[
+            "非認知能力の育成",
+            "多様な人々と協働する体験",
+            "答えのない問いに挑む力",
+            "その他"
+        ],
 
-        tree[big][mid].push(op);
+        "心身を健やかに育てる自然体験（個性・才能の開花）":[
+            "個別最適化された学習プラン",
+            "多様な才能を認める評価基準",
+            "特別なニーズを持つ子への支援",
+            "その他"
+        ],
 
-    });
+        "地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）":[
+            "保幼小の連携強化",
+            "切れ目のない相談窓口",
+            "育児休業からの復職支援",
+            "その他"
+        ]
+
+    };
+
+    //==========================
+    // AI名称 → 固定ツリー名称変換
+    //==========================
+
+    const BIGMAP={
+
+        "主体的な学び":"探究心を育む知育環境（主体的な学び）",
+
+        "楽しさと好奇心":"感性を磨くアートと表現（楽しさと好奇心）",
+
+        "未来を生き抜く力":"協調性を養うグループワーク（未来を生き抜く力）",
+
+        "個性・才能の開花":"心身を健やかに育てる自然体験（個性・才能の開花）",
+
+        "シームレス成長支援":"地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）"
+
+    };
+
+    //==========================
+    // HTML作成
+    //==========================
 
     let html="";
 
-    Object.keys(tree).forEach((big,b)=>{
+    let bigIndex=0;
+
+    Object.keys(CATEGORY).forEach(big=>{
 
         html+=`
-
-<div class="accordion mb-3" id="big${b}">
+<div class="accordion mb-3">
 
 <div class="accordion-item">
 
 <h2 class="accordion-header">
 
-<button class="accordion-button collapsed fw-bold"
+<button class="accordion-button collapsed"
 
 type="button"
 
 data-bs-toggle="collapse"
 
-data-bs-target="#bigBody${b}">
+data-bs-target="#big${bigIndex}">
 
 🌳 ${big}
 
@@ -266,18 +309,18 @@ data-bs-target="#bigBody${b}">
 
 </h2>
 
-<div id="bigBody${b}"
+<div id="big${bigIndex}"
 
 class="accordion-collapse collapse">
 
 <div class="accordion-body">
-
 `;
 
-        Object.keys(tree[big]).forEach((mid,m)=>{
+        let midIndex=0;
+
+        CATEGORY[big].forEach(mid=>{
 
             html+=`
-
 <div class="accordion mb-2">
 
 <div class="accordion-item">
@@ -290,7 +333,7 @@ type="button"
 
 data-bs-toggle="collapse"
 
-data-bs-target="#mid${b}_${m}">
+data-bs-target="#mid${bigIndex}_${midIndex}">
 
 📂 ${mid}
 
@@ -298,15 +341,22 @@ data-bs-target="#mid${b}_${m}">
 
 </h2>
 
-<div id="mid${b}_${m}"
+<div id="mid${bigIndex}_${midIndex}"
 
 class="accordion-collapse collapse">
 
 <div class="accordion-body">
-
 `;
 
-            tree[big][mid].forEach((post,p)=>{
+            opinions
+            .filter(op=>{
+
+                const bigName=BIGMAP[op.bigCatName]||op.bigCatName;
+
+                return bigName===big && op.midCatName===mid;
+
+            })
+            .forEach((post,p)=>{
 
                 html+=`
 
@@ -316,15 +366,11 @@ class="accordion-collapse collapse">
 
 <h2 class="accordion-header">
 
-<button
-
-class="accordion-button collapsed"
-
-type="button"
+<button class="accordion-button collapsed"
 
 data-bs-toggle="collapse"
 
-data-bs-target="#post${b}_${m}_${p}">
+data-bs-target="#post${bigIndex}_${midIndex}_${p}">
 
 📝 ${post.title}
 
@@ -332,7 +378,7 @@ data-bs-target="#post${b}_${m}_${p}">
 
 </h2>
 
-<div id="post${b}_${m}_${p}"
+<div id="post${bigIndex}_${midIndex}_${p}"
 
 class="accordion-collapse collapse">
 
@@ -364,6 +410,8 @@ ${post.summary}
 
 `;
 
+            midIndex++;
+
         });
 
         html+=`
@@ -377,6 +425,8 @@ ${post.summary}
 </div>
 
 `;
+
+        bigIndex++;
 
     });
 
