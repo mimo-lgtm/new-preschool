@@ -99,29 +99,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📤 提案箱へ正式投稿するボタンのイベント
         // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
 
-            const bigCat = currentAiResult["大分類"] || currentAiResult.bigCatId || "その他";
-            const midCat = currentAiResult["中分類"] || currentAiResult.midCatId || "その他";
-            const smallCat = currentAiResult["小分類"] || "";
+            const bigCat = currentAiResult["大分類"] || "その他";
+            const midCat = currentAiResult["中分類"] || "その他";
 
-            // 手動分類選択（HTMLのselect）
-            // カテゴリの取得（既存の処理）
-            // 削除の代わりに、AIの判定結果（bigCat, midCat）をそのまま使用する
-// これにより、手動選択のロジックを完全に排除します
-const finalBigCat = bigCat; // AIが判定した大分類名称
-const finalMidCat = midCat; // AIが判定した中分類名称
-            // 投稿の確認ダイアログの生成と判定
-           // 投稿の確認ダイアログ（名称のみを使用）
-const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
-
-if (!confirm(message)) {
-    return; // キャンセル
-}
+            if (!confirm(`正式に提案箱へ投稿しますか？\n（大分類「${bigCat}」＞ 中分類「${midCat}」へ格納されます）`)) return;
 
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
@@ -133,18 +119,15 @@ if (!confirm(message)) {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    // 修正対象: 投稿時の body 送信部分
-// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
-body: JSON.stringify({
-    action: "submit",
-    content: rawText,
-    title: currentAiResult["推奨タイトル"] || "無題の提案",
-    summary: currentAiResult["要約200"] || "",
-    // 【強制上書き】AIの結果がない場合でも「その他」とする
-    bigCatName: currentAiResult["大分類"] || "その他",
-    midCatName: currentAiResult["中分類"] || "その他",
-    aiResult: currentAiResult
-})
+                    body: JSON.stringify({
+                        action: "submit",
+                        content: rawText,
+                        title: currentAiResult["推奨タイトル"] || "無題の提案",
+                        summary: currentAiResult["要約200"] || "",
+                        bigCatName: bigCat,
+                        midCatName: midCat,
+                        aiResult: currentAiResult
+                    })
                 });
                 const data = await res.json();
 
@@ -171,7 +154,6 @@ body: JSON.stringify({
             }
         });
     }
-});
 
 // ==========================================
 // 3. データ取得・バックエンド連携
