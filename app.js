@@ -120,13 +120,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     // 【修正】body: JSON.stringify({...}) の中を以下にする
+// 【ここが投稿用のfetchです】
 body: JSON.stringify({
     action: "submit",
     content: rawText,
     title: currentAiResult["推奨タイトル"] || "無題の提案",
     summary: currentAiResult["要約200"] || "",
-    bigCatName: currentAiResult["大分類"] || "その他", // 記号ではなく直接日本語を取得
-    midCatName: currentAiResult["中分類"] || "その他"
+    bigCatName: bigCat, // ここをbigCatに書き換える
+    midCatName: midCat  // ここをmidCatに書き換える
 })
                 });
                 const data = await res.json();
