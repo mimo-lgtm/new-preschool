@@ -199,65 +199,37 @@ async function fetchOpinions() {
 // 名称だけで構成された構造定義（IDは含みません）
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
-function renderStructuredIdeas(ideasDataset) {
-    const container = document.getElementById("proposal-container");
-    container.innerHTML = "";
+function renderStructuredIdeas(opinions) {
+    const container = document.getElementById("ideaContainer");
+    if (!container) return; // 念のための安全策
+    container.innerHTML = ""; 
 
-    const accordion = document.createElement("div");
-    accordion.className = "accordion shadow-sm";
-    accordion.id = "mainAccordion";
-
-    // CATEGORY_STRUCTURE を直接回す（IDは一切不要）
-    Object.entries(CATEGORY_STRUCTURE).forEach(([bigName, midNames], bIndex) => {
-        const bigId = `big${bIndex}`;
-        const bigItem = document.createElement("div");
-        bigItem.className = "accordion-item border-0 mb-3";
-        bigItem.innerHTML = `
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed fw-bold fs-4 bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#${bigId}">
-                    ${bigName}
-                </button>
-            </h2>
-            <div id="${bigId}" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
-                <div class="accordion-body bg-white" id="midContainer${bIndex}"></div>
-            </div>
-        `;
-        accordion.appendChild(bigItem);
-
-        const midContainer = bigItem.querySelector(`#midContainer${bIndex}`);
-        midNames.forEach((midName, mIndex) => {
-            // 名称一致でフィルタリング
-            const filtered = ideasDataset.filter(i => i.bigCatName === bigName && i.midCatName === midName);
-            
-            // 並び替え：新統合(status === '新統合') を一番上にする
-            filtered.sort((a, b) => (b.status === '新統合') - (a.status === '新統合'));
-
-            const midId = `mid${bIndex}${mIndex}`;
-            const midItem = document.createElement("div");
-            midItem.className = "accordion-item border-0 mb-2";
-            midItem.innerHTML = `
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#${midId}">
-                        ${midName} (${filtered.length})
-                    </button>
-                </h2>
-                <div id="${midId}" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        ${filtered.map(idea => `
-                            <div class="card mb-2 ${idea.status === '新統合' ? 'border-success' : 'border-primary'}">
-                                <div class="card-header ${idea.status === '新統合' ? 'bg-success text-white' : 'bg-primary text-white'}">
-                                    ${idea.status === '新統合' ? '★ ' : ''}${idea.status}：${idea.title}
-                                </div>
-                                <div class="card-body">
-                                    <p class="card-text">${idea.content || idea.summary}</p>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            midContainer.appendChild(midItem);
-        });
+    // 1. 新統合・単独提案をメイン表示
+    const main = opinions.filter(o => o.status !== "元記事");
+    main.forEach(o => {
+        const isMerged = (o.status === "新統合");
+        const cardClass = isMerged ? "border-success" : "border-primary";
+        const headerClass = isMerged ? "bg-success" : "bg-primary";
+        const label = isMerged ? "★ 新統合" : "📄 単独提案";
+        
+        container.innerHTML += `
+            <div class="card mb-3 ${cardClass}">
+                <div class="card-header ${headerClass} text-white">${label} : ${o.title}</div>
+                <div class="card-body">${o.content || o.summary}</div>
+            </div>`;
     });
-    container.appendChild(accordion);
+
+    // 2. 元記事を「格納」するエリア（ここが追加分です）
+    const origins = opinions.filter(o => o.status === "元記事");
+    if (origins.length > 0) {
+        container.innerHTML += `
+            <div class="mt-4">
+                <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#originList">
+                    🔗 統合済み元記事 (${origins.length}件)
+                </button>
+                <div id="originList" class="collapse mt-2">
+                    ${origins.map(o => `<div class="card mb-1 text-muted border-secondary"><div class="card-body py-1 small">🔗 ${o.title}</div></div>`).join('')}
+                </div>
+            </div>`;
+    }
 }
