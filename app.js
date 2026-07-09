@@ -120,14 +120,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify({
-                        action: "submit",
-                        content: rawText,
-                        title: currentAiResult["推奨タイトル"] || "無題の提案",
-                        summary: currentAiResult["要約200"] || "",
-                        bigCatName: bigCat,
-                        midCatName: midCat,
-                        aiResult: currentAiResult
-                    })
+    action: "submit",
+    content: rawText,
+    title: currentAiResult["推奨タイトル"] || "無題の提案",
+    summary: currentAiResult["要約200"] || "",
+    bigCatName: currentAiResult["大分類"] || currentAiResult.bigCatId || "その他",
+    midCatName: currentAiResult["中分類"] || currentAiResult.midCatId || "その他",
+    bigCatId: currentAiResult.bigCatId || currentAiResult["大分類"] || "BIG-5",
+    midCatId: currentAiResult.midCatId || currentAiResult["中分類"] || "MID-4",
+    aiResult: currentAiResult
+})
                 });
                 const data = await res.json();
 
