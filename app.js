@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 設定・定数・グローバル変数定義。
+// 1. 設定・定数・グローバル変数定義
 // ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxmM8xb0WjGw32yLSVacv30nz2y1LabmGu0aKfFa9DBPRJUw6R_U9Q6odT5HA1A-t2I/exec";
 
