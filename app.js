@@ -216,7 +216,7 @@ function renderStructuredIdeas(opinions){
     if(!container) return;
 
     container.innerHTML="";
-
+　　alert(JSON.stringify(opinions[0], null, 2));
     // -----------------------------
     // 大分類
     // -----------------------------
