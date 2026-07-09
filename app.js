@@ -64,3 +64,61 @@ async function fetchOpinions() {
 function renderStructuredIdeas(ideasDataset) {
     console.log("描画中:", ideasDataset.length, "件");
 }
+// 投稿機能
+if (btnSubmitToBox) {
+    btnSubmitToBox.addEventListener("click", async function () {
+        if (!currentAiResult) return alert("AI分析を先に行ってください。");
+
+        const bigCat = currentAiResult["大分類"] || "その他";
+        const midCat = currentAiResult["中分類"] || "その他";
+
+        if (!confirm(`投稿しますか？\n（${bigCat} > ${midCat}）`)) return;
+
+        const rawText = document.getElementById("content").value.trim();
+
+        try {
+            const res = await fetch(GAS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    action: "submit",
+                    content: rawText,
+                    title: currentAiResult["推奨タイトル"] || "無題の提案",
+                    summary: currentAiResult["要約200"] || "",
+                    bigCatName: bigCat,
+                    midCatName: midCat,
+                    aiResult: currentAiResult
+                })
+            });
+            const data = await res.json();
+
+            if (data.status === "success") {
+                alert("投稿完了！");
+                document.getElementById("content").value = "";
+                fetchOpinions();
+            } else {
+                alert("投稿エラー: " + data.message);
+            }
+        } catch (err) {
+            alert("送信エラー");
+        }
+    });
+}
+
+// 提案箱の表示
+function renderStructuredIdeas(ideasDataset) {
+    const container = document.getElementById("proposal-container");
+    if (!container) return;
+    container.innerHTML = "<h5>提案箱</h5>";
+
+    ideasDataset.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "card mb-2 p-3";
+        div.innerHTML = `
+            <strong>${item.title || "無題"}</strong><br>
+            <small>${item.bigCatName || item.category || "その他"}</small><br>
+            <small class="text-muted">${item.summary || ""}</small>
+        `;
+        container.appendChild(div);
+    });
+}
