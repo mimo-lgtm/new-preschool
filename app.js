@@ -71,7 +71,7 @@ fetch(GAS_URL,{
         bigCatName: globalBigCat, 
         midCatName: globalMidCat
     })
-});
+
                 });
                 const data = await res.json();
 
