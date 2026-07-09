@@ -199,38 +199,172 @@ async function fetchOpinions() {
 // 名称だけで構成された構造定義（IDは含みません）
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
-function renderStructuredIdeas(opinions) {
-    const container = document.getElementById("proposal-container");
-    if (!container) return; // 念のための安全策
-    container.innerHTML = ""; 
+function renderStructuredIdeas(opinions){
 
-    // 1. 新統合・単独提案をメイン表示
-    const main = opinions.filter(o => o.status !== "元記事");
-    main.forEach(o => {
-        const isMerged = (o.status === "新統合");
-        const cardClass = isMerged ? "border-success" : "border-primary";
-        const headerClass = isMerged ? "bg-success" : "bg-primary";
-        const label = isMerged ? "★ 新統合" : "📄 単独提案";
-        
-        container.innerHTML += `
-            <div class="card mb-3 ${cardClass}">
-                <div class="card-header ${headerClass} text-white">${label} : ${o.title}</div>
-                <div class="card-body">${o.content || o.summary}</div>
-            </div>`;
+    const container=document.getElementById("proposal-container");
+    if(!container) return;
+
+    container.innerHTML="";
+
+    // -----------------------------
+    // 大分類
+    // -----------------------------
+
+    const tree={};
+
+    opinions.forEach(op=>{
+
+        const big=op.bigCatName||"その他";
+        const mid=op.midCatName||"その他";
+
+        if(!tree[big]) tree[big]={};
+
+        if(!tree[big][mid]) tree[big][mid]=[];
+
+        tree[big][mid].push(op);
+
     });
 
-    // 2. 元記事を「格納」するエリア（ここが追加分です）
-    const origins = opinions.filter(o => o.status === "元記事");
-    if (origins.length > 0) {
-        container.innerHTML += `
-            <div class="mt-4">
-                <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#originList">
-                    🔗 統合済み元記事 (${origins.length}件)
-                </button>
-                <div id="originList" class="collapse mt-2">
-                    ${origins.map(o => `<div class="card mb-1 text-muted border-secondary"><div class="card-body py-1 small">🔗 ${o.title}</div></div>`).join('')}
-                </div>
-            </div>`;
-    }
-}
+    let html="";
 
+    Object.keys(tree).forEach((big,b)=>{
+
+        html+=`
+
+<div class="accordion mb-3" id="big${b}">
+
+<div class="accordion-item">
+
+<h2 class="accordion-header">
+
+<button class="accordion-button collapsed fw-bold"
+
+type="button"
+
+data-bs-toggle="collapse"
+
+data-bs-target="#bigBody${b}">
+
+🌳 ${big}
+
+</button>
+
+</h2>
+
+<div id="bigBody${b}"
+
+class="accordion-collapse collapse">
+
+<div class="accordion-body">
+
+`;
+
+        Object.keys(tree[big]).forEach((mid,m)=>{
+
+            html+=`
+
+<div class="accordion mb-2">
+
+<div class="accordion-item">
+
+<h2 class="accordion-header">
+
+<button class="accordion-button collapsed"
+
+type="button"
+
+data-bs-toggle="collapse"
+
+data-bs-target="#mid${b}_${m}">
+
+📂 ${mid}
+
+</button>
+
+</h2>
+
+<div id="mid${b}_${m}"
+
+class="accordion-collapse collapse">
+
+<div class="accordion-body">
+
+`;
+
+            tree[big][mid].forEach((post,p)=>{
+
+                html+=`
+
+<div class="accordion mb-2">
+
+<div class="accordion-item">
+
+<h2 class="accordion-header">
+
+<button
+
+class="accordion-button collapsed"
+
+type="button"
+
+data-bs-toggle="collapse"
+
+data-bs-target="#post${b}_${m}_${p}">
+
+📝 ${post.title}
+
+</button>
+
+</h2>
+
+<div id="post${b}_${m}_${p}"
+
+class="accordion-collapse collapse">
+
+<div class="accordion-body">
+
+${post.summary}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+            });
+
+            html+=`
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+        });
+
+        html+=`
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+    });
+
+    container.innerHTML=html;
+
+}
