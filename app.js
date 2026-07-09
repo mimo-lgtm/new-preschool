@@ -118,7 +118,37 @@ const finalMidCat = midCat; // AIが判定した中分類名称
             // 投稿の確認ダイアログの生成と判定
            // 投稿の確認ダイアログ（名称のみを使用）
 const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
+// （既存のコードはそのまま残す）
 
+// ▼ ここから追記・修正部分
+    // 送信用のデータ作成（必要に応じて変数は既存のものを使ってください）
+    const payload = {
+        action: "submit",
+        title: currentAiResult["推奨タイトル"], // 既存の変数
+        summary: currentAiResult["要約"],       // 既存の変数
+        bigCat: "主体的な学び",                  // ここは画面で選択した値などを入れてください
+        midCat: "その他"                        // ここは画面で選択した値などを入れてください
+    };
+
+    try {
+        const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        if (data.status === "success") {
+            alert("提案箱に保存しました！");
+            // 成功後にリストを再読み込み
+            fetchOpinions(); 
+        } else {
+            alert("保存に失敗しました: " + data.message);
+        }
+    } catch (e) {
+        console.error("保存エラー:", e);
+    }
+// ▲ ここまでを追記する
 if (!confirm(message)) {
     return; // キャンセル
 }
@@ -234,3 +264,35 @@ function renderStructuredIdeas(opinions) {
     }
 }
 
+function renderStructuredIdeas(dataList) {
+    const container = document.getElementById("proposal-container");
+    container.innerHTML = "";
+    
+    // 大分類 > 中分類 でグループ化
+    const structure = {};
+    dataList.forEach(row => {
+        const big = row[1] || "未分類"; // B列
+        const mid = row[6] || "未分類"; // G列
+        if (!structure[big]) structure[big] = {};
+        if (!structure[big][mid]) structure[big][mid] = [];
+        structure[big][mid].push(row);
+    });
+
+    // アコーディオン生成
+    Object.keys(structure).forEach(big => {
+        const bigDetails = document.createElement("details");
+        bigDetails.className = "mb-2 border p-2";
+        bigDetails.innerHTML = `<summary class="fw-bold">${big}</summary>`;
+        
+        Object.keys(structure[big]).forEach(mid => {
+            const midDetails = document.createElement("details");
+            midDetails.className = "ms-3";
+            midDetails.innerHTML = `<summary class="text-primary">${mid}</summary>`;
+            structure[big][mid].forEach(item => {
+                midDetails.innerHTML += `<div class="ms-3 small border-bottom">${item[2]}</div>`;
+            });
+            bigDetails.appendChild(midDetails);
+        });
+        container.appendChild(bigDetails);
+    });
+}
