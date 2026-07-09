@@ -195,3 +195,4 @@ function renderStructuredIdeas(ideasDataset) {
 function showIdeaDetail(idea) {
     alert(`【${idea.title || "無題の提案"}】\n\n${idea.summary || ""}`);
 }
+}); // ← この行を追加
