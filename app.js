@@ -14,19 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
             const contentValue = document.getElementById("content").value.trim();
             if (!contentValue) return alert("内容を入力してください。");
 
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "analyze", content: contentValue })
-            });
-            const data = await res.json();
+            // app.js の btnAiAnalysis 内の fetch 部分を以下に置換
+const res = await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, // JSON指定を明示
+    body: JSON.stringify({ action: "analyze", content: contentValue })
+});
+const data = await res.json();
 
-            if (data.status === "success") {
-                currentAiResult = data.result;
-                alert("AI分析完了: " + currentAiResult["推奨タイトル"]);
-            }
-        });
-    }
+if (data.status === "success") {
+    currentAiResult = data.result;
+    // 「案内」が出るだけなら、ここが呼ばれていない可能性があります
+    console.log("成功データ:", data.result); 
+    alert("AI分析完了: " + (currentAiResult["推奨タイトル"] || "結果を取得しました"));
+}
 
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
