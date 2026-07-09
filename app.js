@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             try {
                 const res = await // 【修正前】
-fetch(GAS_URL, 
+fetch(GAS_URL,{ 
     method: "POST", // ここにも { が足りない可能性が高いです
 
 // 【修正後】
