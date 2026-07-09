@@ -200,7 +200,7 @@ async function fetchOpinions() {
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
 function renderStructuredIdeas(opinions) {
-    const container = document.getElementById("ideaContainer");
+    const container = document.getElementById("proposal-container");
     if (!container) return; // 念のための安全策
     container.innerHTML = ""; 
 
