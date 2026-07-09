@@ -59,7 +59,7 @@ fetch(GAS_URL,{
     method: "POST", // ここにも { が足りない可能性が高いです
 
 // 【修正後】
-fetch(GAS_URL, {
+fetch(GAS_URL, 
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
