@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     body: JSON.stringify({ action: "analyze", content: contentValue })
                 });
                 const data = await res.json();
-
+　　　　　　　　　alert(JSON.stringify(data, null, 2));
                 if (data.status === "success") {
                     currentAiResult = data.result;
                     const bigCat = currentAiResult["大分類"] || "その他";
