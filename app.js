@@ -160,22 +160,22 @@ if (!confirm(message)) {
             btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
 
             try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    // 修正対象: 投稿時の body 送信部分
-// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
-body: JSON.stringify({
-    action: "submit",
-    content: rawText,
-    title: currentAiResult["推奨タイトル"] || "無題の提案",
-    summary: currentAiResult["要約200"] || "",
-    // 【強制上書き】AIの結果がない場合でも「その他」とする
-    bigCatName: currentAiResult["大分類"] || "その他",
-    midCatName: currentAiResult["中分類"] || "その他",
-    aiResult: currentAiResult
-})
-                });
+                // 修正箇所ここから
+const res = await fetch(GAS_URL, {
+    method: "POST",
+    mode: "cors", // ★追加：CORS許可通信
+    headers: { "Content-Type": "application/json" }, // ★変更：text/plain から変更
+    body: JSON.stringify({
+        action: "submit",
+        content: rawText,
+        title: currentAiResult["推奨タイトル"] || "無題の提案",
+        summary: currentAiResult["要約200"] || "",
+        bigCatName: currentAiResult["大分類"] || "その他",
+        midCatName: currentAiResult["中分類"] || "その他",
+        aiResult: currentAiResult
+    })
+});
+// 修正箇所ここまで
                 const data = await res.json();
 
                 if (data.status === "success") {
