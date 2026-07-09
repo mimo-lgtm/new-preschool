@@ -119,16 +119,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({
+                    // 【修正】body: JSON.stringify({...}) の中を以下にする
+body: JSON.stringify({
     action: "submit",
     content: rawText,
     title: currentAiResult["推奨タイトル"] || "無題の提案",
     summary: currentAiResult["要約200"] || "",
-　　bigCatName: currentAiResult["大分類"] || "その他",
-    midCatName: currentAiResult["中分類"] || "その他",
-    bigCatId: currentAiResult.bigCatId || currentAiResult["大分類"] || "BIG-5",
-    midCatId: currentAiResult.midCatId || currentAiResult["中分類"] || "MID-4",
-    aiResult: currentAiResult
+    bigCatName: currentAiResult["大分類"] || "その他", // 記号ではなく直接日本語を取得
+    midCatName: currentAiResult["中分類"] || "その他"
 })
                 });
                 const data = await res.json();
