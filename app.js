@@ -176,42 +176,102 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 描画ロジック（アコーディオン式・名前表示版）
+// 4. 描画ロジック（アコーディオン式・名称変換版）
 // ==========================================
-// 名称だけで構成された構造定義（IDは含みません）
+function renderStructuredIdeas(ideasDataset) {
+    const proposalContainer = document.getElementById("proposal-container");
+    if (proposalContainer) proposalContainer.innerHTML = "";
 
-// 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
-function renderStructuredIdeas(opinions) {
-    const container = document.getElementById("ideaContainer");
-    if (!container) return; // 念のための安全策
-    container.innerHTML = ""; 
+    const pillarRules = [
+        { id: 1, bigName: "🌱 1. 探究心を育む知育環境（主体的な学び）", bigId: "BIG-1" },
+        { id: 2, bigName: "🎨 2. 感性を磨くアートと表現（楽しさと好奇心）", bigId: "BIG-2" },
+        { id: 3, bigName: "🤝 3. 協調性を養うグループワーク（未来を生き抜く力）", bigId: "BIG-3" },
+        { id: 4, bigName: "🌳 4. 心身を健やかに育てる自然体験（個性・才能の開花）", bigId: "BIG-4" },
+        { id: 5, bigName: "🌐 5. 地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）", bigId: "BIG-5" }
+    ];
 
-    // 1. 新統合・単独提案をメイン表示
-    const main = opinions.filter(o => o.status !== "元記事");
-    main.forEach(o => {
-        const isMerged = (o.status === "新統合");
-        const cardClass = isMerged ? "border-success" : "border-primary";
-        const headerClass = isMerged ? "bg-success" : "bg-primary";
-        const label = isMerged ? "★ 新統合" : "📄 単独提案";
+    pillarRules.forEach(rule => {
+        const pillarId = rule.id;
         
-        container.innerHTML += `
-            <div class="card mb-3 ${cardClass}">
-                <div class="card-header ${headerClass} text-white">${label} : ${o.title}</div>
-                <div class="card-body">${o.content || o.summary}</div>
-            </div>`;
-    });
+        const pillarIdeas = ideasDataset.filter(item => {
+            if (!item) return false;
+            const cat = String(item.bigCatId || item.category || item.B || "").trim();
+            return cat === rule.bigId || rule.bigName.includes(cat);
+        });
 
-    // 2. 元記事を「格納」するエリア（ここが追加分です）
-    const origins = opinions.filter(o => o.status === "元記事");
-    if (origins.length > 0) {
-        container.innerHTML += `
-            <div class="mt-4">
-                <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#originList">
-                    🔗 統合済み元記事 (${origins.length}件)
-                </button>
-                <div id="originList" class="collapse mt-2">
-                    ${origins.map(o => `<div class="card mb-1 text-muted border-secondary"><div class="card-body py-1 small">🔗 ${o.title}</div></div>`).join('')}
+        const pillarSection = document.createElement("div");
+        pillarSection.className = "mb-4 p-3 border rounded bg-light shadow-sm";
+        pillarSection.innerHTML = `<h5 class="fw-bold border-bottom pb-2 text-dark">${rule.bigName}</h5>`;
+
+        // メインアイデア
+        const mainIdeas = pillarIdeas.filter(item => 
+            String(item.status || "").trim() !== "元記事"
+        );
+
+        const hasOriginals = pillarIdeas.some(item => 
+            String(item.status || "").trim() === "元記事"
+        );
+
+        if (mainIdeas.length === 0 && !hasOriginals) {
+            pillarSection.innerHTML += `<p class="text-muted small">投稿されたアイデアはまだありません。</p>`;
+        }
+
+        mainIdeas.forEach(idea => {
+            let displayStatus = String(idea.status || "単独提案").trim();
+            let badgeColor = displayStatus === "新統合" ? "bg-success" : "bg-info text-dark";
+
+            const cardHtml = `
+                <div class="card mb-2 shadow-sm border-0 cursor-pointer" onclick="showIdeaDetail(${JSON.stringify(idea).replace(/"/g, '&quot;')})">
+                    <div class="card-body p-3">
+                        <span class="badge ${badgeColor} mb-2">${displayStatus}</span>
+                        <h6 class="fw-bold text-dark mb-1">${idea.title || "無題の提案"}</h6>
+                        <p class="small text-secondary mb-0">${idea.summary || ""}</p>
+                    </div>
                 </div>
-            </div>`;
-    }
+            `;
+            pillarSection.innerHTML += cardHtml;
+        });
+
+        // 元記事一覧（アコーディオン）← 残しています
+        const originalIdeas = pillarIdeas.filter(item => 
+            String(item.status || "").trim() === "元記事"
+        );
+
+        if (originalIdeas.length > 0) {
+            const subAccordionId = `subCollapse-original-${pillarId}`;
+            let originalSectionHtml = `
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${subAccordionId}">
+                        <span>📂 この分野の「元記事」一覧 (${originalIdeas.length}件)</span>
+                        <small class="text-muted">クリックで開閉</small>
+                    </button>
+                    <div class="collapse mt-2" id="${subAccordionId}">
+                        <div class="p-2 border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
+            `;
+
+            originalIdeas.forEach(orig => {
+                let reasonText = orig.reason || orig.mergedTo || '類似した投稿のため、新統合記事へ集約されました。';
+                originalSectionHtml += `
+                    <div class="p-2 mb-2 border-bottom last-border-0 bg-light-subtle rounded">
+                        <span class="badge bg-secondary mb-1">元記事</span>
+                        <h6 class="fw-bold text-muted mb-1" style="text-decoration: line-through;">${orig.title || "無題の提案"}</h6>
+                        <p class="text-danger small mb-1" style="font-size: 0.75rem; font-weight: 500;">🔄 統合理由: ${reasonText}</p>
+                        <p class="small text-muted mb-0">${orig.summary || ""}</p>
+                    </div>
+                `;
+            });
+
+            originalSectionHtml += `</div></div></div>`;
+            pillarSection.innerHTML += originalSectionHtml;
+        }
+
+        if (proposalContainer) {
+            proposalContainer.appendChild(pillarSection);
+        }
+    });
+}
+
+function showIdeaDetail(idea) {
+    const detail = `【${idea.title || "無題の提案"}】\n\n${idea.summary || ""}\n\n${idea.content ? "【原文】\n" + idea.content : ""}`;
+    alert(detail);
 }
