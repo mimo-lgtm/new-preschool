@@ -54,10 +54,24 @@ document.addEventListener("DOMContentLoaded", function () {
             btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
 
             try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({ action: "analyze", content: contentValue })
+                const res = await // 【修正前】
+fetch(GAS_URL, 
+    method: "POST", // ここにも { が足りない可能性が高いです
+
+// 【修正後】
+fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        action: "submit",
+        content: rawText,
+        title: currentAiResult["推奨タイトル"] || "無題の提案",
+        summary: currentAiResult["要約200"] || "",
+        bigCatName: globalBigCat, 
+        midCatName: globalMidCat
+    })
+});
                 });
                 const data = await res.json();
 
@@ -116,20 +130,14 @@ document.addEventListener("DOMContentLoaded", function () {
             btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
 
             try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    // 【修正】body: JSON.stringify({...}) の中を以下にする
-// 【ここが投稿用のfetchです】
-body: JSON.stringify({
-    action: "submit",
-    content: rawText,
-    title: currentAiResult["推奨タイトル"] || "無題の提案",
-    summary: currentAiResult["要約200"] || "",
-    bigCatName: bigCat, // ここをbigCatに書き換える
-    midCatName: midCat  // ここをmidCatに書き換える
-})
-                });
+    const res = await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, // "text/plain" から変更
+    body: JSON.stringify({ 
+        action: "analyze", 
+        content: contentValue 
+    })
+});
                 const data = await res.json();
 
                 if (data.status === "success") {
