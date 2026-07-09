@@ -177,20 +177,31 @@ body: JSON.stringify({
 // 3. データ取得・バックエンド連携
 // ==========================================
 async function fetchOpinions() {
+
     try {
+
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        
-        console.log("取得したデータ:", data); // デバッグ用
 
-        allOpinions = Array.isArray(data) ? data : (data?.opinions || data || []);
-        
-        console.log("allOpinionsに格納:", allOpinions.length, "件");
-        
+        console.log(data);
+
+        if (data.status !== "success") {
+            console.error(data.message);
+            return;
+        }
+
+        allOpinions = data.opinions || [];
+
+        console.log(allOpinions);
+
         renderStructuredIdeas(allOpinions);
+
     } catch (e) {
-        console.error("データ取得に失敗しました:", e);
+
+        console.error(e);
+
     }
+
 }
 
 // ==========================================
