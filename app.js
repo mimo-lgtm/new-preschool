@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxNF-Kpwc07K1B-T9bYxkQI2Ia4xwoFB-MYkl66O1qR1jDEgkI7KdCaFtAsUuYVKvVv/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxmM8xb0WjGw32yLSVacv30nz2y1LabmGu0aKfFa9DBPRJUw6R_U9Q6odT5HA1A-t2I/exec";
 
 const MAIN_CATEGORIES = [
     "シームレス成長支援",
@@ -118,37 +118,7 @@ const finalMidCat = midCat; // AIが判定した中分類名称
             // 投稿の確認ダイアログの生成と判定
            // 投稿の確認ダイアログ（名称のみを使用）
 const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
-// （既存のコードはそのまま残す）
 
-// ▼ ここから追記・修正部分
-    // 送信用のデータ作成（必要に応じて変数は既存のものを使ってください）
-    const payload = {
-        action: "submit",
-        title: currentAiResult["推奨タイトル"], // 既存の変数
-        summary: currentAiResult["要約"],       // 既存の変数
-        bigCat: "主体的な学び",                  // ここは画面で選択した値などを入れてください
-        midCat: "その他"                        // ここは画面で選択した値などを入れてください
-    };
-
-    try {
-        const res = await fetch(GAS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-        
-        const data = await res.json();
-        if (data.status === "success") {
-            alert("提案箱に保存しました！");
-            // 成功後にリストを再読み込み
-            fetchOpinions(); 
-        } else {
-            alert("保存に失敗しました: " + data.message);
-        }
-    } catch (e) {
-        console.error("保存エラー:", e);
-    }
-// ▲ ここまでを追記する
 if (!confirm(message)) {
     return; // キャンセル
 }
@@ -160,22 +130,22 @@ if (!confirm(message)) {
             btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
 
             try {
-                // 修正箇所ここから
-const res = await fetch(GAS_URL, {
-    method: "POST",
-    mode: "cors", // ★追加：CORS許可通信
-    headers: { "Content-Type": "application/json" }, // ★変更：text/plain から変更
-    body: JSON.stringify({
-        action: "submit",
-        content: rawText,
-        title: currentAiResult["推奨タイトル"] || "無題の提案",
-        summary: currentAiResult["要約200"] || "",
-        bigCatName: currentAiResult["大分類"] || "その他",
-        midCatName: currentAiResult["中分類"] || "その他",
-        aiResult: currentAiResult
-    })
-});
-// 修正箇所ここまで
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    // 修正対象: 投稿時の body 送信部分
+// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
+body: JSON.stringify({
+    action: "submit",
+    content: rawText,
+    title: currentAiResult["推奨タイトル"] || "無題の提案",
+    summary: currentAiResult["要約200"] || "",
+    // 【強制上書き】AIの結果がない場合でも「その他」とする
+    bigCatName: currentAiResult["大分類"] || "その他",
+    midCatName: currentAiResult["中分類"] || "その他",
+    aiResult: currentAiResult
+})
+                });
                 const data = await res.json();
 
                 if (data.status === "success") {
@@ -264,35 +234,3 @@ function renderStructuredIdeas(opinions) {
     }
 }
 
-function renderStructuredIdeas(dataList) {
-    const container = document.getElementById("proposal-container");
-    container.innerHTML = "";
-    
-    // 大分類 > 中分類 でグループ化
-    const structure = {};
-    dataList.forEach(row => {
-        const big = row[1] || "未分類"; // B列
-        const mid = row[6] || "未分類"; // G列
-        if (!structure[big]) structure[big] = {};
-        if (!structure[big][mid]) structure[big][mid] = [];
-        structure[big][mid].push(row);
-    });
-
-    // アコーディオン生成
-    Object.keys(structure).forEach(big => {
-        const bigDetails = document.createElement("details");
-        bigDetails.className = "mb-2 border p-2";
-        bigDetails.innerHTML = `<summary class="fw-bold">${big}</summary>`;
-        
-        Object.keys(structure[big]).forEach(mid => {
-            const midDetails = document.createElement("details");
-            midDetails.className = "ms-3";
-            midDetails.innerHTML = `<summary class="text-primary">${mid}</summary>`;
-            structure[big][mid].forEach(item => {
-                midDetails.innerHTML += `<div class="ms-3 small border-bottom">${item[2]}</div>`;
-            });
-            bigDetails.appendChild(midDetails);
-        });
-        container.appendChild(bigDetails);
-    });
-}
