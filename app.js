@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✨ 最優先でデータを読み込む
     fetchOpinions();
 
-       // 📄 AI分析（壁打ち）ボタンのイベント
+           // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
