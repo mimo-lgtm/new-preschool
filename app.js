@@ -275,3 +275,4 @@ function showIdeaDetail(idea) {
     const detail = `【${idea.title || "無題の提案"}】\n\n${idea.summary || ""}\n\n${idea.content ? "【原文】\n" + idea.content : ""}`;
     alert(detail);
 }
+});
