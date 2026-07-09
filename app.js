@@ -211,12 +211,16 @@ async function fetchOpinions() {
 
 // 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
 function renderStructuredIdeas(opinions){
+   alert(JSON.stringify(opinions, null, 2));
 
     const container=document.getElementById("proposal-container");
     if(!container) return;
 
-    container.innerHTML="";
-　　alert(JSON.stringify(opinions[0], null, 2));
+    container.innerHTML =
+"<pre style='white-space:pre-wrap;font-size:12px'>" +
+JSON.stringify(tree, null, 2) +
+"</pre>";
+return;
     // -----------------------------
     // 大分類
     // -----------------------------
