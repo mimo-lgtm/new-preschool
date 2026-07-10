@@ -205,231 +205,311 @@ async function fetchOpinions() {
 }
 
 // ==========================================
-// 4. 描画ロジック（アコーディオン式・名前表示版）
+// 提案箱ツリー表示
 // ==========================================
-// 名称だけで構成された構造定義（IDは含みません）
-
-// 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
-function renderStructuredIdeas(opinions){
+function renderProposalTree(opinions){
 
     const container=document.getElementById("proposal-container");
-    if(!container) return;
+
+    if(!container)return;
 
     container.innerHTML="";
 
-    //==========================
     // 固定ツリー
-    //==========================
-
-    const CATEGORY={
-
-        "探究心を育む知育環境（主体的な学び）":[
+    const TREE={
+        "主体的な学び":[
             "子ども主導のプロジェクト学習",
             "選択制のアクティビティ",
             "デジタルを活用した自己表現",
             "その他"
         ],
 
-        "感性を磨くアートと表現（楽しさと好奇心）":[
+        "楽しさと好奇心":[
             "五感を使う自然体験",
             "失敗を歓迎する科学遊び",
             "地域のアート・文化資源の活用",
             "その他"
         ],
 
-        "協調性を養うグループワーク（未来を生き抜く力）":[
+        "未来を生き抜く力":[
             "非認知能力の育成",
             "多様な人々と協働する体験",
             "答えのない問いに挑む力",
             "その他"
         ],
 
-        "心身を健やかに育てる自然体験（個性・才能の開花）":[
+        "個性・才能の開花":[
             "個別最適化された学習プラン",
             "多様な才能を認める評価基準",
             "特別なニーズを持つ子への支援",
             "その他"
         ],
 
-        "地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）":[
+        "シームレス成長支援":[
             "保幼小の連携強化",
             "切れ目のない相談窓口",
             "育児休業からの復職支援",
             "その他"
         ]
-
     };
-
-    //==========================
-    // AI名称 → 固定ツリー名称変換
-    //==========================
-
-    const BIGMAP={
-
-        "主体的な学び":"探究心を育む知育環境（主体的な学び）",
-
-        "楽しさと好奇心":"感性を磨くアートと表現（楽しさと好奇心）",
-
-        "未来を生き抜く力":"協調性を養うグループワーク（未来を生き抜く力）",
-
-        "個性・才能の開花":"心身を健やかに育てる自然体験（個性・才能の開花）",
-
-        "シームレス成長支援":"地域と言語を繋ぐグローバルコミュニケーション（シームレス成長支援）"
-
-    };
-
-    //==========================
-    // HTML作成
-    //==========================
 
     let html="";
 
-    let bigIndex=0;
+    let bigNo=0;
 
-    Object.keys(CATEGORY).forEach(big=>{
+    Object.keys(TREE).forEach(big=>{
+
+        bigNo++;
 
         html+=`
-<div class="accordion mb-3">
+        <div class="big-box">
 
-<div class="accordion-item">
+            <div class="big-title"
+                 onclick="toggleTree('big${bigNo}')">
 
-<h2 class="accordion-header">
+                 🌳 ${big}
 
-<button class="accordion-button collapsed"
+            </div>
 
-type="button"
+            <div id="big${bigNo}" style="display:none">
+        `;
 
-data-bs-toggle="collapse"
+        let midNo=0;
 
-data-bs-target="#big${bigIndex}">
+        TREE[big].forEach(mid=>{
 
-🌳 ${big}
-
-</button>
-
-</h2>
-
-<div id="big${bigIndex}"
-
-class="accordion-collapse collapse">
-
-<div class="accordion-body">
-`;
-
-        let midIndex=0;
-
-        CATEGORY[big].forEach(mid=>{
+            midNo++;
 
             html+=`
-<div class="accordion mb-2">
 
-<div class="accordion-item">
+            <div class="mid-box">
 
-<h2 class="accordion-header">
+                <div class="mid-title"
 
-<button class="accordion-button collapsed"
+                     onclick="toggleTree('mid${bigNo}_${midNo}')">
 
-type="button"
+                    📂 ${mid}
 
-data-bs-toggle="collapse"
+                </div>
 
-data-bs-target="#mid${bigIndex}_${midIndex}">
+                <div id="mid${bigNo}_${midNo}"
 
-📂 ${mid}
+                     style="display:none">
 
-</button>
-
-</h2>
-
-<div id="mid${bigIndex}_${midIndex}"
-
-class="accordion-collapse collapse">
-
-<div class="accordion-body">
-`;
+            `;
 
             opinions
-            .filter(op=>{
-
-                const bigName=BIGMAP[op.bigCatName]||op.bigCatName;
-
-                return bigName===big && op.midCatName===mid;
-
-            })
+            .filter(o=>o.bigCatName===big && o.midCatName===mid)
             .forEach((post,p)=>{
 
                 html+=`
 
-<div class="accordion mb-2">
+                <div class="post-title"
 
-<div class="accordion-item">
+                     onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
 
-<h2 class="accordion-header">
+                     📝 ${post.title}
 
-<button class="accordion-button collapsed"
+                </div>
 
-data-bs-toggle="collapse"
+                <div class="post-body"
 
-data-bs-target="#post${bigIndex}_${midIndex}_${p}">
+                     id="post${bigNo}_${midNo}_${p}"
 
-📝 ${post.title}
+                     style="display:none">
 
-</button>
+                    ${post.summary}
 
-</h2>
+                </div>
 
-<div id="post${bigIndex}_${midIndex}_${p}"
-
-class="accordion-collapse collapse">
-
-<div class="accordion-body">
-
-${post.summary}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-`;
+                `;
 
             });
 
             html+=`
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</div>
-
-</div>
-
-`;
-
-            midIndex++;
+            `;
 
         });
 
         html+=`
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-</div>
-
-</div>
-
-`;
-
-        bigIndex++;
+        `;
 
     });
 
     container.innerHTML=html;
+
+}
+
+// ==========================================
+// 提案箱ツリー表示
+// ==========================================
+function renderProposalTree(opinions){
+
+    const container=document.getElementById("proposal-container");
+
+    if(!container)return;
+
+    container.innerHTML="";
+
+    // 固定ツリー
+    const TREE={
+        "主体的な学び":[
+            "子ども主導のプロジェクト学習",
+            "選択制のアクティビティ",
+            "デジタルを活用した自己表現",
+            "その他"
+        ],
+
+        "楽しさと好奇心":[
+            "五感を使う自然体験",
+            "失敗を歓迎する科学遊び",
+            "地域のアート・文化資源の活用",
+            "その他"
+        ],
+
+        "未来を生き抜く力":[
+            "非認知能力の育成",
+            "多様な人々と協働する体験",
+            "答えのない問いに挑む力",
+            "その他"
+        ],
+
+        "個性・才能の開花":[
+            "個別最適化された学習プラン",
+            "多様な才能を認める評価基準",
+            "特別なニーズを持つ子への支援",
+            "その他"
+        ],
+
+        "シームレス成長支援":[
+            "保幼小の連携強化",
+            "切れ目のない相談窓口",
+            "育児休業からの復職支援",
+            "その他"
+        ]
+    };
+
+    let html="";
+
+    let bigNo=0;
+
+    Object.keys(TREE).forEach(big=>{
+
+        bigNo++;
+
+        html+=`
+        <div class="big-box">
+
+            <div class="big-title"
+                 onclick="toggleTree('big${bigNo}')">
+
+                 🌳 ${big}
+
+            </div>
+
+            <div id="big${bigNo}" style="display:none">
+        `;
+
+        let midNo=0;
+
+        TREE[big].forEach(mid=>{
+
+            midNo++;
+
+            html+=`
+
+            <div class="mid-box">
+
+                <div class="mid-title"
+
+                     onclick="toggleTree('mid${bigNo}_${midNo}')">
+
+                    📂 ${mid}
+
+                </div>
+
+                <div id="mid${bigNo}_${midNo}"
+
+                     style="display:none">
+
+            `;
+
+            opinions
+            .filter(o=>o.bigCatName===big && o.midCatName===mid)
+            .forEach((post,p)=>{
+
+                html+=`
+
+                <div class="post-title"
+
+                     onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
+
+                     📝 ${post.title}
+
+                </div>
+
+                <div class="post-body"
+
+                     id="post${bigNo}_${midNo}_${p}"
+
+                     style="display:none">
+
+                    ${post.summary}
+
+                </div>
+
+                `;
+
+            });
+
+            html+=`
+
+                </div>
+
+            </div>
+
+            `;
+
+        });
+
+        html+=`
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    container.innerHTML=html;
+
+}
+
+function toggleTree(id){
+
+    const el=document.getElementById(id);
+
+    if(!el)return;
+
+    if(el.style.display==="none"){
+
+        el.style.display="block";
+
+    }else{
+
+        el.style.display="none";
+
+    }
 
 }
