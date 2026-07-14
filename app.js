@@ -194,7 +194,7 @@ async function fetchOpinions() {
 
         console.log(allOpinions);
 
-        renderStructuredIdeas(allOpinions);
+       renderProposalTree(allOpinions);
 
     } catch (e) {
 
