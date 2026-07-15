@@ -314,36 +314,28 @@
                 </div>
             </div>
             
-            <!-- ========================================== -->
-            <!-- 📥 タブ3: 届いた提案箱                               -->
-            <!-- ========================================== -->
-            <div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab-btn">
-                <div class="mb-4">
-                    <img src="image/logic.jpg" class="tab-sub-image shadow-sm" alt="提案箱イメージ" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80'">
-                </div>
+<!-- 📥 タブ3: 届いた提案箱 -->
+<div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab-btn">
+    <div class="mb-4">
+        <img src="image/logic.jpg" class="tab-sub-image shadow-sm" alt="提案箱イメージ" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80'">
+    </div>
 
-                <div class="mb-3">
-                    <h3 class="fw-bold text-dark mb-1">📥 提案箱（プロセスの可視化）</h3>
-                    <p class="text-muted small mb-0">投稿されたすべてのアイデアが分類ごとにリアルタイム表示されます。</p>
-                </div>
-                <div class="row g-4">
-                    <div class="col-12">
-                        <div id="proposal-container"></div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h3 class="fw-bold text-dark mb-1">📥 提案箱（プロセスの可視化）</h3>
-    <p class="text-muted small mb-0">投稿されたアイデアはステータスごとに整理されます。</p>
-  </div>
-  <button id="btnRefreshProposalBox" class="btn btn-outline-primary btn-sm fw-bold">
-    🔄 更新
-  </button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">📥 提案箱（プロセスの可視化）</h3>
+            <p class="text-muted small mb-0">投稿された提案は大分類・中分類ごとに整理されます。</p>
+        </div>
+        <button id="btnRefreshProposalBox" class="btn btn-outline-primary btn-sm fw-bold">
+            🔄 更新
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div id="proposal-container"></div>
+        </div>
+    </div>
 </div>
-
-<div id="proposal-container"></div>
-                        
-                    </div>
-                </div>
-            </div>
 
         </div>
     </div>
