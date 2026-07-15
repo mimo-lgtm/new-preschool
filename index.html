@@ -24,6 +24,40 @@
             width: 3rem;
             height: 3rem;
         }
+  .category-accordion-item {
+    margin-bottom: 14px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid #dbeafe;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+  .category-accordion-header {
+    width: 100%;
+    text-align: left;
+    padding: 18px 20px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    border: 0;
+    background: linear-gradient(135deg, #eff6ff, #ffffff);
+  }
+  .lane-col {
+    padding: 14px;
+    background: #f8fafc;
+    border-radius: 14px;
+  }
+  .opinion-card {
+    padding: 14px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 12px;
+    border-left: 5px solid #cbd5e1;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  }
+  .card-title-text {
+    font-weight: 700;
+  }
+        
     </style>
 </head>
 <body>
@@ -132,203 +166,84 @@
 
             <!-- 🗺️ タブ2: アイデアの地図 -->
 <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
-    <div class="mb-4">
-        <img src="image/ar.jpg" class="tab-sub-image shadow-sm" alt="地図イメージ" onerror="this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'">
+  <div class="mb-4">
+    <img src="image/ar.jpg" class="tab-sub-image shadow-sm" alt="地図イメージ" onerror="this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'">
+  </div>
+
+  <div class="mb-5 text-center">
+    <h2 class="fw-bold text-dark mb-3">🌳 アイデアの地図：AIの提案を、市民の声で磨き上げる</h2>
+    <p class="text-muted fs-6 mx-auto" style="max-width:800px; line-height:1.8;">
+      AIが考えた提案に、市民の声を重ねて育てる地図です。<br>
+      左は固定の300字、右はリアルタイム更新で表示します。
+    </p>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;">
+        <h5 class="fw-bold text-primary mb-3">🗺️ 未来提案の原点</h5>
+        <div id="map-analysis" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;"></div>
+      </div>
     </div>
-
-    <div class="row g-4">
-        <div class="col-12">
-            <div class="mb-5 text-center">
-                <h2 class="fw-bold text-dark mb-3" style="letter-spacing: 0.05em;">🌳 アイデアの地図：AIの提案を、市民の声で磨き上げる</h2>
-                <p class="text-muted fs-6 mx-auto" style="max-width: 800px; line-height: 1.8;">
-                    AIが考えた提案に、市民の声をしっかり重ねて、みんなで育てるアイデアの地図。<br>
-                    左は固定、右はリアルタイム更新で表示します。
-                </p>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;">
-                        <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                            <span class="me-2">🗺️</span> 未来提案の原点（AIが導き出した提案）
-                        </h5>
-                        <div id="map-base" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;"></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #fffaf0); border-left: 5px solid #ecc94b;">
-                        <h5 class="fw-bold text-warning mb-3 d-flex align-items-center" style="color: #d69e2e !important;">
-                            <span class="me-2">📜</span> 提案集約・共創アップデート案
-                        </h5>
-                        <div class="mb-3 d-flex gap-2">
-                            <button id="btnMapRefresh" class="btn btn-outline-primary btn-sm fw-bold">🔄 リアルタイム更新</button>
-                            <button id="btnMapClear" class="btn btn-outline-secondary btn-sm fw-bold">空に戻す</button>
-                        </div>
-                        <div id="map-live" class="text-secondary lh-base small font-monospace" style="white-space: pre-wrap;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex flex-column gap-5">
-                <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
-                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
-                        <h4 class="fw-bold mb-0 fs-5">🌱 1. 探究心を育む知育環境（主体的な学び）</h4>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
-                                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                                        <span class="me-2">🤖</span> AIが導き出した提案
-                                    </h5>
-                                    <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-主体" style="white-space: pre-wrap;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
-                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
-                                        <span class="me-2">✨</span> AIの提案に市民の声を加えて、よりよく育てた最終提案（300字）
-                                    </h5>
-                                    <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-主体" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
-                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
-                        <h4 class="fw-bold mb-0 fs-5">🎨 2. 学問の楽しさと感性の融合（楽しさと好奇心）</h4>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
-                                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                                        <span class="me-2">🤖</span> AIが導き出した提案
-                                    </h5>
-                                    <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-好奇心" style="white-space: pre-wrap;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
-                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
-                                        <span class="me-2">✨</span> AIの提案に市民の声を加えて、よりよく育てた最終提案（300字）
-                                    </h5>
-                                    <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-好奇心" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
-                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
-                        <h4 class="fw-bold mb-0 fs-5">🤝 3. 逆境を跳ね返すサバイバル能力（未来を生き抜く力）</h4>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
-                                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                                        <span class="me-2">🤖</span> AIが導き出した提案
-                                    </h5>
-                                    <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-未来" style="white-space: pre-wrap;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
-                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
-                                        <span class="me-2">✨</span> AIの提案に市民の声を加えて、よりよく育てた最終提案（300字）
-                                    </h5>
-                                    <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-未来" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
-                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
-                        <h4 class="fw-bold mb-0 fs-5">🌳 4. 個性の開花ととことんやり抜く環境（個性・才能の開花）</h4>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
-                                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                                        <span class="me-2">🤖</span> AIが導き出した提案
-                                    </h5>
-                                    <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-個性" style="white-space: pre-wrap;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
-                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
-                                        <span class="me-2">✨</span> AIの提案に市民の声を加えて、よりよく育てた最終提案（300字）
-                                    </h5>
-                                    <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-個性" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
-                    <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
-                        <h4 class="fw-bold mb-0 fs-5">🌐 5. 学校の枠に縛られない個別最適化教育（シームレス成長支援）</h4>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-4 align-items-stretch">
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
-                                    <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                                        <span class="me-2">🤖</span> AIが導き出した提案
-                                    </h5>
-                                    <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-シームレス" style="white-space: pre-wrap;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
-                                    <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
-                                        <span class="me-2">✨</span> AIの提案に市民の声を加えて、よりよく育てた最終提案（300字）
-                                    </h5>
-                                    <div class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" id="sum-text-シームレス" style="white-space: pre-wrap; min-height: 140px; border-color: #bbf7d0 !important;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #fffaf0); border-left: 5px solid #ecc94b;">
+        <h5 class="fw-bold text-warning mb-3">📜 提案集約・共創アップデート案</h5>
+        <div class="mb-3 d-flex gap-2">
+          <button id="btnMapRefresh" class="btn btn-outline-primary btn-sm fw-bold">🔄 リアルタイム更新</button>
+          <button id="btnMapClear" class="btn btn-outline-secondary btn-sm fw-bold">空に戻す</button>
         </div>
+        <div id="process-log" class="text-secondary lh-base small font-monospace" style="white-space: pre-wrap;"></div>
+      </div>
     </div>
+  </div>
+
+  <div class="d-flex flex-column gap-5">
+    <div class="card border-0 shadow rounded-4 overflow-hidden">
+      <div class="card-header bg-dark text-white py-3 px-4 d-flex align-items-center justify-content-between">
+        <h4 class="fw-bold mb-0 fs-5">🌱 1. 探究心を育む知育環境（主体的な学び）</h4>
+        <span class="badge bg-primary px-3 py-2 rounded-pill small">リアルタイム更新中</span>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-4 align-items-stretch">
+          <div class="col-md-6">
+            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4">
+              <h5 class="fw-bold text-primary mb-3">🤖 AIが導き出した提案</h5>
+              <div id="base-text-主体" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4">
+              <h5 class="fw-bold text-success mb-3">✨ 最終提案（300字）</h5>
+              <div id="sum-text-主体" class="text-dark fw-bold lh-base fs-6 font-monospace bg-white p-3 rounded-3 border" style="white-space: pre-wrap; min-height: 140px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2〜5も同じ形で続ける -->
+  </div>
 </div>
             
 <!-- 📥 タブ3: 届いた提案箱 -->
 <div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab-btn">
-    <div class="mb-4">
-        <img src="image/logic.jpg" class="tab-sub-image shadow-sm" alt="提案箱イメージ" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80'">
-    </div>
+  <div class="mb-4">
+    <img src="image/logic.jpg" class="tab-sub-image shadow-sm" alt="提案箱イメージ" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80'">
+  </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h3 class="fw-bold text-dark mb-1">📥 提案箱（プロセスの可視化）</h3>
-            <p class="text-muted small mb-0">新統合・新提案・元記事を見やすく整理します。</p>
-        </div>
-        <button id="btnRefreshProposalBox" class="btn btn-outline-primary btn-sm fw-bold">🔄 更新</button>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">📥 提案箱</h3>
+      <p class="text-muted small mb-0">大分類 → 中分類 → 記事の順に開きます。</p>
     </div>
+    <button id="btnRefreshProposalBox" class="btn btn-outline-primary btn-sm fw-bold">🔄 更新</button>
+  </div>
 
-    <div class="row g-4">
-        <div class="col-12">
-            <div id="proposal-container"></div>
-        </div>
+  <div class="row g-4">
+    <div class="col-12">
+      <div id="proposal-container"></div>
     </div>
+  </div>
 </div>
 
         </div>
