@@ -1,33 +1,10 @@
-// ==========================================
-// 1. 設定・定数・グローバル変数定義。
-// ==========================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
-
-const MAIN_CATEGORIES = [
-    "シームレス成長支援",
-    "主体的な学び",
-    "楽しさと好奇心",
-    "個性・才能の開花",
-    "未来を生き抜く力"
-];
-
-// 唯一の定義：名称ベースで管理
-const CATEGORY_STRUCTURE = {
-    "シームレス成長支援": ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"],
-    "主体的な学び": ["探究心を育む知育環境", "子ども主導のプロジェクト学習", "デジタルを活用した自己表現", "その他"],
-    "楽しさと好奇心": ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"],
-    "個性・才能の開花": ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"],
-    "未来を生き抜く力": ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"]
-};
 
 let allOpinions = [];
 let currentAiResult = null;
 
-// ==========================================
-// 2. メイン処理（画面初期化・イベント設定）
-// ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
+    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
     const btnSubmitToBox = document.getElementById("btnSubmitToBox");
     const aiPlaceholder = document.getElementById("aiPlaceholder");
     const aiAssistBox = document.getElementById("aiAssistBox");
@@ -36,10 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
 
-    // ✨ 最優先でデータを読み込む
     fetchOpinions();
 
-    // 📄 AI分析（壁打ち）ボタンのイベント
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -60,9 +35,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     body: JSON.stringify({ action: "analyze", content: contentValue })
                 });
                 const data = await res.json();
-　　　　　　　　
+
                 if (data.status === "success") {
                     currentAiResult = data.result;
+
                     const bigCat = currentAiResult["大分類"] || "その他";
                     const midCat = currentAiResult["中分類"] || "その他";
 
@@ -99,32 +75,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📤 提案箱へ正式投稿するボタンのイベント
-        // 📤 提案箱へ正式投稿するボタンのイベント
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
 
-            const bigCat = currentAiResult["大分類"] || currentAiResult.bigCatId || "その他";
-            const midCat = currentAiResult["中分類"] || currentAiResult.midCatId || "その他";
-            const smallCat = currentAiResult["小分類"] || "";
-
-            // 手動分類選択（HTMLのselect）
-            // カテゴリの取得（既存の処理）
-            // 削除の代わりに、AIの判定結果（bigCat, midCat）をそのまま使用する
-// これにより、手動選択のロジックを完全に排除します
-const finalBigCat = bigCat; // AIが判定した大分類名称
-const finalMidCat = midCat; // AIが判定した中分類名称
-            // 投稿の確認ダイアログの生成と判定
-           // 投稿の確認ダイアログ（名称のみを使用）
-const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
-
-if (!confirm(message)) {
-    return; // キャンセル
-}
-
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
+
+            const bigCat = currentAiResult["大分類"] || "その他";
+            const midCat = currentAiResult["中分類"] || "その他";
+
+            const message = `正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`;
+            if (!confirm(message)) return;
 
             btnSubmitToBox.disabled = true;
             btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
@@ -133,24 +95,21 @@ if (!confirm(message)) {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    // 修正対象: 投稿時の body 送信部分
-// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
-body: JSON.stringify({
-    action: "submit",
-    content: rawText,
-    title: currentAiResult["推奨タイトル"] || "無題の提案",
-    summary: currentAiResult["要約200"] || "",
-    // 【強制上書き】AIの結果がない場合でも「その他」とする
-    bigCatName: currentAiResult["大分類"] || "その他",
-    midCatName: currentAiResult["中分類"] || "その他",
-    aiResult: currentAiResult
-})
+                    body: JSON.stringify({
+                        action: "submit",
+                        content: rawText,
+                        title: currentAiResult["推奨タイトル"] || "無題の提案",
+                        summary: currentAiResult["要約200"] || "",
+                        bigCatName: bigCat,
+                        midCatName: midCat,
+                        aiResult: currentAiResult
+                    })
                 });
                 const data = await res.json();
 
                 if (data.status === "success") {
-                    alert(`📥 投稿が完了しました！`);
-                    
+                    alert("📥 投稿が完了しました！");
+
                     if (txtContent) txtContent.value = "";
                     if (aiAssistBox) aiAssistBox.classList.add("d-none");
                     if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
@@ -173,17 +132,10 @@ body: JSON.stringify({
     }
 });
 
-// ==========================================
-// 3. データ取得・バックエンド連携
-// ==========================================
 async function fetchOpinions() {
-
     try {
-
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-
-        console.log(data);
 
         if (data.status !== "success") {
             console.error(data.message);
@@ -191,61 +143,44 @@ async function fetchOpinions() {
         }
 
         allOpinions = data.opinions || [];
-
-        console.log(allOpinions);
-
-       renderProposalTree(allOpinions);
-
+        renderProposalTree(allOpinions);
     } catch (e) {
-
         console.error(e);
-
     }
-
 }
 
-// ==========================================
-// 提案箱ツリー表示
-// ==========================================
-function renderProposalTree(opinions){
+function renderProposalTree(opinions) {
+    const container = document.getElementById("proposal-container");
+    if (!container) return;
 
-    const container=document.getElementById("proposal-container");
+    container.innerHTML = "";
 
-    if(!container)return;
-
-    container.innerHTML="";
-
-    // 固定ツリー
-    const TREE={
-        "主体的な学び":[
+    const TREE = {
+        "主体的な学び": [
             "子ども主導のプロジェクト学習",
             "選択制のアクティビティ",
             "デジタルを活用した自己表現",
             "その他"
         ],
-
-        "楽しさと好奇心":[
+        "楽しさと好奇心": [
             "五感を使う自然体験",
             "失敗を歓迎する科学遊び",
             "地域のアート・文化資源の活用",
             "その他"
         ],
-
-        "未来を生き抜く力":[
+        "未来を生き抜く力": [
             "非認知能力の育成",
             "多様な人々と協働する体験",
             "答えのない問いに挑む力",
             "その他"
         ],
-
-        "個性・才能の開花":[
+        "個性・才能の開花": [
             "個別最適化された学習プラン",
             "多様な才能を認める評価基準",
             "特別なニーズを持つ子への支援",
             "その他"
         ],
-
-        "シームレス成長支援":[
+        "シームレス成長支援": [
             "保幼小の連携強化",
             "切れ目のない相談窓口",
             "育児休業からの復職支援",
@@ -253,263 +188,66 @@ function renderProposalTree(opinions){
         ]
     };
 
-    let html="";
+    let html = "";
+    let bigNo = 0;
 
-    let bigNo=0;
-
-    Object.keys(TREE).forEach(big=>{
-
+    Object.keys(TREE).forEach(big => {
         bigNo++;
-
-        html+=`
+        html += `
         <div class="big-box">
-
-            <div class="big-title"
-                 onclick="toggleTree('big${bigNo}')">
-
-                 🌳 ${big}
-
+            <div class="big-title" onclick="toggleTree('big${bigNo}')">
+                🌳 ${big}
             </div>
-
             <div id="big${bigNo}" style="display:none">
         `;
 
-        let midNo=0;
+        let midNo = 0;
 
-        TREE[big].forEach(mid=>{
-
+        TREE[big].forEach(mid => {
             midNo++;
-
-            html+=`
-
+            html += `
             <div class="mid-box">
-
-                <div class="mid-title"
-
-                     onclick="toggleTree('mid${bigNo}_${midNo}')">
-
+                <div class="mid-title" onclick="toggleTree('mid${bigNo}_${midNo}')">
                     📂 ${mid}
-
                 </div>
-
-                <div id="mid${bigNo}_${midNo}"
-
-                     style="display:none">
-
+                <div id="mid${bigNo}_${midNo}" style="display:none">
             `;
 
             opinions
-            .filter(o=>o.bigCatName===big && o.midCatName===mid)
-            .forEach((post,p)=>{
+                .filter(o => String(o.bigCatName || "").trim() === big && String(o.midCatName || "").trim() === mid)
+                .forEach((post, p) => {
+                    html += `
+                    <div class="post-title" onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
+                        📝 ${post.title}
+                    </div>
+                    <div class="post-body" id="post${bigNo}_${midNo}_${p}" style="display:none">
+                        ${post.summary || ""}
+                    </div>
+                    `;
+                });
 
-                html+=`
-
-                <div class="post-title"
-
-                     onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
-
-                     📝 ${post.title}
-
+            html += `
                 </div>
-
-                <div class="post-body"
-
-                     id="post${bigNo}_${midNo}_${p}"
-
-                     style="display:none">
-
-                    ${post.summary}
-
-                </div>
-
-                `;
-
-            });
-
-            html+=`
-
-                </div>
-
             </div>
-
             `;
-
         });
 
-        html+=`
-
+        html += `
             </div>
-
         </div>
-
         `;
-
     });
 
-    container.innerHTML=html;
-
+    container.innerHTML = html;
 }
 
-// ==========================================
-// 提案箱ツリー表示
-// ==========================================
-function renderProposalTree(opinions){
+function toggleTree(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-    const container=document.getElementById("proposal-container");
-
-    if(!container)return;
-
-    container.innerHTML="";
-
-    // 固定ツリー
-    const TREE={
-        "主体的な学び":[
-            "子ども主導のプロジェクト学習",
-            "選択制のアクティビティ",
-            "デジタルを活用した自己表現",
-            "その他"
-        ],
-
-        "楽しさと好奇心":[
-            "五感を使う自然体験",
-            "失敗を歓迎する科学遊び",
-            "地域のアート・文化資源の活用",
-            "その他"
-        ],
-
-        "未来を生き抜く力":[
-            "非認知能力の育成",
-            "多様な人々と協働する体験",
-            "答えのない問いに挑む力",
-            "その他"
-        ],
-
-        "個性・才能の開花":[
-            "個別最適化された学習プラン",
-            "多様な才能を認める評価基準",
-            "特別なニーズを持つ子への支援",
-            "その他"
-        ],
-
-        "シームレス成長支援":[
-            "保幼小の連携強化",
-            "切れ目のない相談窓口",
-            "育児休業からの復職支援",
-            "その他"
-        ]
-    };
-
-    let html="";
-
-    let bigNo=0;
-
-    Object.keys(TREE).forEach(big=>{
-
-        bigNo++;
-
-        html+=`
-        <div class="big-box">
-
-            <div class="big-title"
-                 onclick="toggleTree('big${bigNo}')">
-
-                 🌳 ${big}
-
-            </div>
-
-            <div id="big${bigNo}" style="display:none">
-        `;
-
-        let midNo=0;
-
-        TREE[big].forEach(mid=>{
-
-            midNo++;
-
-            html+=`
-
-            <div class="mid-box">
-
-                <div class="mid-title"
-
-                     onclick="toggleTree('mid${bigNo}_${midNo}')">
-
-                    📂 ${mid}
-
-                </div>
-
-                <div id="mid${bigNo}_${midNo}"
-
-                     style="display:none">
-
-            `;
-
-            opinions
-            .filter(o=>o.bigCatName===big && o.midCatName===mid)
-            .forEach((post,p)=>{
-
-                html+=`
-
-                <div class="post-title"
-
-                     onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
-
-                     📝 ${post.title}
-
-                </div>
-
-                <div class="post-body"
-
-                     id="post${bigNo}_${midNo}_${p}"
-
-                     style="display:none">
-
-                    ${post.summary}
-
-                </div>
-
-                `;
-
-            });
-
-            html+=`
-
-                </div>
-
-            </div>
-
-            `;
-
-        });
-
-        html+=`
-
-            </div>
-
-        </div>
-
-        `;
-
-    });
-
-    container.innerHTML=html;
-
-}
-
-function toggleTree(id){
-
-    const el=document.getElementById(id);
-
-    if(!el)return;
-
-    if(el.style.display==="none"){
-
-        el.style.display="block";
-
-    }else{
-
-        el.style.display="none";
-
+    if (el.style.display === "none") {
+        el.style.display = "block";
+    } else {
+        el.style.display = "none";
     }
-
 }
