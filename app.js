@@ -168,7 +168,10 @@ async function fetchOpinions() {
   try {
     const res = await fetch(GAS_URL + "?action=get");
     const data = await res.json();
-    if (data.status !== "success") return;
+    if (data.status !== "success") {
+      console.error(data.message);
+      return;
+    }
     allOpinions = data.opinions || [];
     renderProposalBox();
     renderMapPanels();
