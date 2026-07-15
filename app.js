@@ -205,9 +205,15 @@ function renderProposalBox() {
   const container = document.getElementById("proposal-container");
   if (!container) return;
 
+  if (!allOpinions.length) {
+    container.innerHTML = `<div class="text-muted p-4">まだ提案がありません。</div>`;
+    return;
+  }
+
   const html = BIG_ORDER.map(big => {
     const bigOpinions = allOpinions.filter(o => normalizeBig(o.bigCatName) === big);
     const mids = buildMidList(big, bigOpinions);
+
     return `
       <div class="category-accordion-item">
         <button class="category-accordion-header" type="button" onclick="toggleTree('big-${slug(big)}')">
@@ -223,7 +229,6 @@ function renderProposalBox() {
 
   container.innerHTML = html;
 }
-
 function buildMidList(big, opinions) {
   const fixed = getFixedMids(big);
   const mids = new Set(["その他", ...fixed]);
