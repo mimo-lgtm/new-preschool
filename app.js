@@ -311,6 +311,105 @@ function toggleTree(id) {
     if (!el) return;
     el.style.display = (el.style.display === "none" || !el.style.display) ? "block" : "none";
 }
+function refreshMapAnalysis(key) {
+    const mapAnalysis = document.getElementById("map-analysis");
+    const processLog = document.getElementById("process-log");
+
+    if (mapAnalysis) {
+        mapAnalysis.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                <span>更新中...</span>
+            </div>
+        `;
+    }
+
+    if (processLog) {
+        processLog.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+                <span>ログを再構築中...</span>
+            </div>
+        `;
+    }
+
+    const groupMap = {
+        "主体的な学び": {
+            big: "主体的な学び",
+            mids: ["子ども主導のプロジェクト学習", "選択制のアクティビティ", "デジタルを活用した自己表現", "その他"]
+        },
+        "楽しさと好奇心": {
+            big: "楽しさと好奇心",
+            mids: ["五感を使う自然体験", "失敗を歓迎する科学遊び", "地域のアート・文化資源の活用", "その他"]
+        },
+        "未来を生き抜く力": {
+            big: "未来を生き抜く力",
+            mids: ["非認知能力の育成", "多様な人々と協働する体験", "答えのない問いに挑む力", "その他"]
+        },
+        "個性・才能の開花": {
+            big: "個性・才能の開花",
+            mids: ["個別最適化された学習プラン", "多様な才能を認める評価基準", "特別なニーズを持つ子への支援", "その他"]
+        },
+        "シームレス成長支援": {
+            big: "シームレス成長支援",
+            mids: ["保幼小の連携強化", "切れ目のない相談窓口", "育児休業からの復職支援", "その他"]
+        }
+    };
+
+    const selected = groupMap[key] || groupMap["主体的な学び"];
+
+    fetch(GAS_URL + "?action=get")
+        .then(res => res.json())
+        .then(data => {
+            if (data.status !== "success") {
+                throw new Error(data.message || "取得に失敗しました");
+            }
+
+            const opinions = data.opinions || [];
+            const groupOpinions = opinions.filter(o =>
+                String(o.bigCatName || "").trim() === selected.big
+            );
+
+            const total = groupOpinions.length;
+            const midCounts = {};
+            selected.mids.forEach(mid => {
+                midCounts[mid] = groupOpinions.filter(o =>
+                    String(o.midCatName || "").trim() === mid
+                ).length;
+            });
+
+            if (mapAnalysis) {
+                mapAnalysis.innerHTML = `
+                    <div><strong>選択中：</strong>${selected.big}</div>
+                    <div><strong>投稿数：</strong>${total}</div>
+                    <hr>
+                    ${selected.mids.map(mid => `
+                        <div class="d-flex justify-content-between">
+                            <span>${mid}</span>
+                            <span class="badge bg-primary">${midCounts[mid]}</span>
+                        </div>
+                    `).join("")}
+                `;
+            }
+
+            if (processLog) {
+                const latest = groupOpinions.slice(-5).reverse();
+                processLog.innerHTML = latest.length
+                    ? latest.map((o, i) => `
+                        <div class="mb-2 p-2 bg-white rounded border">
+                            <div class="fw-bold">${i + 1}. ${escapeHtml(o.title || "無題")}</div>
+                            <div class="text-muted small">${escapeHtml(o.status || "単独提案")} / ${escapeHtml(o.midCatName || "")}</div>
+                        </div>
+                    `).join("")
+                    : "該当する投稿はまだありません。";
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (mapAnalysis) mapAnalysis.textContent = "更新に失敗しました。";
+            if (processLog) processLog.textContent = "ログの取得に失敗しました。";
+        });
+}
 async function refreshMapAnalysis(categoryKey) {
     const target = document.getElementById(`sum-text-${categoryKey}`);
     if (!target) return;
