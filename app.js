@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
 
+
+
     fetchOpinions();
 
     if (btnAiAnalysis) {
@@ -130,6 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+document.addEventListener("click", function(e) {
+    const btn = e.target.closest("[data-map-refresh]");
+    if (!btn) return;
+    refreshMapAnalysis(btn.getAttribute("data-map-refresh"));
+});
 });
 
 async function fetchOpinions() {
@@ -152,81 +160,128 @@ async function fetchOpinions() {
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) return;
-
     container.innerHTML = "";
 
-    const TREE = {
-        "主体的な学び": [
-            "子ども主導のプロジェクト学習",
-            "選択制のアクティビティ",
-            "デジタルを活用した自己表現",
-            "その他"
-        ],
-        "楽しさと好奇心": [
-            "五感を使う自然体験",
-            "失敗を歓迎する科学遊び",
-            "地域のアート・文化資源の活用",
-            "その他"
-        ],
-        "未来を生き抜く力": [
-            "非認知能力の育成",
-            "多様な人々と協働する体験",
-            "答えのない問いに挑む力",
-            "その他"
-        ],
-        "個性・才能の開花": [
-            "個別最適化された学習プラン",
-            "多様な才能を認める評価基準",
-            "特別なニーズを持つ子への支援",
-            "その他"
-        ],
-        "シームレス成長支援": [
-            "保幼小の連携強化",
-            "切れ目のない相談窓口",
-            "育児休業からの復職支援",
-            "その他"
-        ]
+    const TREE = CATEGORY_STRUCTURE;
+
+    const statusOrder = ["新統合", "新提案", "元記事"];
+    const statusMeta = {
+        "新統合": { badge: "bg-success", titleClass: "text-success", icon: "🟢" },
+        "新提案": { badge: "bg-warning text-dark", titleClass: "text-warning", icon: "🟡" },
+        "元記事": { badge: "bg-secondary", titleClass: "text-secondary", icon: "⚪" }
     };
 
-    let html = "";
-    let bigNo = 0;
+    const countByStatus = (big, mid, status) => {
+        return (opinions || []).filter(o =>
+            String(o.bigCatName || "").trim() === big &&
+            String(o.midCatName || "").trim() === mid &&
+            String(o.status || "新提案").trim() === status
+        ).length;
+    };
 
-    Object.keys(TREE).forEach(big => {
-        bigNo++;
+    const articlesBy = (big, mid, status) => {
+        return (opinions || [])
+            .filter(o =>
+                String(o.bigCatName || "").trim() === big &&
+                String(o.midCatName || "").trim() === mid &&
+                String(o.status || "新提案").trim() === status
+            )
+            .map(o => ({
+                title: String(o.title || "無題"),
+                summary: String(o.summary || ""),
+                reason: String(o.reason || ""),
+                content: String(o.content || ""),
+                status: String(o.status || "新提案")
+            }));
+    };
+
+    let html = `
+    <div class="accordion" id="proposalAccordion">
+    `;
+
+    Object.keys(TREE).forEach((big, bigIndex) => {
+        const bigId = `big-${bigIndex}`;
+        const bigCount = (opinions || []).filter(o => String(o.bigCatName || "").trim() === big).length;
+
         html += `
-        <div class="big-box">
-            <div class="big-title" onclick="toggleTree('big${bigNo}')">
-                🌳 ${big}
-            </div>
-            <div id="big${bigNo}" style="display:none">
+        <div class="category-accordion-item">
+            <button class="category-accordion-header" type="button" onclick="toggleTree('${bigId}')">
+                <span>🌳 ${big}</span>
+                <span class="badge bg-primary rounded-pill">${bigCount}</span>
+            </button>
+            <div class="category-accordion-body" id="${bigId}" style="display:none;">
         `;
 
-        let midNo = 0;
+        TREE[big].forEach((mid, midIndex) => {
+            const midId = `mid-${bigIndex}-${midIndex}`;
+            const midCount = (opinions || []).filter(o =>
+                String(o.bigCatName || "").trim() === big &&
+                String(o.midCatName || "").trim() === mid
+            ).length;
 
-        TREE[big].forEach(mid => {
-            midNo++;
             html += `
-            <div class="mid-box">
-                <div class="mid-title" onclick="toggleTree('mid${bigNo}_${midNo}')">
-                    📂 ${mid}
-                </div>
-                <div id="mid${bigNo}_${midNo}" style="display:none">
+            <div class="category-accordion-item mb-3">
+                <button class="category-accordion-header" type="button" onclick="toggleTree('${midId}')">
+                    <span>📂 ${mid}</span>
+                    <span class="badge bg-dark rounded-pill">${midCount}</span>
+                </button>
+                <div class="category-accordion-body" id="${midId}" style="display:none;">
+                    <div class="lane-row">
             `;
 
-            opinions
-                .filter(o => String(o.bigCatName || "").trim() === big && String(o.midCatName || "").trim() === mid)
-                .forEach((post, p) => {
-                    html += `
-                    <div class="post-title" onclick="toggleTree('post${bigNo}_${midNo}_${p}')">
-                        📝 ${post.title}
+            statusOrder.forEach(status => {
+                const items = articlesBy(big, mid, status);
+                const meta = statusMeta[status];
+                const laneId = `${midId}-${status}`;
+
+                html += `
+                <div class="lane-col">
+                    <div class="col-header ${meta.titleClass}">
+                        ${meta.icon} ${status}
+                        <span class="badge bg-light text-dark ms-2">${items.length}</span>
                     </div>
-                    <div class="post-body" id="post${bigNo}_${midNo}_${p}" style="display:none">
-                        ${post.summary || ""}
+                    <div id="${laneId}">
+                `;
+
+                if (!items.length) {
+                    html += `<div class="text-muted small">該当記事はありません。</div>`;
+                } else {
+                    items.forEach((item, idx) => {
+                        const postId = `${laneId}-${idx}`;
+                        const borderClass =
+                            status === "新統合" ? "border-success-custom" :
+                            status === "新提案" ? "border-primary-custom" :
+                            "border-danger-custom";
+
+                        html += `
+                        <div class="opinion-card ${borderClass}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="card-title-text">${escapeHtml(item.title)}</div>
+                                <span class="badge ${meta.badge}">${status}</span>
+                            </div>
+                            <div class="badge-keyword mb-2">
+                                ${escapeHtml(big)} / ${escapeHtml(mid)}
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary w-100 mb-2" type="button" onclick="toggleTree('${postId}')">
+                                詳細を表示
+                            </button>
+                            <div id="${postId}" style="display:none;">
+                                <div class="small text-muted mb-2" style="white-space: pre-wrap;">${escapeHtml(item.summary)}</div>
+                                ${item.reason ? `<div class="small text-secondary border-top pt-2" style="white-space: pre-wrap;">${escapeHtml(item.reason)}</div>` : ""}
+                            </div>
+                        </div>
+                        `;
+                    });
+                }
+
+                html += `
                     </div>
-                    `;
-                });
+                </div>
+                `;
+            });
 
             html += `
+                    </div>
                 </div>
             </div>
             `;
@@ -238,16 +293,65 @@ function renderProposalTree(opinions) {
         `;
     });
 
+    html += `</div>`;
     container.innerHTML = html;
 }
 
+
+function escapeHtml(str) {
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
 function toggleTree(id) {
     const el = document.getElementById(id);
     if (!el) return;
+    el.style.display = (el.style.display === "none" || !el.style.display) ? "block" : "none";
+}
+async function refreshMapAnalysis(categoryKey) {
+    const target = document.getElementById(`sum-text-${categoryKey}`);
+    if (!target) return;
 
-    if (el.style.display === "none") {
-        el.style.display = "block";
-    } else {
-        el.style.display = "none";
+    target.innerHTML = `<span class="text-muted">読み込み中...</span>`;
+
+    try {
+        const res = await fetch(GAS_URL + "?action=get");
+        const data = await res.json();
+        if (data.status !== "success") {
+            target.textContent = "更新に失敗しました。";
+            return;
+        }
+
+        const all = data.opinions || [];
+        const merged = all.filter(o => (o.status || "") === "新統合" && o.bigCatName === categoryKey);
+
+        const fixed = (document.getElementById(`base-text-${categoryKey}`)?.innerText || "").trim();
+        const mergedText = merged.map(o => `${o.title} ${o.summary}`).join("。 ");
+
+        if (!merged.length) {
+            target.textContent = "まだ新統合記事がありません。";
+            return;
+        }
+
+        const combined = buildHalfHalfSummary(fixed, mergedText);
+        target.textContent = combined;
+    } catch (e) {
+        console.error(e);
+        target.textContent = "更新中にエラーが発生しました。";
     }
+}
+
+function buildHalfHalfSummary(fixedText, mergedText) {
+    const fixedPart = splitByLength(fixedText, 150);
+    const mergedPart = splitByLength(mergedText, 150);
+    return `${fixedPart}\n\n${mergedPart}`;
+}
+
+function splitByLength(text, len) {
+    const t = String(text || "").replace(/\s+/g, " ").trim();
+    if (t.length <= len) return t;
+    return t.slice(0, len) + "…";
 }
