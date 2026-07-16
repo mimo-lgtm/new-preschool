@@ -170,22 +170,19 @@ async function fetchOpinions() {
     const data = await res.json();
 
     if (data.status !== "success") {
-      console.error("fetchOpinions error:", data.message);
+      console.error(data.message);
       allOpinions = [];
       renderProposalBox();
-      renderMapPanels();
       return;
     }
 
     allOpinions = Array.isArray(data.opinions) ? data.opinions : [];
     console.log("opinions:", allOpinions);
     renderProposalBox();
-    renderMapPanels();
   } catch (e) {
-    console.error("fetchOpinions exception:", e);
+    console.error(e);
     allOpinions = [];
     renderProposalBox();
-    renderMapPanels();
   }
 }
 
