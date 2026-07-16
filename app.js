@@ -193,12 +193,6 @@ function renderMapPanels() {
     const baseEl = document.getElementById(`base-text-${key}`);
     const sumEl = document.getElementById(`sum-text-${key}`);
 
-    if (baseEl) {
-      baseEl.innerHTML = mapBaseData && mapBaseData[big]
-        ? mapBaseData[big]
-        : DEFAULT_BASE_TEXT[big];
-    }
-
     if (sumEl) {
       if (!mapLiveMode) {
         sumEl.innerHTML = "";
