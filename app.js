@@ -164,14 +164,12 @@ async function fetchOpinions() {
     const data = await res.json();
 
     if (data.status !== "success") {
-      console.error(data.message);
       allOpinions = [];
       renderProposalBox();
       return;
     }
 
     allOpinions = Array.isArray(data.opinions) ? data.opinions : [];
-    console.log("opinions:", allOpinions);
     renderProposalBox();
   } catch (e) {
     console.error(e);
