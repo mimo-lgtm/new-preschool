@@ -168,15 +168,24 @@ async function fetchOpinions() {
   try {
     const res = await fetch(GAS_URL + "?action=get");
     const data = await res.json();
+
     if (data.status !== "success") {
-      console.error(data.message);
+      console.error("fetchOpinions error:", data.message);
+      allOpinions = [];
+      renderProposalBox();
+      renderMapPanels();
       return;
     }
-    allOpinions = data.opinions || [];
+
+    allOpinions = Array.isArray(data.opinions) ? data.opinions : [];
+    console.log("opinions:", allOpinions);
     renderProposalBox();
     renderMapPanels();
   } catch (e) {
-    console.error(e);
+    console.error("fetchOpinions exception:", e);
+    allOpinions = [];
+    renderProposalBox();
+    renderMapPanels();
   }
 }
 
@@ -185,14 +194,18 @@ function renderMapPanels() {
     const key = BIG_TO_KEY[big];
     const baseEl = document.getElementById(`base-text-${key}`);
     const sumEl = document.getElementById(`sum-text-${key}`);
-    if (baseEl) baseEl.innerHTML = mapBaseData[big] || DEFAULT_BASE_TEXT[big];
+
+    if (baseEl) {
+      baseEl.innerHTML = (mapBaseData[big] || DEFAULT_BASE_TEXT[big] || "").replace(/\n/g, "<br>");
+    }
+
     if (sumEl) {
       if (!mapLiveMode) {
         sumEl.innerHTML = "";
       } else {
         const related = allOpinions.filter(o => normalizeBig(o.bigCatName) === big && normalizeStatus(o.status) !== "元記事");
         const merged = related.filter(o => normalizeStatus(o.status) === "新統合");
-        sumEl.innerHTML = buildLiveSummary(big, merged, related);
+        sumEl.innerHTML = buildLiveSummary(big, merged, related).replace(/\n/g, "<br>");
       }
     }
   });
