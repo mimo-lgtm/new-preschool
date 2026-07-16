@@ -199,7 +199,6 @@ function renderProposalBox() {
   const html = BIG_ORDER.map(big => {
     const bigOpinions = allOpinions.filter(o => normalizeBig(o.bigCatName) === big);
     const mids = buildMidList(big, bigOpinions);
-
     return `
       <div class="category-accordion-item">
         <button class="category-accordion-header" type="button" onclick="toggleTree('big-${slug(big)}')">
