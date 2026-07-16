@@ -10,18 +10,12 @@ const BIG_TO_KEY = {
   "シームレス成長支援": "シームレス"
 };
 
-const DEFAULT_BASE_TEXT = {
-  "主体的な学び": "子どもが自分で選び、考え、試す経験を増やすことが大切です。保育者は教え込む役から、探究を支える伴走者へと役割を広げる必要があります。",
-  "楽しさと好奇心": "遊びや自然体験を通して、知る喜びを育てます。楽しい体験が、そのまま学びへつながる設計が求められます。",
-  "未来を生き抜く力": "失敗から立ち直る力や、他者と協力する力を育てます。知識だけではなく、変化に対応する力が重要です。",
-  "個性・才能の開花": "一人ひとりの違いを前提に、得意を伸ばす仕組みが必要です。評価も画一的ではなく、多面的であるべきです。",
-  "シームレス成長支援": "保育、教育、家庭支援を切れ目なくつなぎます。相談しやすい導線と、継続支援の安心感が鍵になります。"
-};
+
 
 let allOpinions = [];
 let currentAiResult = null;
 let mapLiveMode = false;
-let mapBaseData = { ...DEFAULT_BASE_TEXT };
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnAiAnalysis = document.getElementById("btnAiAnalysis");
@@ -186,27 +180,6 @@ async function fetchOpinions() {
   }
 }
 
-function renderMapPanels() {
-  BIG_ORDER.forEach(big => {
-    const key = BIG_TO_KEY[big];
-    const baseEl = document.getElementById(`base-text-${key}`);
-    const sumEl = document.getElementById(`sum-text-${key}`);
-
-    if (baseEl) {
-      baseEl.innerHTML = (mapBaseData[big] || DEFAULT_BASE_TEXT[big] || "").replace(/\n/g, "<br>");
-    }
-
-    if (sumEl) {
-      if (!mapLiveMode) {
-        sumEl.innerHTML = "";
-      } else {
-        const related = allOpinions.filter(o => normalizeBig(o.bigCatName) === big && normalizeStatus(o.status) !== "元記事");
-        const merged = related.filter(o => normalizeStatus(o.status) === "新統合");
-        sumEl.innerHTML = buildLiveSummary(big, merged, related).replace(/\n/g, "<br>");
-      }
-    }
-  });
-}
 
 function buildLiveSummary(big, merged, related) {
   const countText = `対象件数: ${related.length}件 / 新統合: ${merged.length}件`;
