@@ -83,15 +83,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
 
-          if (aiPerspectivesText) {
-            aiPerspectivesText.innerHTML = `
-<div class="mb-3"><strong>a. 核心</strong><br><span class="text-dark">${escapeHtml(currentAiResult["核心"] || "分析中")}</span></div>
-<div class="mb-3"><strong>b. 変化</strong><br><span class="text-dark">${escapeHtml(currentAiResult["変化"] || "分析中")}</span></div>
-<div class="mb-3"><strong>c. 成功事例</strong><br><span class="text-dark">${escapeHtml(currentAiResult["成功事例"] || "分析中")}</span></div>
-<div class="mb-3"><strong>d. 懸念点</strong><br><span class="text-dark">${escapeHtml(currentAiResult["懸念点"] || "分析中")}</span></div>
-<div class="mb-1"><strong>e. 問い</strong><br><span class="text-dark">${escapeHtml(currentAiResult["問い"] || "分析中")}</span></div>
-            `.trim();
-          }
+         if (aiPerspectivesText) {
+  aiPerspectivesText.innerHTML = `
+    <div class="mb-4 p-3 border rounded-3 bg-light">
+      <strong class="d-block mb-2 text-primary">a. 核心</strong>
+      <div class="text-dark lh-base">
+        ${escapeHtml(currentAiResult["核心"] || "分析中")}<br>
+        <span class="text-muted small">この意見の中心にある課題や願いを、ひと言で整理したものです。何を変えたいのか、何を守りたいのかがここに現れます。ここが明確だと、後の提案がぶれにくくなります。</span>
+      </div>
+    </div>
+
+    <div class="mb-4 p-3 border rounded-3 bg-light">
+      <strong class="d-block mb-2 text-success">b. 変化</strong>
+      <div class="text-dark lh-base">
+        ${escapeHtml(currentAiResult["変化"] || "分析中")}<br>
+        <span class="text-muted small">現状のままでは難しい点、または、これから起きる変化を踏まえて必要になる対応をまとめています。時代の流れ、現場の負担、子どもや家庭の状況変化などもここに含まれます。</span>
+      </div>
+    </div>
+
+    <div class="mb-4 p-3 border rounded-3 bg-light">
+      <strong class="d-block mb-2 text-warning">c. 成功事例</strong>
+      <div class="text-dark lh-base">
+        ${escapeHtml(currentAiResult["成功事例"] || "分析中")}<br>
+        <span class="text-muted small">すでにうまくいっている実践や、参考にできる前向きな工夫を整理した部分です。既存の成功例を使うと、提案が現実的になり、実装のイメージも持ちやすくなります。</span>
+      </div>
+    </div>
+
+    <div class="mb-4 p-3 border rounded-3 bg-light">
+      <strong class="d-block mb-2 text-danger">d. 懸念点</strong>
+      <div class="text-dark lh-base">
+        ${escapeHtml(currentAiResult["懸念点"] || "分析中")}<br>
+        <span class="text-muted small">導入するうえで気をつけるべき点や、負担が増えやすい部分をまとめています。ここを先に見ておくことで、理想だけで終わらず、実際に続けられる形へ調整しやすくなります。</span>
+      </div>
+    </div>
+
+    <div class="mb-1 p-3 border rounded-3 bg-light">
+      <strong class="d-block mb-2 text-secondary">e. 問い</strong>
+      <div class="text-dark lh-base">
+        ${escapeHtml(currentAiResult["問い"] || "分析中")}<br>
+        <span class="text-muted small">この提案を次に進めるための問いです。何を優先するか、誰が関わるか、どこから始めるかを考える入口になります。問いが良いと、議論も提案も深くなります。</span>
+      </div>
+    </div>
+  `.trim();
+}
 
           if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
           if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
