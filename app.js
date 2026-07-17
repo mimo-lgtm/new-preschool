@@ -145,6 +145,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  if (document.getElementById("btnVoiceInput")) {
+    const btnVoiceInput = document.getElementById("btnVoiceInput");
+    const btnVoiceStop = document.getElementById("btnVoiceStop");
+    btnVoiceInput.addEventListener("click", () => {
+      alert("音声認識は次の段階で実装します。今はテキスト入力で壁打ちしてください。");
+    });
+    btnVoiceStop.addEventListener("click", () => {});
+  }
 });
 
 async function fetchOpinions() {
@@ -272,13 +281,13 @@ function renderMidSection(big, mid, opinions) {
       </button>
       <div id="mid-${slug(big)}-${slug(mid)}" style="display:none; padding: 12px 0 0 0;">
         <div class="mb-2">${labelBadge("新統合")} ${merged.length}</div>
-        ${merged.length ? merged.map((p,i) => renderPostCard(p, "新統合", i)).join("") : `<div class="text-muted small mb-3">新統合はありません。</div>`}
+        ${merged.length ? merged.map((p, i) => renderPostCard(p, "新統合", i)).join("") : `<div class="text-muted small mb-3">新統合はありません。</div>`}
 
         <div class="mb-2">${labelBadge("新提案")} ${proposals.length}</div>
-        ${proposals.length ? proposals.map((p,i) => renderPostCard(p, "新提案", i)).join("") : `<div class="text-muted small mb-3">新提案はありません。</div>`}
+        ${proposals.length ? proposals.map((p, i) => renderPostCard(p, "新提案", i)).join("") : `<div class="text-muted small mb-3">新提案はありません。</div>`}
 
         <div class="mb-2">${labelBadge("元記事")} ${originals.length}</div>
-        ${originals.length ? originals.map((p,i) => renderOriginalFolder(p, i)).join("") : `<div class="text-muted small">元記事はありません。</div>`}
+        ${originals.length ? originals.map((p, i) => renderOriginalFolder(p, i)).join("") : `<div class="text-muted small">元記事はありません。</div>`}
       </div>
     </div>
   `;
@@ -329,9 +338,10 @@ function normalizeBig(s) {
   return String(s || "").trim();
 }
 
-function normalizeMid(mid) {
+function normalizeMid(mid, big) {
   const x = String(mid || "").trim();
-  return x || "その他";
+  if (x) return x;
+  return "その他";
 }
 
 function slug(str) {
