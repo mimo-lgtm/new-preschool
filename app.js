@@ -169,8 +169,14 @@ async function fetchOpinions() {
 function renderMapPanels() {
   const mapEl = document.getElementById("map-analysis");
   const logEl = document.getElementById("process-log");
-  if (mapEl) mapEl.textContent = buildMapAnalysisText();
-  if (logEl) logEl.textContent = buildProcessLogText();
+
+  if (mapEl) {
+    mapEl.textContent = "";
+  }
+
+  if (logEl) {
+    logEl.textContent = mapLiveMode ? buildProcessLogText() : "";
+  }
 }
 
 function buildMapAnalysisText() {
