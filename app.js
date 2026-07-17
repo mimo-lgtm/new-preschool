@@ -163,6 +163,8 @@ async function fetchOpinions() {
     allOpinions = [];
     renderMapPanels();
     renderProposalBox();
+if (btnMapRefresh) btnMapRefresh.addEventListener("click", () => { mapLiveMode = true; const mapEl = document.getElementById("map-analysis"); if (mapEl) mapEl.textContent = buildMapAnalysisText(); renderMapPanels(); });
+    
   }
 }
 
