@@ -33,54 +33,54 @@ document.addEventListener("DOMContentLoaded", () => {
   const txtContent = document.getElementById("content");
 
   let recognition = null;
-  let isListening = false;
+let isListening = false;
+let finalText = "";
 
-  function setupVoiceRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      if (voiceStatus) voiceStatus.textContent = "このブラウザは音声入力に対応していません。";
-      if (btnVoiceInput) btnVoiceInput.disabled = true;
-      return null;
-    }
-
-    const rec = new SpeechRecognition();
-    rec.lang = "ja-JP";
-    rec.continuous = true;
-    rec.interimResults = true;
-
-    rec.onstart = () => {
-      isListening = true;
-      if (voiceStatus) voiceStatus.textContent = "音声入力中です。話してください。";
-      if (btnVoiceInput) btnVoiceInput.disabled = true;
-      if (btnVoiceStop) btnVoiceStop.disabled = false;
-    };
-
-    rec.onresult = (event) => {
-      let text = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        text += event.results[i][0].transcript;
-      }
-      if (txtContent && text.trim()) {
-        const current = txtContent.value.trim();
-        txtContent.value = current ? `${current}\n${text.trim()}` : text.trim();
-      }
-    };
-
-    rec.onerror = (event) => {
-      console.error(event);
-      if (voiceStatus) voiceStatus.textContent = `音声入力エラー: ${event.error}`;
-      stopVoice();
-    };
-
-    rec.onend = () => {
-      isListening = false;
-      if (voiceStatus) voiceStatus.textContent = "音声入力は停止しました。";
-      if (btnVoiceInput) btnVoiceInput.disabled = false;
-      if (btnVoiceStop) btnVoiceStop.disabled = true;
-    };
-
-    return rec;
+function setupVoiceRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    if (voiceStatus) voiceStatus.textContent = "このブラウザは音声入力に対応していません。";
+    if (btnVoiceInput) btnVoiceInput.disabled = true;
+    return null;
   }
+
+  const rec = new SpeechRecognition();
+  rec.lang = "ja-JP";
+  rec.continuous = true;
+  rec.interimResults = false;
+
+  rec.onstart = () => {
+    isListening = true;
+    finalText = "";
+    if (voiceStatus) voiceStatus.textContent = "音声入力中です。話してください。";
+    if (btnVoiceInput) btnVoiceInput.disabled = true;
+    if (btnVoiceStop) btnVoiceStop.disabled = false;
+  };
+
+  rec.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      finalText += event.results[i][0].transcript;
+    }
+    if (txtContent) {
+      txtContent.value = finalText.trim();
+    }
+  };
+
+  rec.onerror = (event) => {
+    console.error(event);
+    if (voiceStatus) voiceStatus.textContent = `音声入力エラー: ${event.error}`;
+    stopVoice();
+  };
+
+  rec.onend = () => {
+    isListening = false;
+    if (voiceStatus) voiceStatus.textContent = "音声入力は停止しました。";
+    if (btnVoiceInput) btnVoiceInput.disabled = false;
+    if (btnVoiceStop) btnVoiceStop.disabled = true;
+  };
+
+  return rec;
+}
 
   function startVoice() {
     if (!recognition) recognition = setupVoiceRecognition();
