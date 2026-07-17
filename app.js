@@ -121,58 +121,65 @@ function setupVoiceRecognition() {
   if (btnRefreshProposalBox) btnRefreshProposalBox.addEventListener("click", fetchOpinions);
 
   if (btnAiAnalysis) {
-    btnAiAnalysis.addEventListener("click", async () => {
-      const contentValue = txtContent ? txtContent.value.trim() : "";
-      if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
+  btnAiAnalysis.addEventListener("click", async () => {
+    const txtContent = document.getElementById("content");
+    const contentValue = txtContent ? txtContent.value.trim() : "";
+    if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
 
-      btnAiAnalysis.disabled = true;
-      btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
+    btnAiAnalysis.disabled = true;
+    btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
 
-      try {
-        const res = await fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({ action: "analyze", content: contentValue })
-        });
-        const data = await res.json();
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "analyze", content: contentValue })
+      });
 
-        if (data.status === "success") {
-          currentAiResult = data.result;
-          const bigCat = currentAiResult["大分類"] || "その他";
-          const midCat = currentAiResult["中分類"] || "その他";
+      if (!res.ok) {
+        throw new Error(`HTTPエラー: ${res.status}`);
+      }
 
-          if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
+      const data = await res.json();
+      console.log("AI response:", data);
 
-          if (aiPerspectivesText) {
-            aiPerspectivesText.innerHTML = `
+      if (data.status === "success" && data.result) {
+        currentAiResult = data.result;
+        const bigCat = currentAiResult["大分類"] || "その他";
+        const midCat = currentAiResult["中分類"] || "その他";
+
+        if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
+
+        if (aiPerspectivesText) {
+          aiPerspectivesText.innerHTML = `
 <div class="mb-3"><strong>a. 核心</strong><br><span class="text-dark">${escapeHtml(currentAiResult["核心"] || "分析中")}</span></div>
 <div class="mb-3"><strong>b. 変化</strong><br><span class="text-dark">${escapeHtml(currentAiResult["変化"] || "分析中")}</span></div>
 <div class="mb-3"><strong>c. 成功事例</strong><br><span class="text-dark">${escapeHtml(currentAiResult["成功事例"] || "分析中")}</span></div>
 <div class="mb-3"><strong>d. 懸念点</strong><br><span class="text-dark">${escapeHtml(currentAiResult["懸念点"] || "分析中")}</span></div>
 <div class="mb-1"><strong>e. 問い</strong><br><span class="text-dark">${escapeHtml(currentAiResult["問い"] || "分析中")}</span></div>
-            `.trim();
-          }
-
-          if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
-          if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
-
-          if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
-          if (aiAssistBox) {
-            aiAssistBox.style.setProperty("display", "flex", "important");
-            aiAssistBox.classList.remove("d-none");
-          }
-        } else {
-          alert("AI分析エラー: " + data.message);
+          `.trim();
         }
-      } catch (err) {
-        console.error(err);
-        alert("通信エラーが発生しました。");
-      } finally {
-        btnAiAnalysis.disabled = false;
-        btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
+
+        if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
+        if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
+
+        if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
+        if (aiAssistBox) {
+          aiAssistBox.style.setProperty("display", "flex", "important");
+          aiAssistBox.classList.remove("d-none");
+        }
+      } else {
+        alert("AI分析エラー: " + (data.message || "結果が返りませんでした"));
       }
-    });
-  }
+    } catch (err) {
+      console.error(err);
+      alert("通信エラーが発生しました。");
+    } finally {
+      btnAiAnalysis.disabled = false;
+      btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
+    }
+  });
+}
 
   if (btnSubmitToBox) {
     btnSubmitToBox.addEventListener("click", async () => {
