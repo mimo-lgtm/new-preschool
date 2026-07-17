@@ -2,14 +2,6 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvY
 
 const BIG_ORDER = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
 
-const BIG_TO_KEY = {
-  "主体的な学び": "主体",
-  "楽しさと好奇心": "好奇心",
-  "未来を生き抜く力": "未来",
-  "個性・才能の開花": "個性",
-  "シームレス成長支援": "シームレス"
-};
-
 let allOpinions = [];
 let currentAiResult = null;
 let mapLiveMode = false;
@@ -26,80 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiPerspectivesText = document.getElementById("aiPerspectivesText");
   const aiTitleText = document.getElementById("aiTitleText");
   const aiRefinedText = document.getElementById("aiRefinedText");
-
-  const btnVoiceInput = document.getElementById("btnVoiceInput");
-  const btnVoiceStop = document.getElementById("btnVoiceStop");
-  const voiceStatus = document.getElementById("voiceStatus");
-  const txtContent = document.getElementById("content");
-
-  let recognition = null;
-let isListening = false;
-let finalText = "";
-
-function setupVoiceRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    if (voiceStatus) voiceStatus.textContent = "このブラウザは音声入力に対応していません。";
-    if (btnVoiceInput) btnVoiceInput.disabled = true;
-    return null;
-  }
-
-  const rec = new SpeechRecognition();
-  rec.lang = "ja-JP";
-  rec.continuous = true;
-  rec.interimResults = false;
-
-  rec.onstart = () => {
-    isListening = true;
-    finalText = "";
-    if (voiceStatus) voiceStatus.textContent = "音声入力中です。話してください。";
-    if (btnVoiceInput) btnVoiceInput.disabled = true;
-    if (btnVoiceStop) btnVoiceStop.disabled = false;
-  };
-
-  rec.onresult = (event) => {
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      finalText += event.results[i][0].transcript;
-    }
-    if (txtContent) {
-      txtContent.value = finalText.trim();
-    }
-  };
-
-  rec.onerror = (event) => {
-    console.error(event);
-    if (voiceStatus) voiceStatus.textContent = `音声入力エラー: ${event.error}`;
-    stopVoice();
-  };
-
-  rec.onend = () => {
-    isListening = false;
-    if (voiceStatus) voiceStatus.textContent = "音声入力は停止しました。";
-    if (btnVoiceInput) btnVoiceInput.disabled = false;
-    if (btnVoiceStop) btnVoiceStop.disabled = true;
-  };
-
-  return rec;
-}
-
-  function startVoice() {
-    if (!recognition) recognition = setupVoiceRecognition();
-    if (!recognition) return;
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  function stopVoice() {
-    if (recognition && isListening) {
-      recognition.stop();
-    }
-  }
-
-  if (btnVoiceInput) btnVoiceInput.addEventListener("click", startVoice);
-  if (btnVoiceStop) btnVoiceStop.addEventListener("click", stopVoice);
 
   if (aiAssistBox) aiAssistBox.classList.add("d-none");
   if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
@@ -121,65 +39,59 @@ function setupVoiceRecognition() {
   if (btnRefreshProposalBox) btnRefreshProposalBox.addEventListener("click", fetchOpinions);
 
   if (btnAiAnalysis) {
-  btnAiAnalysis.addEventListener("click", async () => {
-    const txtContent = document.getElementById("content");
-    const contentValue = txtContent ? txtContent.value.trim() : "";
-    if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
+    btnAiAnalysis.addEventListener("click", async () => {
+      const txtContent = document.getElementById("content");
+      const contentValue = txtContent ? txtContent.value.trim() : "";
+      if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
 
-    btnAiAnalysis.disabled = true;
-    btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
+      btnAiAnalysis.disabled = true;
+      btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
 
-    try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ action: "analyze", content: contentValue })
-      });
+      try {
+        const res = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({ action: "analyze", content: contentValue })
+        });
+        const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(`HTTPエラー: ${res.status}`);
-      }
+        if (data.status === "success") {
+          currentAiResult = data.result;
+          const bigCat = currentAiResult["大分類"] || "その他";
+          const midCat = currentAiResult["中分類"] || "その他";
 
-      const data = await res.json();
-      console.log("AI response:", data);
+          if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
 
-      if (data.status === "success" && data.result) {
-        currentAiResult = data.result;
-        const bigCat = currentAiResult["大分類"] || "その他";
-        const midCat = currentAiResult["中分類"] || "その他";
-
-        if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
-
-        if (aiPerspectivesText) {
-          aiPerspectivesText.innerHTML = `
+          if (aiPerspectivesText) {
+            aiPerspectivesText.innerHTML = `
 <div class="mb-3"><strong>a. 核心</strong><br><span class="text-dark">${escapeHtml(currentAiResult["核心"] || "分析中")}</span></div>
 <div class="mb-3"><strong>b. 変化</strong><br><span class="text-dark">${escapeHtml(currentAiResult["変化"] || "分析中")}</span></div>
 <div class="mb-3"><strong>c. 成功事例</strong><br><span class="text-dark">${escapeHtml(currentAiResult["成功事例"] || "分析中")}</span></div>
 <div class="mb-3"><strong>d. 懸念点</strong><br><span class="text-dark">${escapeHtml(currentAiResult["懸念点"] || "分析中")}</span></div>
 <div class="mb-1"><strong>e. 問い</strong><br><span class="text-dark">${escapeHtml(currentAiResult["問い"] || "分析中")}</span></div>
-          `.trim();
-        }
+            `.trim();
+          }
 
-        if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
-        if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
+          if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
+          if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
 
-        if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
-        if (aiAssistBox) {
-          aiAssistBox.style.setProperty("display", "flex", "important");
-          aiAssistBox.classList.remove("d-none");
+          if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
+          if (aiAssistBox) {
+            aiAssistBox.style.setProperty("display", "flex", "important");
+            aiAssistBox.classList.remove("d-none");
+          }
+        } else {
+          alert("AI分析エラー: " + (data.message || "不明なエラー"));
         }
-      } else {
-        alert("AI分析エラー: " + (data.message || "結果が返りませんでした"));
+      } catch (err) {
+        console.error(err);
+        alert("通信エラーが発生しました。");
+      } finally {
+        btnAiAnalysis.disabled = false;
+        btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
       }
-    } catch (err) {
-      console.error(err);
-      alert("通信エラーが発生しました。");
-    } finally {
-      btnAiAnalysis.disabled = false;
-      btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
-    }
-  });
-}
+    });
+  }
 
   if (btnSubmitToBox) {
     btnSubmitToBox.addEventListener("click", async () => {
@@ -190,6 +102,7 @@ function setupVoiceRecognition() {
 
       if (!confirm(`正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`)) return;
 
+      const txtContent = document.getElementById("content");
       const rawText = txtContent ? txtContent.value.trim() : "";
 
       btnSubmitToBox.disabled = true;
@@ -242,24 +155,57 @@ async function fetchOpinions() {
     if (data.status !== "success") {
       console.error(data.message);
       allOpinions = [];
+      renderMapPanels();
       renderProposalBox();
       return;
     }
 
     allOpinions = Array.isArray(data.opinions) ? data.opinions : [];
     console.log("opinions:", allOpinions);
+    renderMapPanels();
     renderProposalBox();
   } catch (e) {
     console.error(e);
     allOpinions = [];
+    renderMapPanels();
     renderProposalBox();
   }
 }
 
-function buildLiveSummary(big, merged, related) {
-  const countText = `対象件数: ${related.length}件 / 新統合: ${merged.length}件`;
-  const latest = merged.slice(0, 3).map(o => o.summary || o.content || o.title).filter(Boolean).join(" / ");
-  return latest ? `${countText}\n\n${latest}` : `${countText}\n\nまだ新統合はありません。`;
+function renderMapPanels() {
+  const mapEl = document.getElementById("map-analysis");
+  const logEl = document.getElementById("process-log");
+  if (mapEl) mapEl.textContent = buildMapAnalysisText();
+  if (logEl) logEl.textContent = buildProcessLogText();
+}
+
+function buildMapAnalysisText() {
+  const counts = countOpinions();
+  return [
+    `総件数: ${counts.total}件`,
+    `主体的な学び: ${counts.big["主体的な学び"] || 0}件`,
+    `楽しさと好奇心: ${counts.big["楽しさと好奇心"] || 0}件`,
+    `未来を生き抜く力: ${counts.big["未来を生き抜く力"] || 0}件`,
+    `個性・才能の開花: ${counts.big["個性・才能の開花"] || 0}件`,
+    `シームレス成長支援: ${counts.big["シームレス成長支援"] || 0}件`
+  ].join("\n");
+}
+
+function buildProcessLogText() {
+  const latest = allOpinions.slice(-10).reverse();
+  if (!latest.length) return "まだデータがありません。";
+  return latest.map((o, i) => {
+    return `${i + 1}. [${o.status || "単独提案"}] ${o.bigCatName || "その他"} > ${o.midCatName || "その他"}\n${o.title || "無題"}\n`;
+  }).join("\n");
+}
+
+function countOpinions() {
+  const counts = { total: allOpinions.length, big: {} };
+  allOpinions.forEach(o => {
+    const big = String(o.bigCatName || "その他").trim();
+    counts.big[big] = (counts.big[big] || 0) + 1;
+  });
+  return counts;
 }
 
 function renderProposalBox() {
@@ -383,10 +329,9 @@ function normalizeBig(s) {
   return String(s || "").trim();
 }
 
-function normalizeMid(mid, big) {
+function normalizeMid(mid) {
   const x = String(mid || "").trim();
-  if (x) return x;
-  return "その他";
+  return x || "その他";
 }
 
 function slug(str) {
