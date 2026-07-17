@@ -1,5 +1,4 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
-
 const BIG_ORDER = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
 
 let allOpinions = [];
@@ -9,8 +8,6 @@ let mapLiveMode = false;
 document.addEventListener("DOMContentLoaded", () => {
   const btnAiAnalysis = document.getElementById("btnAiAnalysis");
   const btnSubmitToBox = document.getElementById("btnSubmitToBox");
-  const btnMapRefresh = document.getElementById("btnMapRefresh");
-  const btnMapClear = document.getElementById("btnMapClear");
   const btnRefreshProposalBox = document.getElementById("btnRefreshProposalBox");
   const aiPlaceholder = document.getElementById("aiPlaceholder");
   const aiAssistBox = document.getElementById("aiAssistBox");
@@ -25,16 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchOpinions();
   renderMapPanels();
   renderProposalBox();
-
-  if (btnMapRefresh) btnMapRefresh.addEventListener("click", () => {
-    mapLiveMode = true;
-    renderMapPanels();
-  });
-
-  if (btnMapClear) btnMapClear.addEventListener("click", () => {
-    mapLiveMode = false;
-    renderMapPanels();
-  });
 
   if (btnRefreshProposalBox) btnRefreshProposalBox.addEventListener("click", fetchOpinions);
 
@@ -194,9 +181,7 @@ function buildMapAnalysisText() {
 function buildProcessLogText() {
   const latest = allOpinions.slice(-10).reverse();
   if (!latest.length) return "まだデータがありません。";
-  return latest.map((o, i) => {
-    return `${i + 1}. [${o.status || "単独提案"}] ${o.bigCatName || "その他"} > ${o.midCatName || "その他"}\n${o.title || "無題"}\n`;
-  }).join("\n");
+  return latest.map((o, i) => `${i + 1}. [${o.status || "単独提案"}] ${o.bigCatName || "その他"} > ${o.midCatName || "その他"}\n${o.title || "無題"}\n`).join("\n");
 }
 
 function countOpinions() {
@@ -241,7 +226,7 @@ function buildMidList(big, opinions) {
   const fixed = getFixedMids(big);
   const mids = new Set(["その他", ...fixed]);
   opinions.forEach(o => {
-    const m = normalizeMid(o.midCatName, big);
+    const m = normalizeMid(o.midCatName);
     if (m) mids.add(m);
   });
   return Array.from(mids);
@@ -259,7 +244,7 @@ function getFixedMids(big) {
 }
 
 function renderMidSection(big, mid, opinions) {
-  const group = opinions.filter(o => normalizeMid(o.midCatName, big) === mid);
+  const group = opinions.filter(o => normalizeMid(o.midCatName) === mid);
   const merged = group.filter(o => normalizeStatus(o.status) === "新統合");
   const proposals = group.filter(o => normalizeStatus(o.status) === "新提案" || normalizeStatus(o.status) === "単独提案");
   const originals = group.filter(o => normalizeStatus(o.status) === "元記事");
@@ -272,19 +257,19 @@ function renderMidSection(big, mid, opinions) {
       </button>
       <div id="mid-${slug(big)}-${slug(mid)}" style="display:none; padding: 12px 0 0 0;">
         <div class="mb-2">${labelBadge("新統合")} ${merged.length}</div>
-        ${merged.length ? merged.map((p,i) => renderPostCard(p, "新統合", i)).join("") : `<div class="text-muted small mb-3">新統合はありません。</div>`}
+        ${merged.length ? merged.map((p, i) => renderPostCard(p, "新統合", i)).join("") : `<div class="text-muted small mb-3">新統合はありません。</div>`}
 
         <div class="mb-2">${labelBadge("新提案")} ${proposals.length}</div>
-        ${proposals.length ? proposals.map((p,i) => renderPostCard(p, "新提案", i)).join("") : `<div class="text-muted small mb-3">新提案はありません。</div>`}
+        ${proposals.length ? proposals.map((p, i) => renderPostCard(p, "新提案", i)).join("") : `<div class="text-muted small mb-3">新提案はありません。</div>`}
 
         <div class="mb-2">${labelBadge("元記事")} ${originals.length}</div>
-        ${originals.length ? originals.map((p,i) => renderOriginalFolder(p, i)).join("") : `<div class="text-muted small">元記事はありません。</div>`}
+        ${originals.length ? originals.map((p, i) => renderOriginalFolder(p, i)).join("") : `<div class="text-muted small">元記事はありません。</div>`}
       </div>
     </div>
   `;
 }
 
-function renderPostCard(post, status, idx) {
+function renderPostCard(post, status) {
   const cls = status === "新統合" ? "bg-danger" : "bg-primary";
   return `
     <div class="opinion-card">
