@@ -18,10 +18,7 @@
       border-radius: 12px;
       background-color: #e2e8f0;
     }
-    .spinner-border {
-      width: 3rem;
-      height: 3rem;
-    }
+    .spinner-border { width: 3rem; height: 3rem; }
     .category-accordion-item {
       margin-bottom: 14px;
       border-radius: 18px;
@@ -52,8 +49,11 @@
       border-left: 5px solid #cbd5e1;
       box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
     }
-    .card-title-text {
-      font-weight: 700;
+    .card-title-text { font-weight: 700; }
+    .map-fixed-text {
+      white-space: pre-wrap;
+      line-height: 1.9;
+      font-size: 0.98rem;
     }
   </style>
 </head>
@@ -64,8 +64,8 @@
          style="height: 380px; object-fit: cover; object-position: center;"
          alt="メインヘッダー"
          onerror="this.style.display='none';">
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));"></div>
-    <div style="position: absolute; bottom: 30px; left: 5%; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.8);">
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));"></div>
+    <div style="position:absolute;bottom:30px;left:5%;color:white;text-shadow:2px 2px 8px rgba(0,0,0,0.8);">
       <h1 class="fw-bold display-5">未来の幼児教育 意見ひろば</h1>
       <p class="lead mb-0" style="font-weight: 500;">みんなの想いをAIと紡ぎ、新しい教育のカタチをつくる</p>
     </div>
@@ -74,17 +74,17 @@
   <div class="container my-4" style="max-width: 1140px;">
     <ul class="nav nav-tabs mb-4 justify-content-center" id="myTab" role="tablist" style="font-size: 11pt; font-weight: bold;">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="wall-tab-btn" data-bs-toggle="tab" data-bs-target="#wall-tab-pane" type="button" role="tab" aria-controls="wall-tab-pane" aria-selected="true">✨ 1. AIと壁打ちする</button>
+        <button class="nav-link active" id="wall-tab-btn" data-bs-toggle="tab" data-bs-target="#wall-tab-pane" type="button" role="tab">✨ 1. AIと壁打ちする</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab" aria-controls="map-tab-pane" aria-selected="false">🗺️ 2. アイデアの地図</button>
+        <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab">🗺️ 2. アイデアの地図</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab" aria-controls="list-tab-pane" aria-selected="false">📥 3. 届いた提案箱</button>
+        <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab">📥 3. 届いた提案箱</button>
       </li>
     </ul>
 
-    <div class="tab-content" id="myTabContent">
+    <div class="tab-content">
       <div class="tab-pane fade show active" id="wall-tab-pane" role="tabpanel" aria-labelledby="wall-tab-btn">
         <div class="mb-4">
           <img src="image/aiWall.jpg" class="tab-sub-image shadow-sm" alt="壁打ちイメージ" onerror="this.src='https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80'">
@@ -95,14 +95,13 @@
             <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 12px;">
               <h5 class="fw-bold text-dark mb-3">🖋️ あなたの想いやアイデア</h5>
               <p class="text-muted small">幼児教育に関する気づき、課題感を自由に入力してください。</p>
-              <div class="mb-3 flex-grow-1">
+              <div class="mb-3">
                 <textarea class="form-control h-100" id="content" rows="12" style="border-radius: 8px; resize: none;" placeholder="例：幼稚園と小学校のギャップを減らすために、年長クラスでの合同授業をもっと増やしてほしい..."></textarea>
               </div>
 
               <div class="d-flex flex-wrap gap-2 mb-3">
                 <button type="button" id="btnVoiceInput" class="btn btn-outline-secondary btn-sm">🎤 音声入力</button>
                 <button type="button" id="btnVoiceStop" class="btn btn-outline-danger btn-sm" disabled>⏹ 停止</button>
-                <span class="small text-muted align-self-center">音声認識は後で実装可能な状態にしてあります</span>
               </div>
 
               <button id="btnAiAnalysis" class="btn btn-primary w-100 fw-bold py-2" style="border-radius: 8px; background-color: #3b82f6;">
@@ -160,13 +159,17 @@
         <div class="row g-4 mb-4">
           <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;">
-              <h5 class="fw-bold text-primary mb-3 d-flex align-items-center"><span class="me-2">🗺️</span> 未来提案の原点（アイデアの地図）</h5>
-              <div id="map-analysis" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;">データを構築中...</div>
+              <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                <span class="me-2">🗺️</span> 未来提案の原点（固定文言）
+              </h5>
+              <div id="map-analysis" class="text-secondary map-fixed-text font-monospace">データを構築中...</div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #fffaf0); border-left: 5px solid #ecc94b;">
-              <h5 class="fw-bold text-warning mb-3 d-flex align-items-center" style="color: #d69e2e !important;"><span class="me-2">📜</span> 提案集約・共創アップデート案</h5>
+              <h5 class="fw-bold text-warning mb-3 d-flex align-items-center" style="color: #d69e2e !important;">
+                <span class="me-2">📜</span> 提案集約・共創アップデート案
+              </h5>
               <div id="process-log" class="text-secondary lh-base small font-monospace" style="white-space: pre-wrap;">履歴ログを読み込み中...</div>
             </div>
           </div>
