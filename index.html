@@ -107,8 +107,13 @@
                             <h5 class="fw-bold text-dark mb-3">🖋️ あなたの想いやアイデア</h5>
                             <p class="text-muted small">幼児教育に関する気づき、課題感を自由に入力してください。</p>
                             <div class="mb-3 flex-grow-1">
-                                <textarea class="form-control h-100" id="content" rows="12" style="border-radius: 8px; resize: none;" placeholder="例：幼稚園と小学校のギャップを減らすために、年長クラスでの合同授業をもっと増やしてほしい..."></textarea>
-                                <div class="mt-2 d-flex gap-2">
+<div class="mb-3">
+  <textarea class="form-control h-100" id="content" rows="12"
+    style="border-radius: 8px; resize: none;"
+    placeholder="例：幼稚園と小学校のギャップを減らすために、年長クラスでの合同授業をもっと増やしてほしい..."></textarea>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
   <button type="button" id="btnVoiceInput" class="btn btn-outline-secondary btn-sm">
     🎤 音声入力
   </button>
@@ -116,11 +121,10 @@
     ⏹ 停止
   </button>
 </div>
-<div id="voiceStatus" class="small text-muted mt-2">音声入力は未開始です。</div>
-                            </div>
-                            <button id="btnAiAnalysis" class="btn btn-primary w-100 fw-bold py-2" style="border-radius: 8px; background-color: #3b82f6;">
-                                ✨ 1. 意見を送信してAIと壁打ちする
-                            </button>
+
+<button id="btnAiAnalysis" class="btn btn-primary w-100 fw-bold py-2" style="border-radius: 8px; background-color: #3b82f6;">
+  ✨ 1. 意見を送信してAIと壁打ちする
+</button>
                         </div>
                     </div>
 
