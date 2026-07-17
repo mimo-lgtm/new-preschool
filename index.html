@@ -143,7 +143,7 @@
         </div>
       </div>
 
-      <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
+<div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
   <div class="mb-4">
     <img src="image/ar.jpg" class="tab-sub-image shadow-sm" alt="地図イメージ" onerror="this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'">
   </div>
@@ -157,22 +157,27 @@
   </div>
 
   <div class="row g-4 mb-4">
-  <div class="col-md-6">
-    <div class="card ...">
-      <h5>🗺️ 未来提案の原点（5分野）</h5>
-      <div id="map-analysis"></div>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card ...">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">📜 提案集約・共創アップデート</h5>
-        <button id="btnMapRefresh">リアルタイム更新</button>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;">
+        <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
+          <span class="me-2">🗺️</span> 未来提案の原点（アイデアの地図）
+        </h5>
+        <div id="map-analysis" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;">データを構築中...</div>
       </div>
-      <div id="process-log"></div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #fffaf0); border-left: 5px solid #ecc94b;">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="fw-bold mb-0" style="color: #d69e2e !important;">
+            <span class="me-2">📜</span> 提案集約・共創アップデート案
+          </h5>
+          <button id="btnMapRefresh" class="btn btn-outline-primary btn-sm fw-bold">リアルタイム更新</button>
+        </div>
+        <div id="process-log" class="text-secondary lh-base small font-monospace" style="white-space: pre-wrap;">履歴ログを読み込み中...</div>
+      </div>
     </div>
   </div>
-</div>
 
   <div class="d-flex flex-column gap-5">
     <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;">
