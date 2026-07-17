@@ -1,15 +1,5 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
 
-const DEFAULT_BASE_TEXT = {
-  "主体的な学び": "子どもが自分で選び、考え、試す経験を増やすことが大切です。保育者は教え込む役から、探究を支える伴走者へと役割を広げる必要があります。",
-  "楽しさと好奇心": "遊びや自然体験を通して、知る喜びを育てます。楽しい体験が、そのまま学びへつながる設計が求められます。",
-  "未来を生き抜く力": "失敗から立ち直る力や、他者と協力する力を育てます。知識だけではなく、変化に対応する力が重要です。",
-  "個性・才能の開花": "一人ひとりの違いを前提に、得意を伸ばす仕組みが必要です。評価も画一的ではなく、多面的であるべきです。",
-  "シームレス成長支援": "保育、教育、家庭支援を切れ目なくつなぎます。相談しやすい導線と、継続支援の安心感が鍵になります。"
-};
-
-let mapBaseData = { ...DEFAULT_BASE_TEXT };
-
 const BIG_ORDER = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
 
 const BIG_TO_KEY = {
@@ -20,12 +10,9 @@ const BIG_TO_KEY = {
   "シームレス成長支援": "シームレス"
 };
 
-
-
 let allOpinions = [];
 let currentAiResult = null;
 let mapLiveMode = false;
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnAiAnalysis = document.getElementById("btnAiAnalysis");
@@ -39,6 +26,80 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiPerspectivesText = document.getElementById("aiPerspectivesText");
   const aiTitleText = document.getElementById("aiTitleText");
   const aiRefinedText = document.getElementById("aiRefinedText");
+
+  const btnVoiceInput = document.getElementById("btnVoiceInput");
+  const btnVoiceStop = document.getElementById("btnVoiceStop");
+  const voiceStatus = document.getElementById("voiceStatus");
+  const txtContent = document.getElementById("content");
+
+  let recognition = null;
+  let isListening = false;
+
+  function setupVoiceRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      if (voiceStatus) voiceStatus.textContent = "このブラウザは音声入力に対応していません。";
+      if (btnVoiceInput) btnVoiceInput.disabled = true;
+      return null;
+    }
+
+    const rec = new SpeechRecognition();
+    rec.lang = "ja-JP";
+    rec.continuous = true;
+    rec.interimResults = true;
+
+    rec.onstart = () => {
+      isListening = true;
+      if (voiceStatus) voiceStatus.textContent = "音声入力中です。話してください。";
+      if (btnVoiceInput) btnVoiceInput.disabled = true;
+      if (btnVoiceStop) btnVoiceStop.disabled = false;
+    };
+
+    rec.onresult = (event) => {
+      let text = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        text += event.results[i][0].transcript;
+      }
+      if (txtContent && text.trim()) {
+        const current = txtContent.value.trim();
+        txtContent.value = current ? `${current}\n${text.trim()}` : text.trim();
+      }
+    };
+
+    rec.onerror = (event) => {
+      console.error(event);
+      if (voiceStatus) voiceStatus.textContent = `音声入力エラー: ${event.error}`;
+      stopVoice();
+    };
+
+    rec.onend = () => {
+      isListening = false;
+      if (voiceStatus) voiceStatus.textContent = "音声入力は停止しました。";
+      if (btnVoiceInput) btnVoiceInput.disabled = false;
+      if (btnVoiceStop) btnVoiceStop.disabled = true;
+    };
+
+    return rec;
+  }
+
+  function startVoice() {
+    if (!recognition) recognition = setupVoiceRecognition();
+    if (!recognition) return;
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function stopVoice() {
+    if (recognition && isListening) {
+      recognition.stop();
+    }
+  }
+
+  if (btnVoiceInput) btnVoiceInput.addEventListener("click", startVoice);
+  if (btnVoiceStop) btnVoiceStop.addEventListener("click", stopVoice);
 
   if (aiAssistBox) aiAssistBox.classList.add("d-none");
   if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
@@ -61,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnAiAnalysis) {
     btnAiAnalysis.addEventListener("click", async () => {
-      const txtContent = document.getElementById("content");
       const contentValue = txtContent ? txtContent.value.trim() : "";
       if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
 
@@ -83,49 +143,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${escapeHtml(bigCat)} ＞ ${escapeHtml(midCat)}`;
 
-         if (aiPerspectivesText) {
-  aiPerspectivesText.innerHTML = `
-    <div class="mb-4 p-3 border rounded-3 bg-light">
-      <strong class="d-block mb-2 text-primary">a. 核心</strong>
-      <div class="text-dark lh-base">
-        ${escapeHtml(currentAiResult["核心"] || "分析中")}<br>
-        <span class="text-muted small">この意見の中心にある課題や願いを、ひと言で整理したものです。何を変えたいのか、何を守りたいのかがここに現れます。ここが明確だと、後の提案がぶれにくくなります。</span>
-      </div>
-    </div>
-
-    <div class="mb-4 p-3 border rounded-3 bg-light">
-      <strong class="d-block mb-2 text-success">b. 変化</strong>
-      <div class="text-dark lh-base">
-        ${escapeHtml(currentAiResult["変化"] || "分析中")}<br>
-        <span class="text-muted small">現状のままでは難しい点、または、これから起きる変化を踏まえて必要になる対応をまとめています。時代の流れ、現場の負担、子どもや家庭の状況変化などもここに含まれます。</span>
-      </div>
-    </div>
-
-    <div class="mb-4 p-3 border rounded-3 bg-light">
-      <strong class="d-block mb-2 text-warning">c. 成功事例</strong>
-      <div class="text-dark lh-base">
-        ${escapeHtml(currentAiResult["成功事例"] || "分析中")}<br>
-        <span class="text-muted small">すでにうまくいっている実践や、参考にできる前向きな工夫を整理した部分です。既存の成功例を使うと、提案が現実的になり、実装のイメージも持ちやすくなります。</span>
-      </div>
-    </div>
-
-    <div class="mb-4 p-3 border rounded-3 bg-light">
-      <strong class="d-block mb-2 text-danger">d. 懸念点</strong>
-      <div class="text-dark lh-base">
-        ${escapeHtml(currentAiResult["懸念点"] || "分析中")}<br>
-        <span class="text-muted small">導入するうえで気をつけるべき点や、負担が増えやすい部分をまとめています。ここを先に見ておくことで、理想だけで終わらず、実際に続けられる形へ調整しやすくなります。</span>
-      </div>
-    </div>
-
-    <div class="mb-1 p-3 border rounded-3 bg-light">
-      <strong class="d-block mb-2 text-secondary">e. 問い</strong>
-      <div class="text-dark lh-base">
-        ${escapeHtml(currentAiResult["問い"] || "分析中")}<br>
-        <span class="text-muted small">この提案を次に進めるための問いです。何を優先するか、誰が関わるか、どこから始めるかを考える入口になります。問いが良いと、議論も提案も深くなります。</span>
-      </div>
-    </div>
-  `.trim();
-}
+          if (aiPerspectivesText) {
+            aiPerspectivesText.innerHTML = `
+<div class="mb-3"><strong>a. 核心</strong><br><span class="text-dark">${escapeHtml(currentAiResult["核心"] || "分析中")}</span></div>
+<div class="mb-3"><strong>b. 変化</strong><br><span class="text-dark">${escapeHtml(currentAiResult["変化"] || "分析中")}</span></div>
+<div class="mb-3"><strong>c. 成功事例</strong><br><span class="text-dark">${escapeHtml(currentAiResult["成功事例"] || "分析中")}</span></div>
+<div class="mb-3"><strong>d. 懸念点</strong><br><span class="text-dark">${escapeHtml(currentAiResult["懸念点"] || "分析中")}</span></div>
+<div class="mb-1"><strong>e. 問い</strong><br><span class="text-dark">${escapeHtml(currentAiResult["問い"] || "分析中")}</span></div>
+            `.trim();
+          }
 
           if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
           if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
@@ -157,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!confirm(`正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`)) return;
 
-      const txtContent = document.getElementById("content");
       const rawText = txtContent ? txtContent.value.trim() : "";
 
       btnSubmitToBox.disabled = true;
@@ -208,41 +233,20 @@ async function fetchOpinions() {
     const data = await res.json();
 
     if (data.status !== "success") {
+      console.error(data.message);
       allOpinions = [];
       renderProposalBox();
       return;
     }
 
     allOpinions = Array.isArray(data.opinions) ? data.opinions : [];
+    console.log("opinions:", allOpinions);
     renderProposalBox();
   } catch (e) {
     console.error(e);
     allOpinions = [];
     renderProposalBox();
   }
-}
-function renderMapPanels() {
-  BIG_ORDER.forEach(big => {
-    const key = BIG_TO_KEY[big];
-    const baseEl = document.getElementById(`base-text-${key}`);
-    const sumEl = document.getElementById(`sum-text-${key}`);
-
-    if (sumEl) {
-      if (!mapLiveMode) {
-        sumEl.innerHTML = "";
-      } else {
-        const related = allOpinions.filter(o => normalizeBig(o.bigCatName) === big && normalizeStatus(o.status) !== "元記事");
-        const merged = related.filter(o => normalizeStatus(o.status) === "新統合");
-        sumEl.innerHTML = buildLiveSummary(big, merged, related);
-      }
-    }
-  });
-}
-
-function buildLiveSummary(big, merged, related) {
-  const countText = `対象件数: ${related.length}件 / 新統合: ${merged.length}件`;
-  const latest = merged.slice(0, 3).map(o => o.summary || o.content || o.title).filter(Boolean).join(" / ");
-  return latest ? `${countText}\n\n${latest}` : `${countText}\n\nまだ新統合はありません。`;
 }
 
 function buildLiveSummary(big, merged, related) {
@@ -263,6 +267,7 @@ function renderProposalBox() {
   const html = BIG_ORDER.map(big => {
     const bigOpinions = allOpinions.filter(o => normalizeBig(o.bigCatName) === big);
     const mids = buildMidList(big, bigOpinions);
+
     return `
       <div class="category-accordion-item">
         <button class="category-accordion-header" type="button" onclick="toggleTree('big-${slug(big)}')">
@@ -278,6 +283,7 @@ function renderProposalBox() {
 
   container.innerHTML = html;
 }
+
 function buildMidList(big, opinions) {
   const fixed = getFixedMids(big);
   const mids = new Set(["その他", ...fixed]);
