@@ -225,3 +225,134 @@ body {
     gap: 20px;
   }
 }
+/* 提案箱のスタイル強化 */
+.proposal-box-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  min-height: 400px;
+}
+
+/* 大分類カード */
+.proposal-category-card {
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+/* 中分類カード */
+.proposal-subcategory-card {
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  margin: 12px 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+/* 記事カード */
+.proposal-article-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin: 10px 16px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.proposal-article-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+/* 記事タイトル */
+.proposal-article-title {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+/* 記事本文 */
+.proposal-article-body {
+  font-size: 10pt;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+/* 記事メタ情報 */
+.proposal-article-meta {
+  font-size: 8.5pt;
+  color: #64748b;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 折りたたみヘッダー */
+.proposal-category-header,
+.proposal-subcategory-header {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 16px 20px;
+  font-size: 12pt;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.proposal-category-header:hover,
+.proposal-subcategory-header:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* 折りたたみボディ */
+.proposal-category-body {
+  padding: 0 16px 16px 16px;
+}
+
+.proposal-subcategory-body {
+  padding: 0 0 12px 0;
+}
+
+/* 矢印アイコン */
+.accordion-arrow {
+  font-size: 12pt;
+  color: #64748b;
+  transition: transform 0.3s ease;
+}
+
+.accordion-arrow.rotated {
+  transform: rotate(90deg);
+}
+
+/* 未読バッジ */
+.badge-unread {
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 7.5pt;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+/* 各ペインの調整 */
+.tab-pane {
+  padding: 12px 0;
+}
