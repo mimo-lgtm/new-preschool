@@ -85,7 +85,72 @@ function buildFinalProposal(baseText, mergedOps){
   return `【${countInfo}・市民の声を50%反映した最終提案】\n${result}`;
 }
 
+
+// --- 音声認識（Web Speech API） ---
+let recognition = null;
+let isListening = false;
+function initVoice(){
+  const btn = document.getElementById("btnVoice");
+  const status = document.getElementById("voiceStatus");
+  const statusText = document.getElementById("voiceStatusText");
+  const textarea = document.getElementById("content");
+  if(!btn || !textarea) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    btn.style.display="none";
+    console.warn("SpeechRecognition not supported");
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = "ja-JP";
+  recognition.interimResults = true;
+  recognition.continuous = true;
+
+  let finalTranscript = "";
+
+  recognition.onstart = ()=>{
+    isListening=true;
+    btn.classList.add("listening");
+    btn.textContent="⏹️";
+    status.classList.remove("d-none");
+    statusText.textContent="聞き取り中…話してください（もう一度押すと停止）";
+    finalTranscript = textarea.value;
+  };
+  recognition.onend = ()=>{
+    isListening=false;
+    btn.classList.remove("listening");
+    btn.textContent="🎙️";
+    status.classList.add("d-none");
+  };
+  recognition.onerror = (e)=>{
+    console.error(e);
+    statusText.textContent="音声認識エラー: "+e.error;
+    setTimeout(()=>{ status.classList.add("d-none"); }, 2000);
+  };
+  recognition.onresult = (event)=>{
+    let interim = "";
+    for(let i=event.resultIndex; i<event.results.length; i++){
+      const t = event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalTranscript += t + " ";
+      else interim += t;
+    }
+    textarea.value = finalTranscript + interim;
+    statusText.textContent = interim ? `認識中: "${interim}"` : "聞き取り中…";
+    textarea.dispatchEvent(new Event('input'));
+  };
+
+  btn.addEventListener("click", ()=>{
+    if(isListening){ recognition.stop(); }
+    else {
+      finalTranscript = textarea.value ? textarea.value + " " : "";
+      try{ recognition.start(); }catch(e){ console.error(e); }
+    }
+  });
+}
+
+
 document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(initVoice, 500);
   fetchOpinions();
   renderMapPanels(true);
   renderProposalBox();
@@ -158,6 +223,7 @@ function renderMapPanels(){
   const mapEl=document.getElementById("map-analysis"); const logEl=document.getElementById("process-log");
   if(mapEl) mapEl.textContent=buildMapAnalysisText();
   if(logEl) logEl.textContent=buildProcessLogText();
+  updateMapBadges();
 
   const keys=[
     {key:"主体", big:"主体的な学び"},
@@ -184,6 +250,17 @@ function renderMapPanels(){
   });
 }
 
+function updateMapBadges(){
+  const total = allOpinions.length;
+  const merged = allOpinions.filter(o=>normalizeStatus(o.status)==="新統合").length;
+  const news = allOpinions.filter(o=>normalizeStatus(o.status)==="新提案").length;
+  const elT=document.getElementById("stat-total"); if(elT) elT.textContent=total;
+  const elM=document.getElementById("stat-merged"); if(elM) elM.textContent=merged;
+  const elN=document.getElementById("stat-new"); if(elN) elN.textContent=news;
+  const progress = total===0?0:Math.min(100, Math.round((merged/total)*100 + (total>0?20:0)));
+  const fill=document.getElementById("progress-fill"); if(fill) fill.style.width=progress+"%";
+  const label=document.getElementById("progress-label"); if(label) label.textContent=progress+"%";
+}
 function buildMapAnalysisText(){
   const counts=BIG_ORDER.map(b=>`${b}: ${allOpinions.filter(o=>normalizeBig(o.bigCatName)===b).length}件 (うち新統合:${allOpinions.filter(o=>normalizeBig(o.bigCatName)===b && normalizeStatus(o.status)==="新統合").length}件)`).join("\n");
   return [
