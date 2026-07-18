@@ -1,5 +1,12 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
-
+// タブの初期化
+document.addEventListener('DOMContentLoaded', () => {
+  // Bootstrap タブを有効化
+  const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
+  tabElements.forEach(tabEl => {
+    new bootstrap.Tab(tabEl);
+  });
+});
 const BIG_ORDER = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
 
 let allOpinions = [];
