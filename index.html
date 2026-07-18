@@ -27,8 +27,10 @@
     <div class="tab-content">
       <div class="tab-pane fade show active" id="wall-tab-pane" role="tabpanel" aria-labelledby="wall-tab-btn">
         <div class="mb-4"><img src="image/aiWall.jpg" class="tab-sub-image shadow-sm" alt="壁打ちイメージ" onerror="this.src='https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80'"></div>
+
         <div class="row g-4">
-          <div class="col-lg-5"><div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 12px;"><h5 class="fw-bold text-dark mb-3">🖋️ あなたの想いやアイデア</h5><p class="text-muted small">幼児教育に関する気づき、課題感を自由に入力してください。</p><div class="mb-3"><textarea class="form-control h-100" id="content" rows="12" style="border-radius: 8px; resize: none;" placeholder="例：幼稚園と小学校のギャップを減らすために、年長クラスでの合同授業をもっと増やしてほしい..."></textarea></div><button id="btnAiAnalysis" class="btn btn-primary w-100 fw-bold py-2" style="border-radius: 8px; background-color: #3b82f6;">✨ 1. 意見を送信して AI と壁打ちする</button></div></div>
+          <div class="col-lg-5"><div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 12px;"><h5 class="fw-bold text-dark mb-3">🖋️ あなたの想いやアイデア</h5><p class="text-muted small">幼児教育に関する気づき、課題感を自由に入力してください。🎙️音声でも入力できます。</p><div class="mb-3 voice-area"><textarea class="form-control h-100" id="content" rows="12" style="border-radius: 8px; resize: none; padding-bottom:50px;" placeholder="例：幼稚園と小学校のギャップを減らすために、年長クラスでの合同授業をもっと増やしてほしい..."></textarea><button id="btnVoice" class="btn-voice" type="button" title="音声で入力">🎙️</button></div><div id="voiceStatus" class="voice-status d-none"><span class="spinner-grow spinner-grow-sm text-danger" style="width:0.6rem;height:0.6rem;"></span><span id="voiceStatusText">聞き取り中...</span></div><button id="btnAiAnalysis" class="btn btn-primary w-100 fw-bold py-2 mt-3" style="border-radius: 8px; background-color: #3b82f6;">✨ 1. 意見を送信して AI と壁打ちする</button></div></div>
+
           <div class="col-lg-7"><div id="aiPlaceholder" class="card shadow-sm border-0 p-4 h-100 text-center d-flex align-items-center justify-content-center bg-white" style="border-radius: 12px; min-height: 400px;"><div class="text-muted" id="aiPlaceholderContent"><div style="font-size: 3rem;" class="mb-2">💡</div><p class="fw-bold mb-1">AI 思考整理エリア</p><p class="small mb-0">左側に意見を入力して送信すると、<br>AI が論点を 5 つの視点で整理し、タイトルを自動生成します。</p></div></div><div id="aiAssistBox" class="card shadow-sm border-0 p-4 h-100 bg-white d-none flex-column" style="border-radius: 12px;"><div class="p-3 mb-3 bg-light rounded" id="aiSummaryText" style="font-size: 10.5pt; border-left: 4px solid #3b82f6;"></div><div class="border rounded p-3 mb-3 flex-grow-1 bg-white" style="font-size: 10pt; max-height: 350px; overflow-y: auto;"><h6 class="fw-bold text-primary mb-3 border-bottom pb-2">📋 5 つの視点による論点整理・分析</h6><div id="aiPerspectivesText" class="lh-base"></div></div><div class="p-3 bg-light rounded mb-3"><div class="mb-2"><span class="badge bg-dark mb-1">👑 生成された推奨タイトル</span><div id="aiTitleText" class="fw-bold text-dark ps-1" style="font-size: 11pt;"></div></div><div><span class="badge bg-secondary mb-1">📝 200 字要約</span><div id="aiRefinedText" class="text-secondary small ps-1 lh-base"></div></div></div><button id="btnSubmitToBox" class="btn btn-success w-100 fw-bold py-2" style="border-radius: 8px; background-color: #10b981;">📥 この内容で提案箱へ正式に投稿する</button></div></div>
         </div>
       </div>
@@ -37,10 +39,50 @@
         <div class="mb-4"><img src="image/ar.jpg" class="tab-sub-image shadow-sm" alt="地図イメージ" onerror="this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80'"></div>
         <div class="mb-5 text-center"><h2 class="fw-bold text-dark mb-3" style="letter-spacing: 0.05em;">🌳 アイデアの地図：AI の提案を、市民の声で磨き上げる</h2><p class="text-muted fs-6 mx-auto" style="max-width: 800px; line-height: 1.8;">AI が考えた提案に、市民の声をしっかり重ねて、みんなで育てるアイデアの地図。<br>今いちばん伝えたい提案をリアルタイムでお届けします。</p></div>
 
-        <div class="row g-4 mb-4">
-          <div class="col-md-6"><div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;"><h5 class="fw-bold text-primary mb-3">🗺️ 未来提案の原点（アイデアの地図）</h5><div id="map-analysis" class="text-secondary lh-base fs-6" style="white-space: pre-wrap;">読み込み中...</div></div></div>
-          <div class="col-md-6"><div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #fffaf0); border-left: 5px solid #ecc94b;"><div class="d-flex align-items-center justify-content-between mb-3"><h5 class="fw-bold text-dark mb-0">📜 集約状況</h5><div class="d-flex gap-2"><button id="btnMapRefresh" class="btn btn-primary btn-sm fw-bold px-3" style="border-radius: 20px;">🔄 リアルタイム更新</button><button id="btnMapClear" class="btn btn-outline-secondary btn-sm fw-bold px-3" style="border-radius: 20px;">クリア</button></div></div><div id="process-log" class="text-secondary lh-base" style="white-space: pre-wrap; max-height: 320px; overflow-y: auto; font-size:10pt;">読み込み中...</div></div></div>
+
+        <div class="row g-4 mb-5">
+          <div class="col-lg-7">
+            <div class="map-hero-card card border-0 p-4 p-md-5 h-100" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border-left: 6px solid #3b82f6 !important;">
+              <div class="d-flex align-items-start justify-content-between mb-3">
+                <div>
+                  <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary bg-opacity-10 text-primary fw-bold small mb-2">🗺️ MAP ORIGIN</div>
+                  <h4 class="fw-bold text-dark mb-1">未来提案の原点</h4>
+                  <p class="text-muted small mb-0">アイデアの地図</p>
+                </div>
+                <div class="bg-white rounded-3 p-2 shadow-sm border" style="font-size:22px;">🌱</div>
+              </div>
+              <div id="map-analysis" class="text-dark lh-base" style="white-space: pre-wrap; font-size:10.5pt; line-height:1.9;">読み込み中...</div>
+              <div class="mt-4 d-flex flex-wrap gap-2" id="map-badges">
+                <span class="map-stat-badge">📊 総件数 <strong id="stat-total">0</strong>件</span>
+                <span class="map-stat-badge">🔥 新統合 <strong id="stat-merged">0</strong>件</span>
+                <span class="map-stat-badge">💬 新提案 <strong id="stat-new">0</strong>件</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="map-hero-card card border-0 p-4 p-md-5 h-100" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border-left: 6px solid #f59e0b !important;">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-warning bg-opacity-10 text-dark fw-bold small mb-2">📊 LIVE STATUS</div>
+                  <h4 class="fw-bold text-dark mb-1">集約状況</h4>
+                  <p class="text-muted small mb-0">リアルタイムで更新</p>
+                </div>
+                <button id="btnMapRefresh" class="btn btn-dark btn-sm fw-bold px-4 py-2" style="border-radius: 999px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">🔄 集計実行</button>
+              </div>
+              <div id="process-log" class="text-secondary lh-base bg-white rounded-3 p-3 border" style="white-space: pre-wrap; min-height:140px; font-size:10pt; line-height:1.8;">読み込み中...</div>
+              <div class="mt-3">
+                <div class="d-flex justify-content-between small text-muted mb-1"><span>統合進捗</span><span id="progress-label">0%</span></div>
+                <div class="map-progress-bar"><div id="progress-fill" class="map-progress-fill" style="width:0%"></div></div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <button id="btnMapClear" class="btn btn-outline-secondary btn-sm w-50" style="border-radius:999px;">表示クリア</button>
+                <button class="btn btn-outline-primary btn-sm w-50" style="border-radius:999px;" onclick="document.getElementById('list-tab-btn').click()">📥 提案箱を見る</button>
+              </div>
+              <p class="small text-muted mt-3 mb-0" style="font-size:8.5pt;">左50%：固定原点 ＋ 右50%：新統合を内容ベースで統合・重複除去</p>
+            </div>
+          </div>
         </div>
+
 
         <div class="d-flex flex-column gap-4 mb-4">
           <div class="card border-0 shadow rounded-4 overflow-hidden" style="background: #f8fafc;"><div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between"><h4 class="fw-bold mb-0 fs-5">🌱 1. 探究心を育む知育環境（主体的な学び）</h4><span class="badge bg-light text-dark">固定原点</span></div><div class="card-body p-4"><div class="row g-4"><div class="col-md-6"><div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-primary border-4"><h5 class="fw-bold text-primary mb-3">🤖 AI が導き出した提案（固定）</h5><div class="text-secondary lh-base fs-6" id="base-text-主体" style="white-space: pre-wrap;">多くの市民から、子どもたちが自発的に活動を選択できる環境づくりへの要望が寄せられています。画一的な一斉保育から脱却し、個々の興味関心に基づくプロジェクト型学習の導入や、デジタルを活用した自己表現の場を確保することが急務とされています。課題は自由度を高めた際の見守りの難しさですが、保育者が『教える』立場から『子どもの探求を支える』ファシリテーターへとシフトするための研修体制を整備することが、今後の現場改革における最大のブレイクスルーの鍵となります。</div></div></div><div class="col-md-6"><div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;"><h5 class="fw-bold text-success mb-3">✨ 市民の声を加えた最終提案</h5><div class="text-dark fw-bold lh-base fs-6 bg-white p-3 rounded-3 border" id="sum-text-主体" style="white-space: pre-wrap; min-height: 140px;">ここを表示させるには、右上のリアルタイム更新ボタンをクリックしてください</div></div></div></div></div></div>
