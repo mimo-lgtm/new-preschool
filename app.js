@@ -1,19 +1,24 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
-// タブの初期化
-document.addEventListener('DOMContentLoaded', () => {
-  // Bootstrap タブを有効化
-  const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
-  tabElements.forEach(tabEl => {
-    new bootstrap.Tab(tabEl);
-  });
-});
+
 const BIG_ORDER = ["主体的な学び", "楽しさと好奇心", "未来を生き抜く力", "個性・才能の開花", "シームレス成長支援"];
 
 let allOpinions = [];
 let currentAiResult = null;
 let mapLiveMode = false;
 
-window.addEventListener("DOMContentLoaded", () => {
+// ===== タブ初期化（即時実行） =====
+function initTabs() {
+  const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
+  tabElements.forEach(tabEl => {
+    new bootstrap.Tab(tabEl);
+  });
+}
+
+// ===== DOM 読み込み完了後の処理 =====
+document.addEventListener('DOMContentLoaded', () => {
+  // タブ初期化
+  initTabs();
+
   const btnAiAnalysis = document.getElementById("btnAiAnalysis");
   const btnSubmitToBox = document.getElementById("btnSubmitToBox");
   const btnMapRefresh = document.getElementById("btnMapRefresh");
@@ -52,7 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!contentValue) return alert("あなたの想いやアイデアを自由に入力してください。");
 
       btnAiAnalysis.disabled = true;
-      btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
+      btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AI が思考を整理中...`;
 
       try {
         const res = await fetch(GAS_URL, {
@@ -80,7 +85,7 @@ window.addEventListener("DOMContentLoaded", () => {
           }
 
           if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
-          if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
+          if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約 200"] || "";
 
           if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
           if (aiAssistBox) {
@@ -88,14 +93,14 @@ window.addEventListener("DOMContentLoaded", () => {
             aiAssistBox.classList.remove("d-none");
           }
         } else {
-          alert("AI分析エラー: " + (data.message || "不明なエラー"));
+          alert("AI 分析エラー：" + (data.message || "不明なエラー"));
         }
       } catch (err) {
         console.error(err);
         alert("通信エラーが発生しました。");
       } finally {
         btnAiAnalysis.disabled = false;
-        btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
+        btnAiAnalysis.innerHTML = `✨ 1. 意見を送信して AI と壁打ちする`;
       }
     });
   }
@@ -123,7 +128,7 @@ window.addEventListener("DOMContentLoaded", () => {
             action: "submit",
             content: rawText,
             title: currentAiResult["推奨タイトル"] || "無題の提案",
-            summary: currentAiResult["要約200"] || "",
+            summary: currentAiResult["要約 200"] || "",
             bigCatName: bigCat,
             midCatName: midCat,
             aiResult: currentAiResult
@@ -141,7 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
           const listTabBtn = document.getElementById("list-tab-btn");
           if (listTabBtn) listTabBtn.click();
         } else {
-          alert("投稿エラー: " + (data.message || "不明なエラー"));
+          alert("投稿エラー：" + (data.message || "不明なエラー"));
         }
       } catch (err) {
         console.error(err);
@@ -189,12 +194,12 @@ function renderMapPanels() {
 function buildMapAnalysisText() {
   return [
     "【固定文言】",
-    "・この地図は、AI壁打ちの論点整理を土台に、市民の声を重ねて育てる場所です。",
+    "・この地図は、AI 壁打ちの論点整理を土台に、市民の声を重ねて育てる場所です。",
     "・左側では全体像を固定で確認し、右側では提案の流れと更新履歴を見ます。",
     "・提案箱の内容はこの下にある詳細カードで確認できます。",
     "",
     "【現在の状況】",
-    `総件数: ${allOpinions.length}件`
+    `総件数：${allOpinions.length}件`
   ].join("\n");
 }
 
@@ -331,7 +336,7 @@ function normalizeMid(mid) {
 }
 
 function slug(str) {
-  return String(str || "").replace(/[^\wぁ-んァ-ヶ一-龠ー]/g, "_");
+  return String(str || "").replace(/[^\wぁ - んァ - ヶ一 - 龠ー]/g, "_");
 }
 
 function escapeHtml(str) {
