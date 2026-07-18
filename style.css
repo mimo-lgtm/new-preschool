@@ -356,3 +356,20 @@ body {
 .tab-pane {
   padding: 12px 0;
 }
+/* タブの表示制御を強化 */
+.tab-content > .tab-pane {
+  display: none;
+}
+
+.tab-content > .tab-pane.active {
+  display: block !important;
+}
+
+.tab-content > .tab-pane.fade {
+  opacity: 0;
+  transition: opacity 0.15s linear;
+}
+
+.tab-content > .tab-pane.fade.show {
+  opacity: 1;
+}
